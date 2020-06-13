@@ -1,6 +1,9 @@
 import 'package:droog/models/enums.dart';
 import 'package:droog/screens/chat_list.dart';
 import 'package:droog/screens/chat_screen.dart';
+import 'package:droog/screens/feed.dart';
+import 'package:droog/screens/user_profile.dart';
+
 import 'package:droog/screens/home.dart';
 import 'package:droog/screens/introduction_screen.dart';
 import 'package:droog/screens/mobile_verification.dart';
@@ -10,6 +13,7 @@ import 'package:droog/screens/profile_setup.dart';
 import 'package:droog/screens/search.dart';
 import 'package:droog/screens/signup.dart';
 import 'package:droog/services/sharedprefs_methods.dart';
+import 'package:droog/widgets/profile_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -54,7 +58,7 @@ class _MyAppState extends State<MyApp> {
           if (snapshot.hasData) {
             print(snapshot.data);
             if(snapshot.data == LoggedInStatus.loggedIn.index){
-              return NewPost();
+              return UserProfile();
             }
             else if(snapshot.data == LoggedInStatus.halfProfileLeft.index){
               return ProfileSetup();

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
 import 'package:droog/services/database_methods.dart';
-import 'package:droog/services/image_picker.dart';
+import 'file:///P:/androidProjects/Droog/droog/lib/utils/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 

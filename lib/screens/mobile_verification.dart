@@ -61,6 +61,7 @@ class _MobileVerificationState extends State<MobileVerification> {
       codeSentFunc(codeSent, context);
     };
     final cART = (codeSent) {
+      print("autoretrieval");
       codeSentFunc(codeSent, context);
     };
 
