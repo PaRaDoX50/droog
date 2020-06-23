@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/data/constants.dart';
+import 'package:droog/models/user.dart';
 import 'package:droog/screens/search.dart';
 import 'package:droog/services/database_methods.dart';
 
@@ -18,21 +19,21 @@ class _ChatScreenState extends State<ChatScreen> {
   final DatabaseMethods _databaseMethods = DatabaseMethods();
   final TextEditingController messageController = TextEditingController();
 
-  sendMessage(String userEmail) async {
-    print(userEmail + messageController.text);
+  sendMessage(String userName) async {
+    print(userName + messageController.text);
     Map<String, dynamic> message = {
       "message": messageController.text,
-      "by": Constants.userEmail,
+      "by": Constants.userName,
       "time": DateTime.now().millisecondsSinceEpoch,
     };
-    await _databaseMethods.sendMessage(userEmail, message);
+    await _databaseMethods.sendMessage(userName, message);
   }
 
   List<String> messages = ["hello boi"];
 
   @override
   Widget build(BuildContext context) {
-    final userEmail = ModalRoute.of(context).settings.arguments as String;
+    final user = ModalRoute.of(context).settings.arguments as User;
     final messageTextField = Container(
         constraints:
             BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 5),
@@ -69,16 +70,16 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             IconButton(
               icon: Icon(Icons.send),
-              onPressed: () => sendMessage(userEmail),
+              onPressed: () => sendMessage(user.userName),
             )
           ],
         ));
 
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
-      appBar: AppBar(
-        userEmail: userEmail,
-        userProfilePicture: Image.asset("assets/images/droog_logo.png"),
+      appBar: CustomAppBar(
+        userFullName: "${user.firstName} ${user.lastName}" ,
+        userProfilePictureUrl: user.profilePictureUrl,
       ),
       body: Stack(
         children: <Widget>[
@@ -91,7 +92,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   bottom: MediaQuery.of(context).padding.bottom + 70),
               child: StreamBuilder<QuerySnapshot>(
                   stream:
-                      _databaseMethods.getUserConversationsByEmail(userEmail),
+                      _databaseMethods.getAConversation(targetUserName: user.userName),
                   builder: (context, snapshot) {
                     List<DocumentSnapshot> data = [];
 
@@ -105,15 +106,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     return ListView.builder(
                       reverse: true,
                       itemBuilder: (_, index) {
-                        if (data[index]["by"] == Constants.userEmail) {
+                        if (data[index]["by"] == Constants.userName) {
                           return MessageTileRight(
-                              image:
-                                  Image.asset("assets/images/droog_logo.png"),
+
                               message: data[index]["message"],
                               ctx: context);
                         }
                         return MessageTileLeft(
-                          image: Image.asset("assets/images/droog_logo.png"),
                           message: data[index]["message"],
                         );
                       },
@@ -129,11 +128,11 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
-class AppBar extends PreferredSize {
-  final String userEmail;
-  final Image userProfilePicture;
+class CustomAppBar extends PreferredSize {
+  final String userFullName;
+  final String userProfilePictureUrl;
 
-  AppBar({this.userProfilePicture, this.userEmail});
+  CustomAppBar({this.userProfilePictureUrl, this.userFullName});
 
   @override
   Size get preferredSize => Size.fromHeight(100);
@@ -159,13 +158,15 @@ class AppBar extends PreferredSize {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   CircleAvatar(
-                    child: userProfilePicture,
+                    child: ClipOval(
+                      child: Image.network(userProfilePictureUrl,),
+                    ),
                   ),
                   SizedBox(
                     height: 16,
                   ),
                   Text(
-                    userEmail,
+                    userFullName,
                     style: TextStyle(color: Colors.white),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -188,9 +189,9 @@ class AppBar extends PreferredSize {
 
 class MessageTileLeft extends StatelessWidget {
   final String message;
-  final Image image;
 
-  MessageTileLeft({this.message, this.image});
+
+  MessageTileLeft({this.message, });
 
   @override
   Widget build(BuildContext context) {
@@ -200,7 +201,7 @@ class MessageTileLeft extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          CircleAvatar(child: image),
+
           SizedBox(
             width: width / 30,
           ),
@@ -223,10 +224,10 @@ class MessageTileLeft extends StatelessWidget {
 
 class MessageTileRight extends StatelessWidget {
   final String message;
-  final Image image;
+
   final BuildContext ctx;
 
-  MessageTileRight({this.message, this.image, this.ctx});
+  MessageTileRight({this.message,  this.ctx});
 
   @override
   Widget build(BuildContext context) {
@@ -251,7 +252,7 @@ class MessageTileRight extends StatelessWidget {
           SizedBox(
             width: width / 30,
           ),
-          CircleAvatar(child: image),
+
         ],
       ),
     );

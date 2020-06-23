@@ -9,8 +9,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-
 class ProfileSetup extends StatefulWidget {
+  static final String route= "/profile_setup";
   @override
   _ProfileSetupState createState() => _ProfileSetupState();
 }
@@ -37,7 +37,6 @@ class _ProfileSetupState extends State<ProfileSetup> {
   }
 
   Widget _buildForm() {
-
     final firstNameField = TextFormField(
       controller: firstNameController,
       validator: (val) {
@@ -47,8 +46,7 @@ class _ProfileSetupState extends State<ProfileSetup> {
         return "This field can't be empty";
       },
       decoration: InputDecoration(
-        contentPadding:
-        EdgeInsets.only(left: 8, right: 0, top: 0, bottom: 0),
+        contentPadding: EdgeInsets.only(left: 8, right: 0, top: 0, bottom: 0),
         hintText: "First Name",
         border: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.grey, width: 1),
@@ -66,8 +64,7 @@ class _ProfileSetupState extends State<ProfileSetup> {
         return "This field can't be empty";
       },
       decoration: InputDecoration(
-        contentPadding:
-        EdgeInsets.only(left: 8, right: 0, top: 0, bottom: 0),
+        contentPadding: EdgeInsets.only(left: 8, right: 0, top: 0, bottom: 0),
         hintText: "Last Name",
         border: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.grey, width: 1),
@@ -85,8 +82,7 @@ class _ProfileSetupState extends State<ProfileSetup> {
         return "This field can't be empty";
       },
       decoration: InputDecoration(
-        contentPadding:
-        EdgeInsets.only(left: 8, right: 0, top: 0, bottom: 0),
+        contentPadding: EdgeInsets.only(left: 8, right: 0, top: 0, bottom: 0),
         hintText: "User-Name",
         border: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.grey, width: 1),
@@ -99,8 +95,7 @@ class _ProfileSetupState extends State<ProfileSetup> {
       controller: descriptionController,
       maxLines: 10,
       decoration: InputDecoration(
-        contentPadding:
-        EdgeInsets.only(left: 8, right: 0, top: 16, bottom: 0),
+        contentPadding: EdgeInsets.only(left: 8, right: 0, top: 16, bottom: 0),
         hintText: "Describe yourself",
         border: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.grey, width: 1),
@@ -109,7 +104,6 @@ class _ProfileSetupState extends State<ProfileSetup> {
       ),
       maxLength: 180,
     );
-
 
     return Form(
       key: _formKey,
@@ -175,7 +169,9 @@ class _ProfileSetupState extends State<ProfileSetup> {
                       File image =
                           await _imagePicker.takePicture(ImageSource.camera);
                       if (image != null) {
-                        File croppedImage = await _imagePicker.cropImage(image: image,pictureFor: PictureFor.profilePicture);
+                        File croppedImage = await _imagePicker.cropImage(
+                            image: image,
+                            pictureFor: PictureFor.profilePicture,ratioY: 1,ratioX: 1);
                         if (croppedImage != null) {
                           setState(() {
                             _takenImage = croppedImage;
@@ -199,14 +195,13 @@ class _ProfileSetupState extends State<ProfileSetup> {
               SizedBox(
                 height: 16,
               ),
-
               RaisedButton(
                 child:
                     Text("Submit", style: Theme.of(context).textTheme.button),
                 onPressed: () async {
                   if (_formKey.currentState.validate()) {
                     if (await _databaseMethods
-                        .userNameAvailable(userNameController.text)) {
+                        .userNameAvailable(userName:userNameController.text)) {
                       if (_takenImage != null) {
                         setState(() {
                           showLoading = true;
@@ -214,7 +209,7 @@ class _ProfileSetupState extends State<ProfileSetup> {
 
                         try {
                           String downloadUrl = await _databaseMethods
-                              .uploadProfilePicture(_takenImage);
+                              .uploadProfilePicture(file: _takenImage);
                           if (downloadUrl != null) {
                             await _databaseMethods.completeUserProfile(
                                 userName: userNameController.text,
@@ -224,7 +219,9 @@ class _ProfileSetupState extends State<ProfileSetup> {
                                 profilePictureUrl: downloadUrl);
                           }
 
-                          await _sharedPrefsMethods.saveUserName(
+                          await _sharedPrefsMethods.completeUserPrefs(
+                              firstName: firstNameController.text,
+                              lastName: lastNameController.text,
                               userName: userNameController.text,
                               loggedInStatus: LoggedInStatus.loggedIn);
                           Navigator.pushReplacementNamed(

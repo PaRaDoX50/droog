@@ -4,12 +4,10 @@ import 'package:droog/screens/mobile_verification.dart';
 import 'package:droog/services/auth.dart';
 import 'package:droog/services/sharedprefs_methods.dart';
 
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 
 class SignUp extends StatelessWidget {
   static final String route = "/sign_up";
@@ -55,15 +53,16 @@ class SignUp extends StatelessWidget {
             } else {
               final firebaseUser = user as FirebaseUser;
               print(firebaseUser.phoneNumber);
-              if(firebaseUser.phoneNumber == null){
-
-                Navigator.pushReplacementNamed(context, MobileVerification.route);
-              }
-              else{
-
-
-                await _sharedPrefsMethods.saveUserDetails(userEmail: firebaseUser.email,userPhone: firebaseUser.phoneNumber,isLoggedIn: LoggedInStatus.halfProfileLeft);
-                 //building constants
+              if (firebaseUser.phoneNumber == null) {
+                Navigator.pushReplacementNamed(
+                    context, MobileVerification.route);
+              } else {
+                await _sharedPrefsMethods.saveUserDetails(
+                    userEmail: firebaseUser.email,
+                    userPhone: firebaseUser.phoneNumber,
+                    uid: firebaseUser.uid,
+                    isLoggedIn: LoggedInStatus.halfProfileLeft,);
+                //building constants
                 Navigator.pushReplacementNamed(context, Home.route);
               }
             }
@@ -106,10 +105,10 @@ class SignUp extends StatelessWidget {
             } else {
               final firebaseUser = user as FirebaseUser;
               print(firebaseUser.phoneNumber);
-              if(firebaseUser.phoneNumber == null){
-                Navigator.pushReplacementNamed(context, MobileVerification.route);
-              }
-              else{
+              if (firebaseUser.phoneNumber == null) {
+                Navigator.pushReplacementNamed(
+                    context, MobileVerification.route);
+              } else {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 prefs.setBool('isLoggedIn', true);
                 Navigator.pushReplacementNamed(context, Home.route);

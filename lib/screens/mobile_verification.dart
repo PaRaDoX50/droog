@@ -1,6 +1,7 @@
+
 import 'package:droog/models/enums.dart';
 import 'package:droog/screens/otp_screen.dart';
-import 'package:droog/screens/search.dart';
+import 'package:droog/screens/profile_setup.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/services/sharedprefs_methods.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,10 +18,15 @@ class _MobileVerificationState extends State<MobileVerification> {
   final TextEditingController mobileController = TextEditingController();
 
   bool showLoading = false;
+  bool isCodeSent = false;
+  String verificationCode;
 
   void codeSentFunc(String codeSent, BuildContext context) {
-    Navigator.pushReplacementNamed(context, OTPscreen.route,
-        arguments: {"no": mobileController.text, "code": codeSent});
+    setState(() {
+      isCodeSent = true;
+      verificationCode = codeSent;
+    });
+
   }
 
   Future<void> mobileSignIn(String phoneNo, BuildContext context) async {
@@ -29,14 +35,19 @@ class _MobileVerificationState extends State<MobileVerification> {
     SharedPrefsMethods _sharedPrefsMethods = SharedPrefsMethods();
 
     final vF = (AuthException exception) {
-      print("helloooo");
+
+      print("vF"+exception.message);
       Scaffold.of(context).showSnackBar(SnackBar(
-        content: Text("Something went wrong"),
+        content: Text("Something went wrong" ),
       ));
+      setState(() {
+        showLoading = false;
+      });
     };
 
     final vC = (AuthCredential credential) async {
       try {
+        print("vC MobileVerification" );
         FirebaseUser user = await _auth.currentUser();
         await user.updatePhoneNumberCredential(credential);
         user = await _auth.currentUser();
@@ -49,7 +60,7 @@ class _MobileVerificationState extends State<MobileVerification> {
         await _databaseMethods.createHalfUserProfile(
             userEmail: user.email, mobileNo: user.phoneNumber, uid: user.uid);
 
-        Navigator.pushReplacementNamed(context, SearchScreen.route);
+        Navigator.pushReplacementNamed(context, ProfileSetup.route);
       } catch (e) {
         Scaffold.of(context).showSnackBar(SnackBar(
           content: Text("Something went wrong"),
@@ -57,17 +68,21 @@ class _MobileVerificationState extends State<MobileVerification> {
       }
     };
     final cS = (codeSent, [forceResend]) {
+      print("cS");
       print(codeSent);
+
       codeSentFunc(codeSent, context);
     };
     final cART = (codeSent) {
+      print("cART");
       print("autoretrieval");
       codeSentFunc(codeSent, context);
     };
 
     await _auth.verifyPhoneNumber(
+
         phoneNumber: "+91" + phoneNo,
-        timeout: Duration(milliseconds: 30000),
+        timeout: Duration(milliseconds: 60000),
         verificationCompleted: vC,
         verificationFailed: vF,
         codeSent: cS,
@@ -96,7 +111,9 @@ class _MobileVerificationState extends State<MobileVerification> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
+      body: isCodeSent == true ?
+          OTPscreen(code: verificationCode,number: mobileController.text,)
+          :Stack(
         children: <Widget>[
           SingleChildScrollView(
             child: Padding(

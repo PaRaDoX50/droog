@@ -36,8 +36,8 @@ class PickImage{
 //    _storeImage();
   }
 
-  Future cropImage({File image,PictureFor pictureFor}) async {
-    File croppedImageFile =await ImageCropper.cropImage(sourcePath: image.path,aspectRatio: CropAspectRatio(ratioX: 1,ratioY: 1),compressQuality: 15);
+  Future cropImage({File image,PictureFor pictureFor,double ratioX,double ratioY}) async {
+    File croppedImageFile =await ImageCropper.cropImage(sourcePath: image.path,aspectRatio: CropAspectRatio(ratioX: ratioX,ratioY: ratioY),compressQuality: 15);
     if(croppedImageFile == null){
       return null;
     }

@@ -3,11 +3,10 @@ import 'package:droog/models/enums.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPrefsMethods {
-  Future<void> saveUserDetails(
-      {String userEmail,
-      String userPhone,
-      String uid,
-      LoggedInStatus isLoggedIn}) async {
+  Future<void> saveUserDetails({String userEmail,
+    String userPhone,
+    String uid,
+    LoggedInStatus isLoggedIn}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString("userEmail", userEmail);
     prefs.setString("uid", uid);
@@ -18,10 +17,12 @@ class SharedPrefsMethods {
     Constants.userPhoneNo = userPhone;
   }
 
-  Future<void> saveUserName(
-      {String userName, LoggedInStatus loggedInStatus}) async {
+  Future<void> completeUserPrefs(
+      {String userName, String firstName, String lastName, LoggedInStatus loggedInStatus}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString("userName", userName);
+    prefs.setString("firstName", firstName);
+    prefs.setString("lastName", lastName);
     prefs.setInt("isLoggedIn", loggedInStatus.index);
   }
 
@@ -30,44 +31,51 @@ class SharedPrefsMethods {
 //    prefs.setString("userName", userName);
 //  }
 
-  Future<String> getUserEmail() async {
+  Future<Map<String, String>> getFirstHalfUserDetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString("userEmail");
+    return {"userEmail": prefs.getString("userEmail"),
+      "uid": prefs.getString("uid"),
+      "userPhone": prefs.getString("userPhone")
+    };
   }
 
-  Future<String> getUserPhone() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString("userPhone");
-  }
+//  Future<String> getUserPhone() async {
+//    SharedPreferences prefs = await SharedPreferences.getInstance();
+//    return;
+//  }
+//
+//  Future<String> getUID() async {
+//    SharedPreferences prefs = await SharedPreferences.getInstance();
+//    return;
+//  }
 
-  Future<String> getUID() async {
+  Future<Map<String,String>> getSecondHalfUserDetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString("uid");
-  }
-
-  Future<String> getUserName() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString("userName");
+    return {"userName":prefs.getString("userName"),"firstName":prefs.getString("firstName"),"lastName":prefs.getString("lastName")};
   }
 
   Future<int> getLoggedInStatusAndBuildConstants() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     int status = prefs.getInt("isLoggedIn") ?? -1;
-    print(status.toString()+"statttttusssss");
+    print(status.toString() + "statttttusssss");
     if (LoggedInStatus.halfProfileLeft.index == status) {
       await buildHalfProfileConstants();
     } else if (LoggedInStatus.loggedIn.index == status) {
       await buildHalfProfileConstants();
-      Constants.userName = await getUserName();
+      final data =  await getSecondHalfUserDetails();
+      Constants.lastName = data["lastName"];
+      Constants.firstName = data["firstName"];
+      Constants.userName = data["userName"];
     }
     return status;
   }
 
   buildHalfProfileConstants() async {
-    Constants.userEmail = await getUserEmail();
-    Constants.userPhoneNo = await getUserPhone();
-    Constants.uid = await getUID();
+    Map<String, String> data = await getFirstHalfUserDetails();
+    Constants.userEmail = data["userEmail"];
+    Constants.userPhoneNo = data["userPhone"];
+    Constants.uid = data["uid"];
   }
 
   Future saveProfilePicturePath(String path) async {

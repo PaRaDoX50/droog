@@ -5,11 +5,17 @@ class Constants {
   static String userPhoneNo;
   static String userName;
   static String uid;
+  static String firstName;
+  static String lastName;
+
 
   static Future getProfilePicturePath()async{
     final appDir = await getApplicationDocumentsDirectory();
     return '${appDir.path}/profilePicture.jpg';
 
+  }
+  static String get fullName{
+    return"$firstName $lastName";
   }
 
 }

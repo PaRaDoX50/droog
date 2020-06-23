@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/data/constants.dart';
+import 'package:droog/models/user.dart';
 import 'package:droog/screens/chat_screen.dart';
 import 'package:droog/services/database_methods.dart';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -76,34 +76,45 @@ class _ChatListState extends State<ChatList> {
               preferredSize: Size.fromHeight(60.0), // Add this code
               child: Text(''), // Add this code
             ),
-            backgroundColor: Theme.of(context).primaryColor,
+            backgroundColor: Theme
+                .of(context)
+                .primaryColor,
             flexibleSpace: SafeArea(child: searchTextField),
           ),
           SliverToBoxAdapter(
             child: Container(
-                color: Theme.of(context).primaryColor, child: curveContainer),
+                color: Theme
+                    .of(context)
+                    .primaryColor, child: curveContainer),
           ),
           StreamBuilder<QuerySnapshot>(
               stream: _databaseMethods.getCurrentUserChats(
-                  userEmail: Constants.userEmail),
+                  userName: Constants.userName),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   List<DocumentSnapshot> data = snapshot.data.documents;
                   return SliverList(
                     delegate: SliverChildBuilderDelegate((_, index) {
-                      final userEmail =
-                          data[index]["users"][1] == Constants.userEmail
-                              ? data[index]["users"][0]
-                              : data[index]["users"][1];
+                      final targetUserName =
+                      data[index]["users"][1] == Constants.userName
+                          ? data[index]["users"][0]
+                          : data[index]["users"][1];
 
                       return InkWell(
-                        onTap: () => Navigator.pushNamed(
-                            context, ChatScreen.route,
-                            arguments: userEmail),
+                        onTap: () async {
+                          try {
+                            User user = await _databaseMethods
+                                .getUserDetailsByUsername(targetUserName: targetUserName);
+                            Navigator.pushNamed(
+                                context, ChatScreen.route,
+                                arguments: user);
+                          }  catch (e) {
+                            print(e.toString());
+                          }
+                        },
                         child: ChatTile(
-                          userEmail: userEmail,
-                        ),
-                      );
+                        targetUserName: targetUserName,
+                      ),);
                     }, childCount: data.length),
                   );
                 } else {
@@ -119,17 +130,17 @@ class _ChatListState extends State<ChatList> {
 }
 
 class ChatTile extends StatelessWidget {
-  final String userEmail;
+  final String targetUserName;
   DatabaseMethods _databaseMethods = DatabaseMethods();
   String lastMessage = "";
   String date = "";
 
-  ChatTile({this.userEmail});
+  ChatTile({this.targetUserName});
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-        stream: _databaseMethods.getUserConversationsByEmail(userEmail),
+        stream: _databaseMethods.getAConversation(targetUserName: targetUserName),
         builder: (context, snapshot) {
           List<DocumentSnapshot> data = [];
           if (snapshot.hasData) {
@@ -139,7 +150,7 @@ class ChatTile extends StatelessWidget {
             });
             lastMessage = data.first["message"];
             DateTime temp =
-                DateTime.fromMicrosecondsSinceEpoch(data.last["time"]);
+            DateTime.fromMicrosecondsSinceEpoch(data.first["time"]);
             date = DateFormat.MMMd().format(temp);
           }
           return Container(
@@ -150,7 +161,7 @@ class ChatTile extends StatelessWidget {
                   leading: CircleAvatar(
                     child: Icon(Icons.account_circle),
                   ),
-                  title: Text(userEmail, overflow: TextOverflow.ellipsis),
+                  title: Text(targetUserName, overflow: TextOverflow.ellipsis),
                   subtitle: Text(
                     lastMessage,
                     overflow: TextOverflow.ellipsis,

@@ -7,18 +7,20 @@ import 'file:///P:/androidProjects/Droog/droog/lib/utils/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-class NewPost extends StatefulWidget {
+class NewPostBox extends StatefulWidget {
   static final String route = "/new_post";
-
+  PostIs postIs;
+  NewPostBox({this.postIs});
   @override
-  _NewPostState createState() => _NewPostState();
+  _NewPostBoxState createState() => _NewPostBoxState();
 }
 
-class _NewPostState extends State<NewPost> {
+class _NewPostBoxState extends State<NewPostBox> {
   File _attachedImage;
   TextEditingController descriptionController = TextEditingController();
   DatabaseMethods _databaseMethods = DatabaseMethods();
   PickImage _pickImage = PickImage();
+
 
   Future _getProfilePicture() async {
     try {
@@ -96,8 +98,8 @@ class _NewPostState extends State<NewPost> {
             }
             return CircleAvatar(
                 child: Icon(
-              Icons.account_circle,
-            ));
+                  Icons.account_circle,
+                ));
           },
         ),
       ),
@@ -114,7 +116,7 @@ class _NewPostState extends State<NewPost> {
         child: Center(
           child: Card(
             shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -142,7 +144,7 @@ class _NewPostState extends State<NewPost> {
                               croppedImage = await _pickImage.cropImage(
                                   image: image,
                                   pictureFor: PictureFor.postPicture,
-                              ratioX: 4,ratioY: 3);
+                                  ratioX: 4,ratioY: 3);
                             }
                             if (croppedImage != null) {
                               setState(() {
@@ -179,10 +181,10 @@ class _NewPostState extends State<NewPost> {
                   ),
                   _attachedImage != null
                       ? Image.file(
-                          _attachedImage,
-                          height: 80,
-                          width: 80,
-                        )
+                    _attachedImage,
+                    height: 80,
+                    width: 80,
+                  )
                       : Container(),
                   _buildShareButton(),
                 ],

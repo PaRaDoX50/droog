@@ -2,6 +2,7 @@ import 'package:droog/models/enums.dart';
 import 'package:droog/screens/chat_list.dart';
 import 'package:droog/screens/chat_screen.dart';
 import 'package:droog/screens/feed.dart';
+import 'package:droog/screens/responses_screen.dart';
 import 'package:droog/screens/user_profile.dart';
 
 import 'package:droog/screens/home.dart';
@@ -58,7 +59,7 @@ class _MyAppState extends State<MyApp> {
           if (snapshot.hasData) {
             print(snapshot.data);
             if(snapshot.data == LoggedInStatus.loggedIn.index){
-              return UserProfile();
+              return Home();
             }
             else if(snapshot.data == LoggedInStatus.halfProfileLeft.index){
               return ProfileSetup();
@@ -78,6 +79,9 @@ class _MyAppState extends State<MyApp> {
         SearchScreen.route: (_) => SearchScreen(),
         ChatScreen.route: (_) => ChatScreen(),
         NewPost.route: (_) => NewPost(),
+        UserProfile.route: (_) => UserProfile(),
+        ProfileSetup.route: (_) => ProfileSetup(),
+        ResponseScreen.route:(_) => ResponseScreen(),
       },
     );
   }

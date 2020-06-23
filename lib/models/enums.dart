@@ -14,3 +14,9 @@ enum FollowStatus{
   following,
   requestNotSent,
 }
+
+enum PostIs{
+  normalPost,
+  response,
+  replyToAResponse,
+}

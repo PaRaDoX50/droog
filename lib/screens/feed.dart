@@ -23,6 +23,7 @@ class _FeedState extends State<Feed>{
           if (snapshot.hasData) {
 
             return ListView.builder(
+
               itemCount: snapshot.data.documents.length,
                 itemBuilder: (_, index) {
               final post = _postFromFirebasePost(snapshot.data.documents[index]);
@@ -40,10 +41,13 @@ class _FeedState extends State<Feed>{
   }
 }
 
+
 Post _postFromFirebasePost(DocumentSnapshot documentSnapshot) {
+
   return documentSnapshot != null ? Post(
       description: documentSnapshot["description"],
       imageUrl: documentSnapshot["imageUrl"],
       postBy: documentSnapshot["postBy"],
-      time: documentSnapshot["time"]): null;
+      time: documentSnapshot["time"],
+  postId: documentSnapshot.documentID): null;
 }

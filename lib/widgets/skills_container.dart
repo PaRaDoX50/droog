@@ -19,7 +19,7 @@ class _SkillsContainerState extends State<SkillsContainer> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Text("Skills",style: MyThemeData.blackBoldMedium,),
+          Text("Skills",style: MyThemeData.blackBold12,),
           ...widget.skills.map((e) => Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
@@ -27,7 +27,7 @@ class _SkillsContainerState extends State<SkillsContainer> {
               Text(e,style: TextStyle(color: Colors.blue),),
             ],
           ),).toList(),
-          Text("Achievements",style: MyThemeData.blackBoldMedium,),
+          Text("Achievements",style: MyThemeData.blackBold12,),
           ...widget.skills.map((e) => Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
