@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
+import 'package:droog/models/post.dart';
 import 'package:droog/services/database_methods.dart';
 import 'file:///P:/androidProjects/Droog/droog/lib/utils/image_picker.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,10 @@ import 'package:image_picker/image_picker.dart';
 class NewPostBox extends StatefulWidget {
   static final String route = "/new_post";
   PostIs postIs;
-  NewPostBox({this.postIs});
+  String postId;
+
+  NewPostBox({this.postIs, this.postId});
+
   @override
   _NewPostBoxState createState() => _NewPostBoxState();
 }
@@ -20,7 +24,6 @@ class _NewPostBoxState extends State<NewPostBox> {
   TextEditingController descriptionController = TextEditingController();
   DatabaseMethods _databaseMethods = DatabaseMethods();
   PickImage _pickImage = PickImage();
-
 
   Future _getProfilePicture() async {
     try {
@@ -58,19 +61,38 @@ class _NewPostBoxState extends State<NewPostBox> {
           try {
             if (_attachedImage != null) {
               print("upload");
-              String imageUrl = await _databaseMethods.uploadPictureForPost(
-                  file: _attachedImage);
+              String imageUrl;
+              if (widget.postIs == PostIs.normalPost) {
+                imageUrl = await _databaseMethods.uploadPictureForPost(
+                    file: _attachedImage);
+              } else if (widget.postIs == PostIs.response) {
+                imageUrl = await _databaseMethods.uploadPictureForResponse(
+                    file: _attachedImage);
+              }
               print("upload complete" + imageUrl);
 
               if (imageUrl != null) {
-                await _databaseMethods.makeAPost(
-                    description: descriptionController.text,
-                    imageUrl: imageUrl);
-                print("post complete");
+                if (widget.postIs == PostIs.normalPost) {
+                  await _databaseMethods.makeAPost(
+                      description: descriptionController.text,
+                      imageUrl: imageUrl);
+                  print("post complete");
+                } else if (widget.postIs == PostIs.response) {
+                  await _databaseMethods.makeAResponse(
+                      postId: widget.postId,
+                      imageUrl: imageUrl,
+                      description: descriptionController.text);
+                }
               }
             } else {
-              await _databaseMethods.makeAPost(
-                  description: descriptionController.text);
+              if (widget.postIs == PostIs.normalPost) {
+                await _databaseMethods.makeAPost(
+                    description: descriptionController.text);
+              } else if (widget.postIs == PostIs.response) {
+                await _databaseMethods.makeAResponse(
+                    postId: widget.postId,
+                    description: descriptionController.text);
+              }
               print("post complete without picture");
             }
           } catch (e) {
@@ -98,8 +120,8 @@ class _NewPostBoxState extends State<NewPostBox> {
             }
             return CircleAvatar(
                 child: Icon(
-                  Icons.account_circle,
-                ));
+              Icons.account_circle,
+            ));
           },
         ),
       ),
@@ -109,14 +131,12 @@ class _NewPostBoxState extends State<NewPostBox> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[300],
-      body: Padding(
+    return Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
           child: Card(
             shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -144,7 +164,8 @@ class _NewPostBoxState extends State<NewPostBox> {
                               croppedImage = await _pickImage.cropImage(
                                   image: image,
                                   pictureFor: PictureFor.postPicture,
-                                  ratioX: 4,ratioY: 3);
+                                  ratioX: 4,
+                                  ratioY: 3);
                             }
                             if (croppedImage != null) {
                               setState(() {
@@ -181,10 +202,10 @@ class _NewPostBoxState extends State<NewPostBox> {
                   ),
                   _attachedImage != null
                       ? Image.file(
-                    _attachedImage,
-                    height: 80,
-                    width: 80,
-                  )
+                          _attachedImage,
+                          height: 80,
+                          width: 80,
+                        )
                       : Container(),
                   _buildShareButton(),
                 ],
@@ -192,7 +213,6 @@ class _NewPostBoxState extends State<NewPostBox> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }
