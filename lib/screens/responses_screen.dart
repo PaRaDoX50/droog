@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/models/post.dart';
 import 'package:droog/models/response.dart';
 import 'package:droog/services/database_methods.dart';
@@ -11,13 +12,16 @@ class ResponseScreen extends StatefulWidget {
   static String route = "/response_screen";
 
   @override
-  _ResponseScreenState createState() => _ResponseScreenState();
+  ResponseScreenState createState() => ResponseScreenState();
 }
 
-class _ResponseScreenState extends State<ResponseScreen> {
+class ResponseScreenState extends State<ResponseScreen> {
   Post post;
   DatabaseMethods _databaseMethods = DatabaseMethods();
   Future<List<Response>> responses;
+  int buildMethodCount = 0;
+  bool _showLoading = false;
+
 
   @override
   void initState() {
@@ -26,44 +30,85 @@ class _ResponseScreenState extends State<ResponseScreen> {
 //    print("asdaddddddddddddddddddddd"+post.postId);
   }
 
+  solutionChanged({DocumentSnapshot documentSnapshot,bool markAsSolution}) async {
+//    responses = _databaseMethods.getResponsesByPostId(post.postId);
+//    setState(() {
+//
+//    });
+     await _databaseMethods.toggleSolutionForPost(responseDocument: documentSnapshot,markAsSolution: markAsSolution);
+     if (markAsSolution) {
+       post.solutionId = documentSnapshot.documentID;
+     }
+     else{
+       post.solutionId = null;
+     }
+     setState(() {
+
+     });
+  }
+  toggleLoading(){
+    setState(() {
+      _showLoading = !_showLoading;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+
     post = ModalRoute.of(context).settings.arguments as Post;
-    responses = _databaseMethods.getResponsesByPostId(post.postId);
+
+      if (buildMethodCount == 0) {
+        responses = _databaseMethods.getResponsesByPostId(post.postId);
+      }
+
+    buildMethodCount++;
 
     return Scaffold(
+
       appBar: AppBar(
         title: Text("Responses"),
       ),
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverToBoxAdapter(
-            child: FeedTile(
-              post: post,
+      body: Stack(
+        children: <Widget>[
+          IgnorePointer(
+            ignoring: _showLoading,
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(
+                  child: FeedTile(
+                    post: post,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                    child: Divider(
+                  color: Colors.grey[300],
+                  thickness: 1,
+                )),
+                FutureBuilder<List<Response>>(
+                    future: responses,
+                    builder: (context, snapshot) {
+                      return snapshot.hasData
+                          ? SliverList(
+                              delegate: SliverChildBuilderDelegate((_, index) {
+                                bool isSolution = snapshot.data[index].document.documentID == post.solutionId ? true: false;
+                                return ResponseTile(
+                                  isSolution: isSolution,
+                                  toggleLoading: toggleLoading,
+                                    solutionChanged: solutionChanged,
+                                    response: snapshot.data[index],
+                                    postBy: post.postBy);
+                              }, childCount: snapshot.data.length),
+                            )
+                          : SliverToBoxAdapter(
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                    })
+              ],
             ),
           ),
-          SliverToBoxAdapter(
-              child: Divider(
-            color: Colors.grey[300],
-            thickness: 1,
-          )),
-          FutureBuilder<List<Response>>(
-              future: responses,
-              builder: (context, snapshot) {
-                return snapshot.hasData
-                    ? SliverList(
-                        delegate: SliverChildBuilderDelegate((_, index) {
-                          return ResponseTile(
-                              response: snapshot.data[index],
-                              postBy: post.postBy);
-                        }, childCount: snapshot.data.length),
-                      )
-                    : SliverToBoxAdapter(
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-              })
+          _showLoading ? Container(height:double.infinity,width:double.infinity,color:Colors.transparent,child: Center(child: CircularProgressIndicator(),)) : Container(),
         ],
       ),
     );

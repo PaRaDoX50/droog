@@ -11,7 +11,10 @@ class NewResponse extends StatelessWidget {
   Widget build(BuildContext context) {
     post = ModalRoute.of(context).settings.arguments as Post;
 
-    return Scaffold(body:SingleChildScrollView(
+    return Scaffold(
+      backgroundColor: Colors.grey[300],
+      appBar: AppBar(),
+      body:SingleChildScrollView(
       child: Column(children: <Widget>[
         FeedTile(post: post,),
         SizedBox(height: 8,),

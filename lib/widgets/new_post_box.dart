@@ -41,7 +41,7 @@ class _NewPostBoxState extends State<NewPostBox> {
   }
 
   Widget _buildTextField() {
-    final maxLines = 11;
+    final maxLines = widget.postIs == PostIs.normalPost ? 11 : 2;
 
     return TextField(
       controller: descriptionController,
@@ -132,9 +132,10 @@ class _NewPostBoxState extends State<NewPostBox> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(vertical: 0,horizontal: 8/2),
         child: Center(
           child: Card(
+            elevation: 10,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             child: Padding(

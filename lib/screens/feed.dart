@@ -49,5 +49,6 @@ Post _postFromFirebasePost(DocumentSnapshot documentSnapshot) {
       imageUrl: documentSnapshot["imageUrl"],
       postBy: documentSnapshot["postBy"],
       time: documentSnapshot["time"],
-  postId: documentSnapshot.documentID): null;
+  postId: documentSnapshot.documentID,
+  solutionId: documentSnapshot["solutionId"]): null;
 }

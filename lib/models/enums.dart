@@ -20,3 +20,14 @@ enum PostIs{
   response,
   replyToAResponse,
 }
+
+enum VoteStatus{
+  alreadyVoted,
+  notVoted,
+}
+
+enum VoteType{
+  upVote,
+  undoUpVote,
+
+}

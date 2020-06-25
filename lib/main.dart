@@ -2,6 +2,7 @@ import 'package:droog/models/enums.dart';
 import 'package:droog/screens/chat_list.dart';
 import 'package:droog/screens/chat_screen.dart';
 import 'package:droog/screens/feed.dart';
+import 'package:droog/screens/new_response_screen.dart';
 import 'package:droog/screens/responses_screen.dart';
 import 'package:droog/screens/user_profile.dart';
 
@@ -82,6 +83,7 @@ class _MyAppState extends State<MyApp> {
         UserProfile.route: (_) => UserProfile(),
         ProfileSetup.route: (_) => ProfileSetup(),
         ResponseScreen.route:(_) => ResponseScreen(),
+        NewResponse.route:(_) => NewResponse(),
       },
     );
   }

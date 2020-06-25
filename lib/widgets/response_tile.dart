@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:droog/data/constants.dart';
+import 'package:droog/models/enums.dart';
 import 'package:droog/models/response.dart';
 import 'package:droog/models/user.dart';
+import 'package:droog/screens/responses_screen.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/widgets/expandable_text.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,8 +13,11 @@ import 'package:intl/intl.dart';
 class ResponseTile extends StatefulWidget {
   final Response response;
   final String postBy;
+  Function solutionChanged;
+  Function toggleLoading;
+  bool isSolution;
 
-  ResponseTile({this.response, this.postBy});
+  ResponseTile({this.response, this.postBy, this.solutionChanged,this.toggleLoading,this.isSolution});
 
   @override
   _ResponseTileState createState() => _ResponseTileState();
@@ -20,6 +25,7 @@ class ResponseTile extends StatefulWidget {
 
 class _ResponseTileState extends State<ResponseTile> {
   String responses = "6";
+  bool _isFirstPress = true;
 
   DatabaseMethods _databaseMethods = DatabaseMethods();
 
@@ -30,14 +36,19 @@ class _ResponseTileState extends State<ResponseTile> {
 
   Widget _buildSolutionButton() {
     return RaisedButton(
-      child: Text("Mark as Solution"),
-      color: Theme.of(context).buttonColor,
+      child: FittedBox(child: Text("Mark as Solution",overflow: TextOverflow.ellipsis,maxLines: 1,)),
+      color: Colors.green,
       textColor: Colors.white,
       onPressed: () async {
+        widget.toggleLoading();
         try {
-          await _databaseMethods.toggleSolutionForPost(isSolution: true,responseDocument: widget.response.document);
-        }  catch (e) {
-          print(e.message);
+
+
+          widget.solutionChanged(documentSnapshot:widget.response.document,markAsSolution:true);
+          widget.toggleLoading();
+        } catch (e) {
+          widget.toggleLoading();
+          print(e.toString());
         }
       },
     );
@@ -45,42 +56,82 @@ class _ResponseTileState extends State<ResponseTile> {
 
   Widget _buildMarkedSolutionButton() {
     return RaisedButton(
-      child: Icon(Icons.check),
+      child: FittedBox(child: Icon(Icons.check)),
       color: Theme.of(context).buttonColor,
       textColor: Colors.white,
       onPressed: () async {
         try {
-          await _databaseMethods.toggleSolutionForPost(isSolution: false,responseDocument: widget.response.document);
-        }  catch (e) {
-          print(e.message);
+          widget.toggleLoading();
+          await widget.solutionChanged(documentSnapshot:widget.response.document,markAsSolution:false);
+
+          widget.toggleLoading();
+        } catch (e) {
+          widget.toggleLoading();
+          print(e);
         }
       },
     );
   }
 
   Widget _buildVoteButton() {
-    return RaisedButton(
-      child: Text("Vote"),
-      color: Theme.of(context).buttonColor,
-      textColor: Colors.white,
-      onPressed: () async {
-        try {
+    return FutureBuilder<VoteStatus>(
+        future: _databaseMethods.checkVoteStatus(
+            responseDocument: widget.response.document),
+        builder: (context, snapshot) {
+          bool voted;
+          if (snapshot.data == VoteStatus.alreadyVoted) {
+            voted = true;
+          } else {
+            voted = false;
+          }
+          String buttonText = voted ? "Un-Vote" : "Vote";
+          Color buttonColor = voted ? Colors.lightGreen : Colors.green;
 
-          await _databaseMethods.voteAResponse(responseDocument: widget.response.document);
-          setState(() {
-            widget.response.votes++;
-          });
-        }  catch (e) {
-          print(e.message);
-        }
-      },
-    );
+          return  RaisedButton(
+              child: snapshot.hasData
+                  ? Text(buttonText,overflow: TextOverflow.ellipsis,)
+                  : CircularProgressIndicator(),
+              color: buttonColor,
+              textColor: Colors.white,
+
+              onPressed: () async {
+                if (_isFirstPress) {
+                  widget.toggleLoading();
+                  _isFirstPress = false;
+                  if (snapshot.hasData ) {
+
+                    try {
+                      voted
+                          ? await _databaseMethods.voteAResponse(
+                              responseDocument: widget.response.document,
+                              voteType: VoteType.undoUpVote,
+                            )
+                          : await _databaseMethods.voteAResponse(
+                              responseDocument: widget.response.document,
+                              voteType: VoteType.upVote,
+                            );
+                      setState(() {
+                        voted ? widget.response.votes-- : widget.response.votes++;
+
+                      });
+                      widget.toggleLoading();
+                    } catch (e) {
+                      widget.toggleLoading();
+                      print(e.toString());
+                    }
+                  }
+                  _isFirstPress = true;
+                }
+              },
+            );
+        });
   }
 
   Widget _getCenterButton() {
-    return (widget.postBy == Constants.userName && widget.response.isSolution)
+
+    return (widget.postBy == Constants.userName && widget.isSolution)
         ? _buildMarkedSolutionButton()
-        : ((widget.postBy == Constants.userName && !widget.response.isSolution)
+        : ((widget.postBy == Constants.userName && !widget.isSolution)
             ? _buildSolutionButton()
             : _buildVoteButton());
   }
@@ -157,14 +208,21 @@ class _ResponseTileState extends State<ResponseTile> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Icon(Icons.check_circle),
-                    Text("${widget.response.votes} votes"),
-                  ],
+                Expanded(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      FittedBox(child: Icon(Icons.check_circle)),
+                      SizedBox(width: 8/2),
+                      FittedBox(child: Text("${widget.response.votes} Votes")),
+                    ],
+                  ),
                 ),
-                _getCenterButton(),
-                Icon(Icons.message)
+                Expanded(child: _getCenterButton()),
+                Expanded(child: Align(alignment: Alignment.centerRight,child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(Icons.message),
+                )))
               ],
             ),
           )
