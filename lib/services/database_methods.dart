@@ -3,8 +3,11 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
+import 'package:droog/models/post.dart';
 import 'package:droog/models/response.dart';
+import 'package:droog/models/update.dart';
 import 'package:droog/models/user.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 
@@ -85,12 +88,22 @@ class DatabaseMethods {
     final data = snapshot.documents.first;
     print(data["userName"].toString() + "dddddddd");
 
-    return User(
-        userEmail: data["email"],
-        phoneNo: data["phoneNo"],
-        uid: data["uid"],
-        userName: data["userName"],
-        profilePictureUrl: data["profilePictureUrl"]);
+    return _userFromFirebaseUser(userDocument: data);
+  }
+
+  Future getUserDetailsByUid({String targetUid}) async {
+    DocumentSnapshot snapshot =
+        await _database.collection("users").document(targetUid).get();
+
+//    print(data["userName"].toString() + "dddddddd");
+
+    return _userFromFirebaseUser(userDocument: snapshot);
+  }
+
+  Future<Post> getPostByPostId({String postId}) async {
+    DocumentSnapshot snapshot =
+        await _database.collection("posts").document(postId).get();
+    return _postFromFirebasePost(documentSnapshot: snapshot);
   }
 
   Future<List<User>> searchUser(String keyword) async {
@@ -207,10 +220,25 @@ class DatabaseMethods {
       "postId": postId,
       "time": DateTime.now().millisecondsSinceEpoch,
       "isSolution": false,
-      "votes": 0
+      "votes": 0,
+      "uid": Constants.uid,
     };
     DocumentReference reference =
         await _database.collection("responses").add(data);
+
+    DocumentSnapshot documentSnapshot =
+        await _database.collection("posts").document(postId).get();
+    String postBy = documentSnapshot["postBy"];
+    QuerySnapshot snapshot = await _database
+        .collection("users")
+        .where('userName', isEqualTo: postBy)
+        .getDocuments();
+    await snapshot.documents[0].reference.collection("updates").add({
+      "updateType": 0,
+      "uidInvolved": Constants.uid,
+      "postInvolved": postId,
+      "time": DateTime.now().millisecondsSinceEpoch,
+    });
   }
 
   Stream<QuerySnapshot> getPosts() {
@@ -235,17 +263,17 @@ class DatabaseMethods {
   }
 
   Future<void> sendFollowRequest({String targetUid}) async {
-    print(Constants.userName + "hellllsldla");
+//    print(Constants.userName + "hellllsldla");
     print(targetUid + "hellllsldla");
 
-    print(Constants.firstName + "hellllsldla");
+//    print(Constants.firstName + "hellllsldla");
 
     await _database
         .collection("users")
         .document(targetUid)
         .collection("requests")
         .document(Constants.uid)
-        .setData({"requestBy": Constants.uid});
+        .setData({"uid": Constants.uid});
     //Access target user by its uid -> under collections of "requests", add document  naming it the uid of the user who sent the request.
   }
 
@@ -261,6 +289,46 @@ class DatabaseMethods {
     //Access target user by its uid -> under collections of "requests", delete document named the uid of the user who sent the request.
   }
 
+  Future<List<User>> getRequests({bool limitTo3}) async {
+    FirebaseUser user = await FirebaseAuth.instance.currentUser();
+    print(user.uid);
+    print("reachedMethod");
+    if (limitTo3) {
+      print("reachedLimit");
+      QuerySnapshot snapshot = await _database
+          .collection("users")
+          .document(Constants.uid)
+          .collection("requests")
+          .limit(3)
+          .getDocuments();
+      print("reachedsnapshot");
+      List<DocumentSnapshot> documents = snapshot.documents;
+      print("reachedsnapshot1" + documents.length.toString());
+      List<User> users = [];
+      for (int i = 0; i < documents.length; i++) {
+        print(i.toString() + "index" + documents[i].data.toString());
+        print(documents[i]["uid"] + "documentrequest");
+        User user = await getUserDetailsByUid(targetUid: documents[i]["uid"]);
+        users.add(user);
+      }
+      print("reachedsnapshot2");
+      return users;
+    } else {
+      QuerySnapshot snapshot = await _database
+          .collection("users")
+          .document(Constants.uid)
+          .collection("requests")
+          .getDocuments();
+      List<DocumentSnapshot> documents = snapshot.documents;
+      List<User> users;
+      for (int i = 0; i < documents.length; i++) {
+        User user = await getUserDetailsByUid(targetUid: documents[i]["uid"]);
+        users.add(user);
+      }
+      return users;
+    }
+  }
+
   Future<FollowStatus> getFollowStatus({String targetUid}) async {
     QuerySnapshot snapshotFollowers = await _database
         .collection("users")
@@ -273,7 +341,7 @@ class DatabaseMethods {
         .collection("users")
         .document(targetUid)
         .collection("requests")
-        .where("requestBy", isEqualTo: Constants.uid)
+        .where("uid", isEqualTo: Constants.uid)
         .getDocuments();
     if (snapshotFollowers.documents.isEmpty &&
         snapshotRequests.documents.isEmpty) {
@@ -307,6 +375,15 @@ class DatabaseMethods {
         .collection("requests")
         .document(targetUid)
         .delete();
+    await _database
+        .collection("users")
+        .document(targetUid)
+        .collection("updates")
+        .add({
+      "updateType": 2,
+      "uidInvolved": Constants.uid,
+      "time": DateTime.now().millisecondsSinceEpoch,
+    });
   }
 
   Stream<QuerySnapshot> getPostsForFeed() async* {
@@ -344,6 +421,7 @@ class DatabaseMethods {
         postId: documentSnapshot["postId"],
         response: documentSnapshot["response"],
         responseBy: documentSnapshot["responseBy"],
+        uid: documentSnapshot["uid"],
         votes: documentSnapshot["votes"],
         document: documentSnapshot);
   }
@@ -360,13 +438,29 @@ class DatabaseMethods {
   }
 
   Future<void> toggleSolutionForPost(
-      { DocumentSnapshot responseDocument,bool markAsSolution}) async {
+      {DocumentSnapshot responseDocument, bool markAsSolution}) async {
     String postId = responseDocument["postId"];
     if (markAsSolution) {
-      await _database.collection("posts").document(postId).updateData({"solutionId":responseDocument.documentID});
-    }
-    else{
-      await _database.collection("posts").document(postId).updateData({"solutionId":""});
+      await _database
+          .collection("posts")
+          .document(postId)
+          .updateData({"solutionId": responseDocument.documentID});
+      DocumentSnapshot snapshot = await _database
+          .collection("users")
+          .document(responseDocument["uid"])
+          .get();
+      snapshot.reference.collection("updates").add({
+        "updateType": 1,
+        "uidInvolved": Constants.uid,
+        "responseId": responseDocument.documentID,
+        "postInvolved": postId,
+        "time": DateTime.now().millisecondsSinceEpoch,
+      });
+    } else {
+      await _database
+          .collection("posts")
+          .document(postId)
+          .updateData({"solutionId": ""});
     }
 //    if (isSolution) {
 //      QuerySnapshot snapshot = await _database
@@ -381,9 +475,11 @@ class DatabaseMethods {
 //    }
 //    await responseDocument.reference.updateData({"isSolution": isSolution});
   }
+
   Future<String> getSolutionId(String postId) async {
-    DocumentSnapshot postDocument = await _database.collection("posts").document(postId).get();
-    postDocument["solution"];
+    DocumentSnapshot postDocument =
+        await _database.collection("posts").document(postId).get();
+    return postDocument["solutionId"];
   }
 
   Future<void> voteAResponse(
@@ -391,30 +487,99 @@ class DatabaseMethods {
     int votes = responseDocument["votes"];
     if (voteType == VoteType.upVote) {
       await responseDocument.reference.updateData({"votes": votes + 1});
-      await responseDocument.reference.collection("votes").document(Constants.uid).setData({"voteBy":Constants.userName});
+      await responseDocument.reference
+          .collection("votes")
+          .document(Constants.uid)
+          .setData({"voteBy": Constants.userName});
     } else if (voteType == VoteType.undoUpVote) {
       await responseDocument.reference.updateData({"votes": votes - 1});
-      await responseDocument.reference.collection("votes").document(Constants.uid).delete();
-
+      await responseDocument.reference
+          .collection("votes")
+          .document(Constants.uid)
+          .delete();
     }
   }
 
-  Future<VoteStatus> checkVoteStatus({DocumentSnapshot responseDocument}) async {
-   DocumentSnapshot snapshot = await responseDocument.reference.collection("votes").document(Constants.uid).get();
-   if(snapshot.exists){
-     return VoteStatus.alreadyVoted;
-   }
-   else{
-     return VoteStatus.notVoted;
-   }
+  Future<List<Update>> getUpdates() async {
+    QuerySnapshot snapshot = await _database
+        .collection("users")
+        .document(Constants.uid)
+        .collection("updates")
+        .orderBy("time", descending: true)
+        .getDocuments();
+    List<DocumentSnapshot> documents = snapshot.documents;
+    List<Update> updates = [];
+    for (int i = 0; i < documents.length; i++) {
+      Update update = _updateFromFirebaseUpdate(documentSnapshot: documents[i]);
+      updates.add(update);
+    }
+    return updates;
   }
 
-//  Post _postFromFirebasePost(DocumentSnapshot documentSnapshot) {
-//    return documentSnapshot != null ? Post(
-//        description: documentSnapshot["description"],
-//        imageUrl: documentSnapshot["imageUrl"],
-//        postBy: documentSnapshot["postBy"],
-//        time: documentSnapshot["time"]): null;
-//  }
+  Future<VoteStatus> checkVoteStatus(
+      {DocumentSnapshot responseDocument}) async {
+    DocumentSnapshot snapshot = await responseDocument.reference
+        .collection("votes")
+        .document(Constants.uid)
+        .get();
+    if (snapshot.exists) {
+      return VoteStatus.alreadyVoted;
+    } else {
+      return VoteStatus.notVoted;
+    }
+  }
 
+  User _userFromFirebaseUser({DocumentSnapshot userDocument}) {
+    return User(
+        description: userDocument["description"],
+        userName: userDocument["userName"],
+        lastName: userDocument["lastName"],
+        profilePictureUrl: userDocument["profilePictureUrl"],
+        userEmail: userDocument["userEmail"],
+        firstName: userDocument["firstName"],
+        uid: userDocument["uid"],
+        phoneNo: userDocument["phoneNo"]);
+  }
+
+  Update _updateFromFirebaseUpdate({DocumentSnapshot documentSnapshot}) {
+    if (documentSnapshot["updateType"] == UpdateType.acceptedRequest.index) {
+      return Update(
+        updateType: UpdateType.acceptedRequest,
+        uidInvolved: documentSnapshot["uidInvolved"],
+        time: documentSnapshot["time"],
+      );
+    } else if (documentSnapshot["updateType"] ==
+        UpdateType.markedAsSolution.index) {
+      print("returned update");
+      return Update(
+        updateType: UpdateType.markedAsSolution,
+        responseId: documentSnapshot["responseId"],
+        uidInvolved: documentSnapshot["uidInvolved"],
+        postInvolved: documentSnapshot["postInvolved"],
+        time: documentSnapshot["time"],
+      );
+    } else if (documentSnapshot["updateType"] == UpdateType.responded.index) {
+      print("returned update");
+      return Update(
+        updateType: UpdateType.responded,
+        postInvolved: documentSnapshot["postInvolved"],
+        uidInvolved: documentSnapshot["uidInvolved"],
+        time: documentSnapshot["time"],
+      );
+    }
+    print("undefinedUpdateType");
+    return Update();
+  }
+
+  Post _postFromFirebasePost({DocumentSnapshot documentSnapshot}) {
+    return documentSnapshot != null
+        ? Post(
+            postId: documentSnapshot.documentID,
+            solutionId: documentSnapshot["solutionId"],
+            description: documentSnapshot["description"],
+            imageUrl: documentSnapshot["imageUrl"],
+            postBy: documentSnapshot["postBy"],
+            time: documentSnapshot["time"])
+        : null;
+  }
 }

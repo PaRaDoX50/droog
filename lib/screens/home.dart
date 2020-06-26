@@ -4,6 +4,7 @@ import 'package:droog/data/constants.dart';
 import 'package:droog/screens/chat_list.dart';
 import 'package:droog/screens/feed.dart';
 import 'package:droog/screens/new_post.dart';
+import 'package:droog/screens/notifications_screen.dart';
 import 'package:droog/screens/search.dart';
 import 'package:droog/utils/theme_data.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ class _HomeState extends State<Home> {
     SearchScreen(),
     NewPost(),
     ChatList(),
-    Feed()
+    NotificationsScreen(),
   ];
   int _currentIndex = 0;
 
@@ -122,7 +123,7 @@ class _HomeState extends State<Home> {
           ),
 
       ),
-      body: widgets[_currentIndex],
+      body: IndexedStack(children: widgets,index: _currentIndex,),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         showSelectedLabels: false,

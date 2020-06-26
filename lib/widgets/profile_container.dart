@@ -155,9 +155,7 @@ class _ProfileContainerState extends State<ProfileContainer> {
     );
   }
 
-  _followUser() async {
-    await _databaseMethods.sendFollowRequest(targetUid: widget.user.uid);
-  }
+
 
   Future<String> get _followButtonText async {
     _followStatus = await _databaseMethods.getFollowStatus(targetUid: widget.user.uid);

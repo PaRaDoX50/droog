@@ -31,3 +31,9 @@ enum VoteType{
   undoUpVote,
 
 }
+
+enum UpdateType{
+  responded,
+  markedAsSolution,
+  acceptedRequest,
+}
