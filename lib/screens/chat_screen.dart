@@ -1,12 +1,20 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/data/constants.dart';
+import 'package:droog/models/enums.dart';
+import 'package:droog/models/message.dart';
 import 'package:droog/models/user.dart';
+import 'package:droog/screens/image_message_screen.dart';
 import 'package:droog/screens/search.dart';
 import 'package:droog/services/database_methods.dart';
+import 'package:droog/utils/image_picker.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ChatScreen extends StatefulWidget {
   static final String route = "/chat_screen";
@@ -18,22 +26,61 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final DatabaseMethods _databaseMethods = DatabaseMethods();
   final TextEditingController messageController = TextEditingController();
+  User user;
 
   sendMessage(String userName) async {
     print(userName + messageController.text);
     Map<String, dynamic> message = {
-      "message": messageController.text,
-      "by": Constants.userName,
+      "messageType": MessageType.onlyText.index,
+      "text": messageController.text,
+      "byUid": Constants.uid,
+      "byUserName": Constants.userName,
       "time": DateTime.now().millisecondsSinceEpoch,
     };
-    await _databaseMethods.sendMessage(userName, message);
+    await _databaseMethods.sendMessage(
+        targetUserName: userName, message: message);
+  }
+
+  pickImage(ImageSource imageSource) async {
+    PickImage _pickImage = PickImage();
+    File imageFile = await _pickImage.takePicture(imageSource: imageSource);
+    File croppedFile = await _pickImage.cropImage(
+        image: imageFile,
+        ratioX: 4,
+        ratioY: 3,
+        pictureFor: PictureFor.messagePicture);
+    Navigator.of(context).pushNamed(ImageMessageScreen.route,
+        arguments: {"file": croppedFile, "targetUserName": user.userName});
+  }
+
+  returnAppropriateTile(Message message) {
+    print(message.text);
+    if (message.messageType == MessageType.onlyText) {
+      if (message.byUserName == Constants.userName) {
+        return TextMessageTile(
+          message: message.text,
+          alignment: Alignment.centerRight,
+        );
+      }
+      return TextMessageTile(
+        message: message.text,
+        alignment: Alignment.centerLeft,
+      );
+    } else if (message.messageType == MessageType.image) {
+      if (message.byUserName == Constants.userName) {
+        return ImageMessageTile(imageUrl: message.imageUrl,text: message.text,alignment: Alignment.centerRight,);
+
+      }
+      return ImageMessageTile(imageUrl: message.imageUrl,text: message.text,alignment: Alignment.centerLeft,);
+
+    }
   }
 
   List<String> messages = ["hello boi"];
 
   @override
   Widget build(BuildContext context) {
-    final user = ModalRoute.of(context).settings.arguments as User;
+    user = ModalRoute.of(context).settings.arguments as User;
     final messageTextField = Container(
         constraints:
             BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 5),
@@ -69,6 +116,14 @@ class _ChatScreenState extends State<ChatScreen> {
               width: 8,
             ),
             IconButton(
+              icon: Icon(Icons.camera_alt),
+              onPressed: () => pickImage(ImageSource.camera),
+            ),
+            IconButton(
+              icon: Icon(Icons.attachment),
+              onPressed: () => pickImage(ImageSource.gallery),
+            ),
+            IconButton(
               icon: Icon(Icons.send),
               onPressed: () => sendMessage(user.userName),
             )
@@ -78,7 +133,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: CustomAppBar(
-        userFullName: "${user.firstName} ${user.lastName}" ,
+        userFullName: "${user.firstName} ${user.lastName}",
         userProfilePictureUrl: user.profilePictureUrl,
       ),
       body: Stack(
@@ -90,31 +145,23 @@ class _ChatScreenState extends State<ChatScreen> {
               color: Colors.white,
               padding: EdgeInsets.only(
                   bottom: MediaQuery.of(context).padding.bottom + 70),
-              child: StreamBuilder<QuerySnapshot>(
-                  stream:
-                      _databaseMethods.getAConversation(targetUserName: user.userName),
+              child: StreamBuilder<List<Message>>(
+                  stream: _databaseMethods.getAConversation(
+                      targetUserName: user.userName),
                   builder: (context, snapshot) {
-                    List<DocumentSnapshot> data = [];
+                    List<Message> data = [];
 
                     if (snapshot.hasData) {
-                      data = snapshot.data.documents;
-                      data.sort((b, a) {
-                        return a["time"].compareTo(b["time"]);
-                      });
+                      data = snapshot.data;
+//                      data.sort((b, a) {
+//                        return a["time"].compareTo(b["time"]);
+//                      });
                     }
 
                     return ListView.builder(
                       reverse: true,
                       itemBuilder: (_, index) {
-                        if (data[index]["by"] == Constants.userName) {
-                          return MessageTileRight(
-
-                              message: data[index]["message"],
-                              ctx: context);
-                        }
-                        return MessageTileLeft(
-                          message: data[index]["message"],
-                        );
+                        return returnAppropriateTile(data[index]);
                       },
                       itemCount: data.length,
                     );
@@ -159,7 +206,9 @@ class CustomAppBar extends PreferredSize {
                 children: <Widget>[
                   CircleAvatar(
                     child: ClipOval(
-                      child: Image.network(userProfilePictureUrl,),
+                      child: Image.network(
+                        userProfilePictureUrl,
+                      ),
                     ),
                   ),
                   SizedBox(
@@ -187,11 +236,84 @@ class CustomAppBar extends PreferredSize {
   }
 }
 
-class MessageTileLeft extends StatelessWidget {
+//class MessageTileLeft extends StatelessWidget {
+//  final String message;
+//
+//
+//  MessageTileLeft({this.message, });
+//
+//  @override
+//  Widget build(BuildContext context) {
+//    double width = MediaQuery.of(context).size.width;
+//    return Padding(
+//      padding: EdgeInsets.all(width / 60),
+//      child: Row(
+//        mainAxisSize: MainAxisSize.min,
+//        children: <Widget>[
+//
+//          SizedBox(
+//            width: width / 30,
+//          ),
+//          Container(
+//            padding: EdgeInsets.all(10),
+//            decoration: BoxDecoration(
+//              color: Colors.grey[300],
+//              borderRadius: BorderRadius.circular(10),
+//            ),
+//            child: Text(
+//              message,
+//            ),
+//            constraints: BoxConstraints(maxWidth: width / 1.5),
+//          )
+//        ],
+//      ),
+//    );
+//  }
+//}
+
+class TextMessageTile extends StatelessWidget {
   final String message;
+  final Alignment alignment;
 
+  TextMessageTile({this.message, this.alignment});
 
-  MessageTileLeft({this.message, });
+  getWidgets(double width) {
+    if (alignment == Alignment.centerRight) {
+      return [
+        Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            message,
+          ),
+          constraints: BoxConstraints(maxWidth: width / 1.5),
+        ),
+        SizedBox(
+          width: width / 30,
+        ),
+      ];
+    } else {
+      return [
+        Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            message,
+          ),
+          constraints: BoxConstraints(maxWidth: width / 1.5),
+        ),
+        SizedBox(
+          width: width / 30,
+        ),
+      ].reversed.toList();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -199,61 +321,84 @@ class MessageTileLeft extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(width / 60),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-
-          SizedBox(
-            width: width / 30,
-          ),
-          Container(
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              message,
-            ),
-            constraints: BoxConstraints(maxWidth: width / 1.5),
-          )
-        ],
+        children: getWidgets(width),
       ),
     );
   }
 }
 
-class MessageTileRight extends StatelessWidget {
-  final String message;
+class ImageMessageTile extends StatelessWidget {
+  final String imageUrl;
+  String text = "";
+  final Alignment alignment;
 
-  final BuildContext ctx;
+  ImageMessageTile({this.text, this.imageUrl, this.alignment});
 
-  MessageTileRight({this.message,  this.ctx});
+  getWidgets(double width) {
+    if (alignment == Alignment.centerRight) {
+      return [
+        Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            children: <Widget>[
+              CachedNetworkImage(
+                imageUrl: imageUrl,
+              ),
+              SizedBox(
+                height: 2,
+              ),
+              Text(text)
+            ],
+          ),
+          constraints: BoxConstraints(maxWidth: width / 1.5),
+        ),
+        SizedBox(
+          width: width / 30,
+        ),
+      ];
+    } else {
+      return [
+        Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            children: <Widget>[
+              CachedNetworkImage(
+                imageUrl: imageUrl,
+              ),
+              SizedBox(
+                height: 2,
+              ),
+              Text(text)
+            ],
+          ),
+          constraints: BoxConstraints(maxWidth: width / 1.5),
+        ),
+        SizedBox(
+          width: width / 30,
+        ),
+      ].reversed.toList();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(ctx).size.width;
+    double width = MediaQuery.of(context).size.width;
     return Padding(
       padding: EdgeInsets.all(width / 60),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Container(
-            padding: EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              message,
-            ),
-            constraints: BoxConstraints(maxWidth: width / 1.5),
-          ),
-          SizedBox(
-            width: width / 30,
-          ),
-
-        ],
+        children: getWidgets(width),
       ),
     );
   }

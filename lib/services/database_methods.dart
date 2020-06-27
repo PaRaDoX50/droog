@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
+import 'package:droog/models/message.dart';
 import 'package:droog/models/post.dart';
 import 'package:droog/models/response.dart';
 import 'package:droog/models/update.dart';
@@ -27,14 +28,14 @@ class DatabaseMethods {
     return false;
   }
 
-  Future uploadProfilePicture({File file}) async {
-    StorageUploadTask task = _storage
-        .ref()
-        .child('userProfilePictures/${Constants.uid}.jpg')
-        .putFile(file);
-    StorageTaskSnapshot snapshot = await task.onComplete;
-    return snapshot.ref.getDownloadURL();
-  }
+//  Future uploadProfilePicture({File file}) async {
+//    StorageUploadTask task = _storage
+//        .ref()
+//        .child('userProfilePictures/${Constants.uid}.jpg')
+//        .putFile(file);
+//    StorageTaskSnapshot snapshot = await task.onComplete;
+//    return snapshot.ref.getDownloadURL();
+//  }
 
   Future completeUserProfile(
       {String firstName,
@@ -132,7 +133,7 @@ class DatabaseMethods {
   }
 
   Future sendMessage(
-      String targetUserName, Map<String, dynamic> message) async {
+      {String targetUserName, Map<String, dynamic> message}) async {
     String chatRoomId = _chatRoomIdGenerator(targetUserName: targetUserName);
     print(chatRoomId);
 
@@ -168,30 +169,34 @@ class DatabaseMethods {
     }
   }
 
-  Stream<QuerySnapshot> getAConversation({String targetUserName}) {
+  Stream<List<Message>> getAConversation({String targetUserName}) {
     String chatRoomId = _chatRoomIdGenerator(targetUserName: targetUserName);
-    return _database
+    Stream<QuerySnapshot> stream = _database
         .collection("chatRooms")
         .document(chatRoomId)
         .collection("chats")
+        .orderBy("time", descending: true)
         .snapshots();
+    return stream.map((querySnapshot) => querySnapshot.documents
+        .map((e) => _messageFromFirebaseMessage(documentSnapshot: e))
+        .toList());
   }
 
-  Future uploadPictureForPost({File file}) async {
+  Future uploadPicture({File file, String address}) async {
     String fileName = Uuid().v4();
     StorageUploadTask task =
-        _storage.ref().child("postPictures/$fileName.jpg").putFile(file);
+        _storage.ref().child("$address/$fileName.jpg").putFile(file);
     StorageTaskSnapshot snapshot = await task.onComplete;
     return snapshot.ref.getDownloadURL();
   }
 
-  Future uploadPictureForResponse({File file}) async {
-    String fileName = Uuid().v4();
-    StorageUploadTask task =
-        _storage.ref().child("responsePictures/$fileName.jpg").putFile(file);
-    StorageTaskSnapshot snapshot = await task.onComplete;
-    return snapshot.ref.getDownloadURL();
-  }
+//  Future uploadPictureForResponse({File file}) async {
+//    String fileName = Uuid().v4();
+//    StorageUploadTask task =
+//        _storage.ref().child("responsePictures/$fileName.jpg").putFile(file);
+//    StorageTaskSnapshot snapshot = await task.onComplete;
+//    return snapshot.ref.getDownloadURL();
+//  }
 
   Future makeAPost({String description, String imageUrl}) async {
     Map<String, dynamic> data;
@@ -539,6 +544,33 @@ class DatabaseMethods {
         firstName: userDocument["firstName"],
         uid: userDocument["uid"],
         phoneNo: userDocument["phoneNo"]);
+  }
+
+  Message _messageFromFirebaseMessage({DocumentSnapshot documentSnapshot}) {
+    if (documentSnapshot["messageType"] == MessageType.onlyText.index) {
+      return Message(
+          time: documentSnapshot["time"],
+          byUid: documentSnapshot["byUid"],
+          byUserName: documentSnapshot["byUserName"],
+          messageType: MessageType.onlyText,
+          text: documentSnapshot["text"]);
+    } else if (documentSnapshot["messageType"] == MessageType.image.index) {
+      return Message(
+          time: documentSnapshot["time"],
+          byUid: documentSnapshot["byUid"],
+          byUserName: documentSnapshot["byUserName"],
+          messageType: MessageType.image,
+          text: documentSnapshot["text"],
+          imageUrl: documentSnapshot["imageUrl"]);
+    } else if (documentSnapshot["messageType"] ==
+        MessageType.sharedPost.index) {
+      return Message(
+          time: documentSnapshot["time"],
+          byUid: documentSnapshot["byUid"],
+          byUserName: documentSnapshot["byUserName"],
+          messageType: MessageType.sharedPost,
+          postId: documentSnapshot["postId"]);
+    }
   }
 
   Update _updateFromFirebaseUpdate({DocumentSnapshot documentSnapshot}) {

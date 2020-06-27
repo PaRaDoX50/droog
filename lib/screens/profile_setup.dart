@@ -167,7 +167,7 @@ class _ProfileSetupState extends State<ProfileSetup> {
                     color: Theme.of(context).buttonColor,
                     onPressed: () async {
                       File image =
-                          await _imagePicker.takePicture(ImageSource.camera);
+                          await _imagePicker.takePicture(imageSource: ImageSource.camera);
                       if (image != null) {
                         File croppedImage = await _imagePicker.cropImage(
                             image: image,
@@ -209,7 +209,7 @@ class _ProfileSetupState extends State<ProfileSetup> {
 
                         try {
                           String downloadUrl = await _databaseMethods
-                              .uploadProfilePicture(file: _takenImage);
+                              .uploadPicture(file: _takenImage,address: "profilePictures");
                           if (downloadUrl != null) {
                             await _databaseMethods.completeUserProfile(
                                 userName: userNameController.text,

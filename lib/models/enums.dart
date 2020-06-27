@@ -6,7 +6,9 @@ enum LoggedInStatus{
 }
 enum PictureFor{
   profilePicture,
-  postPicture
+  postPicture,
+  messagePicture,
+
 }
 
 enum FollowStatus{
@@ -36,4 +38,10 @@ enum UpdateType{
   responded,
   markedAsSolution,
   acceptedRequest,
+}
+
+enum MessageType{
+  onlyText,
+  image,
+  sharedPost,
 }

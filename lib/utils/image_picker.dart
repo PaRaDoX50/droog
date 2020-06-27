@@ -8,7 +8,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 class PickImage{
-  Future takePicture(ImageSource imageSource) async {
+  Future<File> takePicture({ImageSource imageSource}) async {
     try {
       final _imagePicker = ImagePicker();
       final imagePickerFile = await _imagePicker.getImage(
@@ -17,7 +17,7 @@ class PickImage{
       );
       File imageFile = File(imagePickerFile.path);
       if (imageFile == null) {
-        return;
+        return null;
       }
 
 
@@ -36,7 +36,7 @@ class PickImage{
 //    _storeImage();
   }
 
-  Future cropImage({File image,PictureFor pictureFor,double ratioX,double ratioY}) async {
+  Future<File> cropImage({File image,PictureFor pictureFor,double ratioX,double ratioY}) async {
     File croppedImageFile =await ImageCropper.cropImage(sourcePath: image.path,aspectRatio: CropAspectRatio(ratioX: ratioX,ratioY: ratioY),compressQuality: 15);
     if(croppedImageFile == null){
       return null;
@@ -52,9 +52,10 @@ class PickImage{
       await croppedImageFile.copy(profilePicturePath);
       return savedImage;
     }
-    else if(pictureFor == PictureFor.postPicture) {
+    else  {
       return croppedImageFile;
     }
+
 
   }
 }

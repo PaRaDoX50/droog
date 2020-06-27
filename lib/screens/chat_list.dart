@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/data/constants.dart';
+import 'package:droog/models/message.dart';
 import 'package:droog/models/user.dart';
 import 'package:droog/screens/chat_screen.dart';
 import 'package:droog/services/database_methods.dart';
@@ -132,25 +133,25 @@ class _ChatListState extends State<ChatList> {
 class ChatTile extends StatelessWidget {
   final String targetUserName;
   DatabaseMethods _databaseMethods = DatabaseMethods();
-  String lastMessage = "";
+  Message lastMessage;
   String date = "";
 
   ChatTile({this.targetUserName});
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
+    return StreamBuilder<List<Message>>(
         stream: _databaseMethods.getAConversation(targetUserName: targetUserName),
         builder: (context, snapshot) {
-          List<DocumentSnapshot> data = [];
+          List<Message> data = [];
           if (snapshot.hasData) {
-            data = snapshot.data.documents;
-            data.sort((b, a) {
-              return a["time"].compareTo(b["time"]);
-            });
-            lastMessage = data.first["message"];
+            data = snapshot.data;
+//            data.sort((b, a) {
+//              return a["time"].compareTo(b["time"]);
+//            });
+            lastMessage = data.first;
             DateTime temp =
-            DateTime.fromMicrosecondsSinceEpoch(data.first["time"]);
+            DateTime.fromMicrosecondsSinceEpoch(lastMessage.time);
             date = DateFormat.MMMd().format(temp);
           }
           return Container(
@@ -163,7 +164,7 @@ class ChatTile extends StatelessWidget {
                   ),
                   title: Text(targetUserName, overflow: TextOverflow.ellipsis),
                   subtitle: Text(
-                    lastMessage,
+                    lastMessage.text,
                     overflow: TextOverflow.ellipsis,
                   ),
                   trailing: Text(date),

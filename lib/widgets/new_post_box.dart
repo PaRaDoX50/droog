@@ -63,11 +63,11 @@ class _NewPostBoxState extends State<NewPostBox> {
               print("upload");
               String imageUrl;
               if (widget.postIs == PostIs.normalPost) {
-                imageUrl = await _databaseMethods.uploadPictureForPost(
-                    file: _attachedImage);
+                imageUrl = await _databaseMethods.uploadPicture(
+                    file: _attachedImage,address: "postPictures");
               } else if (widget.postIs == PostIs.response) {
-                imageUrl = await _databaseMethods.uploadPictureForResponse(
-                    file: _attachedImage);
+                imageUrl = await _databaseMethods.uploadPicture(
+                    file: _attachedImage,address: "responsePictures");
               }
               print("upload complete" + imageUrl);
 
@@ -159,7 +159,7 @@ class _NewPostBoxState extends State<NewPostBox> {
                         child: InkWell(
                           onTap: () async {
                             File image = await _pickImage
-                                .takePicture(ImageSource.camera);
+                                .takePicture(imageSource: ImageSource.camera);
                             File croppedImage;
                             if (image != null) {
                               croppedImage = await _pickImage.cropImage(
@@ -183,7 +183,7 @@ class _NewPostBoxState extends State<NewPostBox> {
                         child: InkWell(
                           onTap: () async {
                             File image = await _pickImage
-                                .takePicture(ImageSource.gallery);
+                                .takePicture(imageSource: ImageSource.gallery);
                             File croppedImage;
                             if (image != null) {
                               croppedImage = await _pickImage.cropImage(
