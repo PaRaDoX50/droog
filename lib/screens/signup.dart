@@ -1,7 +1,10 @@
 import 'package:droog/models/enums.dart';
+import 'package:droog/models/user.dart';
 import 'package:droog/screens/home.dart';
 import 'package:droog/screens/mobile_verification.dart';
+import 'package:droog/screens/profile_setup.dart';
 import 'package:droog/services/auth.dart';
+import 'package:droog/services/database_methods.dart';
 import 'package:droog/services/sharedprefs_methods.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -12,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SignUp extends StatelessWidget {
   static final String route = "/sign_up";
   AuthService _authService = AuthService();
+  DatabaseMethods _databaseMethods = DatabaseMethods();
   SharedPrefsMethods _sharedPrefsMethods = SharedPrefsMethods();
 
   @override
@@ -57,13 +61,25 @@ class SignUp extends StatelessWidget {
                 Navigator.pushReplacementNamed(
                     context, MobileVerification.route);
               } else {
-                await _sharedPrefsMethods.saveUserDetails(
+                User user = await _databaseMethods.getUserDetailsByUid(targetUid: firebaseUser.uid);
+                if (user.firstName != null) {
+                  await _sharedPrefsMethods.saveCompleteUserDetails(
+                      userEmail: firebaseUser.email,
+                      userPhone: firebaseUser.phoneNumber,
+                      uid: firebaseUser.uid,
+                      loggedInStatus: LoggedInStatus.loggedIn,user: user);
+                  //building constants
+                  Navigator.pushReplacementNamed(context, Home.route);
+                }
+                else{
+                  await _sharedPrefsMethods.saveUserDetails(
                     userEmail: firebaseUser.email,
                     userPhone: firebaseUser.phoneNumber,
                     uid: firebaseUser.uid,
-                    isLoggedIn: LoggedInStatus.halfProfileLeft,);
-                //building constants
-                Navigator.pushReplacementNamed(context, Home.route);
+                    loggedInStatus: LoggedInStatus.halfProfileLeft,);
+                  //building constants
+                  Navigator.pushReplacementNamed(context, ProfileSetup.route);
+                }
               }
             }
           },
@@ -109,9 +125,25 @@ class SignUp extends StatelessWidget {
                 Navigator.pushReplacementNamed(
                     context, MobileVerification.route);
               } else {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.setBool('isLoggedIn', true);
-                Navigator.pushReplacementNamed(context, Home.route);
+                User user = await _databaseMethods.getUserDetailsByUid(targetUid: firebaseUser.uid);
+                if (user.firstName != null) {
+                  await _sharedPrefsMethods.saveCompleteUserDetails(
+                      userEmail: firebaseUser.email,
+                      userPhone: firebaseUser.phoneNumber,
+                      uid: firebaseUser.uid,
+                      loggedInStatus: LoggedInStatus.loggedIn,user: user);
+                  //building constants
+                  Navigator.pushReplacementNamed(context, Home.route);
+                }
+                else{
+                  await _sharedPrefsMethods.saveUserDetails(
+                    userEmail: firebaseUser.email,
+                    userPhone: firebaseUser.phoneNumber,
+                    uid: firebaseUser.uid,
+                    loggedInStatus: LoggedInStatus.halfProfileLeft,);
+                  //building constants
+                  Navigator.pushReplacementNamed(context, ProfileSetup.route);
+                }
               }
             }
           },

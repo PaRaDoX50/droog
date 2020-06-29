@@ -154,19 +154,27 @@ class DatabaseMethods {
           .collection("chatRooms")
           .document(chatRoomId)
           .setData(data);
-      await _database
+      DocumentReference reference = await _database
           .collection("chatRooms")
           .document(chatRoomId)
           .collection("chats")
           .add(message);
+      return reference;
     } else {
       print("notTheFirstTime");
-      await _database
+      DocumentReference reference = await _database
           .collection("chatRooms")
           .document(chatRoomId)
           .collection("chats")
           .add(message);
+      return reference;
     }
+  }
+
+  Future deleteMessage(
+      {DocumentReference documentReference,}) async {
+    await documentReference.delete();
+
   }
 
   Stream<List<Message>> getAConversation({String targetUserName}) {

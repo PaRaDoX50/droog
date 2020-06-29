@@ -3,6 +3,7 @@ import 'package:droog/models/post.dart';
 import 'package:droog/models/user.dart';
 import 'package:droog/screens/new_response_screen.dart';
 import 'package:droog/screens/responses_screen.dart';
+import 'package:droog/screens/share_screen.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/widgets/expandable_text.dart';
 import 'package:flutter/cupertino.dart';
@@ -42,19 +43,19 @@ class FeedTile extends StatelessWidget {
                 return ListTile(
                   leading: snapshot.hasData
                       ? ClipOval(
-                          child: Image.network(
-                            snapshot.data.profilePictureUrl,
-                            loadingBuilder: (BuildContext context, Widget child,
-                                ImageChunkEvent loadingProgress) {
-                              if (loadingProgress == null) return child;
-                              return CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes !=
-                                        null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes
-                                    : null,
-                              );
-                            },
+                          child: CachedNetworkImage(
+                            imageUrl:snapshot.data.profilePictureUrl,
+//                            loadingBuilder: (BuildContext context, Widget child,
+//                                ImageChunkEvent loadingProgress) {
+//                              if (loadingProgress == null) return child;
+//                              return CircularProgressIndicator(
+//                                value: loadingProgress.expectedTotalBytes !=
+//                                        null
+//                                    ? loadingProgress.cumulativeBytesLoaded /
+//                                        loadingProgress.expectedTotalBytes
+//                                    : null,
+//                              );
+//                            },
                           ),
                         )
                       : CircleAvatar(
@@ -65,6 +66,7 @@ class FeedTile extends StatelessWidget {
                   title: snapshot.hasData
                       ? Text(
                           snapshot.data.userName,
+                    overflow: TextOverflow.ellipsis,
                         )
                       : Text(
                           "",
@@ -75,6 +77,7 @@ class FeedTile extends StatelessWidget {
                         post.time,
                       ),
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                   trailing: Icon(
                     Icons.more_vert,
@@ -124,6 +127,7 @@ class FeedTile extends StatelessWidget {
                     child: Text(
                       "$responses Responses",
                       style: TextStyle(color: Theme.of(context).primaryColor),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
@@ -141,8 +145,11 @@ class FeedTile extends StatelessWidget {
                   padding: const EdgeInsets.all(
                     8.0,
                   ),
-                  child: Icon(
-                    Icons.share,
+                  child: GestureDetector(
+                    onTap: (){Navigator.of(context).pushNamed(ShareScreen.route,arguments: post.postId);},
+                    child: Icon(
+                      Icons.share,
+                    ),
                   ),
                 ),
                 Padding(

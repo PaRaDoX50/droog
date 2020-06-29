@@ -1,15 +1,18 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
 import 'package:droog/models/message.dart';
+import 'package:droog/models/post.dart';
 import 'package:droog/models/user.dart';
 import 'package:droog/screens/image_message_screen.dart';
 import 'package:droog/screens/search.dart';
+import 'package:droog/screens/share_screen.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/image_picker.dart';
+import 'package:droog/widgets/feed_tile.dart';
+import 'package:droog/widgets/post_message_tile.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -68,11 +71,30 @@ class _ChatScreenState extends State<ChatScreen> {
       );
     } else if (message.messageType == MessageType.image) {
       if (message.byUserName == Constants.userName) {
-        return ImageMessageTile(imageUrl: message.imageUrl,text: message.text,alignment: Alignment.centerRight,);
-
+        return ImageMessageTile(
+          imageUrl: message.imageUrl,
+          text: message.text,
+          alignment: Alignment.centerRight,
+        );
       }
-      return ImageMessageTile(imageUrl: message.imageUrl,text: message.text,alignment: Alignment.centerLeft,);
+      return ImageMessageTile(
+        imageUrl: message.imageUrl,
+        text: message.text,
+        alignment: Alignment.centerLeft,
+      );
+    }
+    else{
+      if (message.byUserName == Constants.userName) {
+        return PostMessageTile(
 
+          postId: message.postId,
+          alignment: Alignment.centerRight,
+        );
+      }
+      return PostMessageTile(
+        postId: message.postId,
+        alignment: Alignment.centerLeft,
+      );
     }
   }
 
@@ -206,8 +228,8 @@ class CustomAppBar extends PreferredSize {
                 children: <Widget>[
                   CircleAvatar(
                     child: ClipOval(
-                      child: Image.network(
-                        userProfilePictureUrl,
+                      child: CachedNetworkImage(
+                        imageUrl: userProfilePictureUrl,
                       ),
                     ),
                   ),
@@ -381,6 +403,79 @@ class ImageMessageTile extends StatelessWidget {
               Text(text)
             ],
           ),
+          constraints: BoxConstraints(maxWidth: width / 1.5),
+        ),
+        SizedBox(
+          width: width / 30,
+        ),
+      ].reversed.toList();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+    return Padding(
+      padding: EdgeInsets.all(width / 60),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: getWidgets(width),
+      ),
+    );
+  }
+}
+
+class PostMessageTile extends StatelessWidget {
+  final String postId;
+  final Alignment alignment;
+  final DatabaseMethods _databaseMethods = DatabaseMethods();
+
+  PostMessageTile({this.postId, this.alignment});
+
+  Future<Post> _getPost() {
+    return _databaseMethods.getPostByPostId(postId: postId);
+  }
+
+  getWidgets(double width) {
+    if (alignment == Alignment.centerRight) {
+      return [
+        Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: FutureBuilder<Post>(
+              future: _getPost(),
+              builder: (_, snapshot) {
+                if (snapshot.hasData) {
+                  return PostMessageWidget(post: snapshot.data,);
+                }
+                return Center(child: CircularProgressIndicator(),);
+              }),
+          constraints: BoxConstraints(maxWidth: width / 1.5),
+        ),
+        SizedBox(
+          width: width / 30,
+        ),
+      ];
+    } else {
+      return [
+        Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: FutureBuilder<Post>(
+              future: _getPost(),
+              builder: (_, snapshot) {
+                if (snapshot.hasData) {
+                  return PostMessageWidget(post: snapshot.data,);
+                }
+                return Center(child: CircularProgressIndicator(),);
+              }),
           constraints: BoxConstraints(maxWidth: width / 1.5),
         ),
         SizedBox(

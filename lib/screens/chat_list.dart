@@ -134,7 +134,7 @@ class ChatTile extends StatelessWidget {
   final String targetUserName;
   DatabaseMethods _databaseMethods = DatabaseMethods();
   Message lastMessage;
-  String date = "";
+  String date = " ";
 
   ChatTile({this.targetUserName});
 
@@ -151,7 +151,8 @@ class ChatTile extends StatelessWidget {
 //            });
             lastMessage = data.first;
             DateTime temp =
-            DateTime.fromMicrosecondsSinceEpoch(lastMessage.time);
+
+            DateTime.fromMillisecondsSinceEpoch(lastMessage.time);
             date = DateFormat.MMMd().format(temp);
           }
           return Container(
@@ -164,7 +165,7 @@ class ChatTile extends StatelessWidget {
                   ),
                   title: Text(targetUserName, overflow: TextOverflow.ellipsis),
                   subtitle: Text(
-                    lastMessage.text,
+                    lastMessage != null ?( lastMessage.text != null ? lastMessage.text : " ") : " ",
                     overflow: TextOverflow.ellipsis,
                   ),
                   trailing: Text(date),

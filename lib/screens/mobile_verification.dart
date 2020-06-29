@@ -55,7 +55,7 @@ class _MobileVerificationState extends State<MobileVerification> {
             userEmail: user.email,
             userPhone: user.phoneNumber,
             uid: user.uid,
-            isLoggedIn: LoggedInStatus.halfProfileLeft);
+            loggedInStatus: LoggedInStatus.halfProfileLeft);
         //consta
         await _databaseMethods.createHalfUserProfile(
             userEmail: user.email, mobileNo: user.phoneNumber, uid: user.uid);

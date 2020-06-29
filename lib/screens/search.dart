@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:droog/models/user.dart';
 import 'package:droog/screens/chat_screen.dart';
 import 'package:droog/screens/user_profile.dart';
@@ -65,8 +66,8 @@ class SearchTile extends StatelessWidget {
               Navigator.pushNamed(context, UserProfile.route, arguments: user);
             },
             leading: CircleAvatar(
-              child: ClipOval(child: Image.network(
-                user.profilePictureUrl, cacheWidth: 80, height: 80,),),
+              child: ClipOval(child: CachedNetworkImage(
+                imageUrl: user.profilePictureUrl,),),
             ),
             title: Text("${user.firstName} ${user.lastName}",
                 overflow: TextOverflow.ellipsis),

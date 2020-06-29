@@ -36,7 +36,7 @@ class _OTPscreenState extends State<OTPscreen> {
           userEmail: user.email,
           userPhone: user.phoneNumber,
           uid: user.uid,
-          isLoggedIn: LoggedInStatus.halfProfileLeft);
+          loggedInStatus: LoggedInStatus.halfProfileLeft);
 
       await _databaseMethods.createHalfUserProfile(
           userEmail: user.email, mobileNo: user.phoneNumber, uid: user.uid);

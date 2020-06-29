@@ -5,6 +5,7 @@ import 'package:droog/screens/feed.dart';
 import 'package:droog/screens/image_message_screen.dart';
 import 'package:droog/screens/new_response_screen.dart';
 import 'package:droog/screens/responses_screen.dart';
+import 'package:droog/screens/share_screen.dart';
 import 'package:droog/screens/user_profile.dart';
 
 import 'package:droog/screens/home.dart';
@@ -86,6 +87,7 @@ class _MyAppState extends State<MyApp> {
         ResponseScreen.route:(_) => ResponseScreen(),
         NewResponse.route:(_) => NewResponse(),
         ImageMessageScreen.route:(_) => ImageMessageScreen(),
+        ShareScreen.route:(_) => ShareScreen(),
       },
     );
   }

@@ -1,20 +1,46 @@
 import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
+import 'package:droog/models/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedPrefsMethods {
   Future<void> saveUserDetails({String userEmail,
     String userPhone,
     String uid,
-    LoggedInStatus isLoggedIn}) async {
+    LoggedInStatus loggedInStatus}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString("userEmail", userEmail);
     prefs.setString("uid", uid);
     prefs.setString("userPhone", userPhone);
-    prefs.setInt("isLoggedIn", isLoggedIn.index);
+    prefs.setInt("isLoggedIn", loggedInStatus.index);
     Constants.uid = uid;
     Constants.userEmail = userEmail;
     Constants.userPhoneNo = userPhone;
+
+
+
+  }
+  Future<void> saveCompleteUserDetails({String userEmail,
+    String userPhone,
+    String uid,
+    LoggedInStatus loggedInStatus,User user}) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("userEmail", userEmail);
+    prefs.setString("uid", uid);
+    prefs.setString("userPhone", userPhone);
+
+    prefs.setString("userName", user.userName);
+    prefs.setString("firstName", user.firstName);
+    prefs.setString("lastName", user.lastName);
+    prefs.setInt("isLoggedIn", loggedInStatus.index);
+    Constants.uid = uid;
+    Constants.userEmail = userEmail;
+    Constants.userPhoneNo = userPhone;
+    Constants.firstName =user.firstName;
+    Constants.lastName = user.lastName;
+    Constants.userName = user.userName;
+
+
   }
 
   Future<void> completeUserPrefs(
@@ -24,6 +50,9 @@ class SharedPrefsMethods {
     prefs.setString("firstName", firstName);
     prefs.setString("lastName", lastName);
     prefs.setInt("isLoggedIn", loggedInStatus.index);
+    Constants.firstName = firstName;
+    Constants.lastName = lastName;
+    Constants.userName = userName;
   }
 
 //  Future<void> saveUserName({String userName}) async {
