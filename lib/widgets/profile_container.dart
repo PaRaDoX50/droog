@@ -74,10 +74,12 @@ class _ProfileContainerState extends State<ProfileContainer> {
                         future: _followButtonText,
                         builder: (context, snapshot) {
                           return snapshot.hasData
-                              ? Text(
-                                  snapshot.data,
-                                  style: Theme.of(context).textTheme.button,
-                                )
+                              ? FittedBox(
+                                child: Text(
+                                    snapshot.data,
+                                    style: Theme.of(context).textTheme.button,
+                                  ),
+                              )
                               : CircularProgressIndicator();
                         }),
                   ),
@@ -165,7 +167,7 @@ class _ProfileContainerState extends State<ProfileContainer> {
       case FollowStatus.following:
         return "Un-follow";
       default:
-        return "Join";
+        return "Follow";
     }
   }
 

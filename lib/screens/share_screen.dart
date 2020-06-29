@@ -32,16 +32,68 @@ class _ShareScreenState extends State<ShareScreen> {
     });
   }
 
+  Widget _buildSearchTextField() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              height: 35,
+              child: TextField(
+                maxLines: null,
+                controller: searchController,
+
+                style: TextStyle(color: Colors.black),
+                onChanged: (_) => getSearchResults(),
+                decoration: InputDecoration(
+
+                  hintText: "Search",
+                  hintStyle: TextStyle(color: Colors.grey),
+                  contentPadding: EdgeInsets.only(
+                    left: 16,
+                  ),
+
+//              focusedBorder: OutlineInputBorder(
+//
+//                borderSide: BorderSide(style: BorderStyle.solid),
+//                borderRadius: BorderRadius.circular(20),
+//              ),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(style: BorderStyle.solid),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(Icons.search),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     postId = ModalRoute.of(context).settings.arguments as String;
     return Scaffold(
+      appBar:  AppBar(
+        title: Text("Share"),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[Theme.of(context).primaryColor, Colors.blue])),
+        ),
+      ),
       body: SafeArea(
         child: Column(children: <Widget>[
-          TextField(
-            controller: searchController,
-            onChanged: (_) => getSearchResults(),
-          ),
+          _buildSearchTextField(),
           Expanded(child: ListView.builder(
             itemCount: searchResults.length,
             itemBuilder: (_, index) {

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:droog/data/constants.dart';
 import 'package:droog/screens/chat_list.dart';
 import 'package:droog/screens/feed.dart';
@@ -19,7 +20,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   Future _profilePicturePath;
-
+  String appBarTitle = "Feed";
   List<Widget> widgets = [
     Feed(),
     SearchScreen(),
@@ -38,6 +39,21 @@ class _HomeState extends State<Home> {
 
   _getProfilePicturePath() {
     _profilePicturePath = Constants.getProfilePicturePath();
+  }
+
+  String _getAppBarTitle() {
+    switch (_currentIndex) {
+      case 0:
+        return "Feed";
+      case 1:
+        return "Search";
+      case 2:
+        return "Post";
+      case 3:
+        return "Messages";
+      case 4:
+        return "Notifications";
+    }
   }
 
   void onTabTapped(int newIndex) {
@@ -68,7 +84,10 @@ class _HomeState extends State<Home> {
               style: MyThemeData.whiteBold14,
               overflow: TextOverflow.ellipsis,
             ),
-            trailing: Icon(Icons.edit,color: Colors.white,),
+            trailing: Icon(
+              Icons.edit,
+              color: Colors.white,
+            ),
           ),
         ),
         height: totalHeight * .2,
@@ -76,8 +95,10 @@ class _HomeState extends State<Home> {
           color: Theme.of(context).primaryColor,
           gradient: LinearGradient(
             colors: [
-              Color(0xff1948a0),
-              Color(0xff4481bc),
+              Theme.of(context).primaryColor,
+//              Color(0xff1948a0),
+//              Color(0xff4481bc),
+            Colors.blue
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -93,7 +114,9 @@ class _HomeState extends State<Home> {
       child: ListTile(
         leading: Icon(icon),
         title: title,
-        onTap: (){Navigator.pop(context);},
+        onTap: () {
+          Navigator.pop(context);
+        },
       ),
     );
   }
@@ -101,75 +124,92 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text(_getAppBarTitle()),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[Theme.of(context).primaryColor, Colors.blue])),
+        ),
+      ),
       drawer: Drawer(
         child: ListView(
-            padding:EdgeInsets.zero ,
-            children: <Widget>[
-              _createDrawerHeader(),
-              _createDrawerItem(Icons.home, Text("Home")),
-              Divider(
-                thickness: .5,
-              ),
-              _createDrawerItem(Icons.home, Text("Home")),
-              Divider(
-                thickness: .5,
-              ),
-              _createDrawerItem(Icons.home, Text("Home")),
-              Divider(
-                thickness: .5,
-              ),
-            ],
-          ),
-
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            _createDrawerHeader(),
+            _createDrawerItem(Icons.home, Text("Home")),
+            Divider(
+              thickness: .5,
+            ),
+            _createDrawerItem(Icons.home, Text("Home")),
+            Divider(
+              thickness: .5,
+            ),
+            _createDrawerItem(Icons.home, Text("Home")),
+            Divider(
+              thickness: .5,
+            ),
+          ],
+        ),
       ),
-      body: IndexedStack(children: widgets,index: _currentIndex,),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        unselectedItemColor: Colors.grey,
+      body: IndexedStack(
+        children: widgets,
+        index: _currentIndex,
+      ),
+      bottomNavigationBar: ConvexAppBar(
         onTap: onTabTapped,
-        currentIndex: _currentIndex,
-        selectedItemColor: Theme.of(context).primaryColor,
+        initialActiveIndex: 0,
+        backgroundColor: Colors.white,
+        style: TabStyle.fixedCircle,
+        color: Theme.of(context).primaryColor,
+
+        activeColor: Theme.of(context).primaryColor,
         items: [
-          BottomNavigationBarItem(
-
-            title: Text(
-              "Feed",
-              style: MyThemeData.blackBold12,
+          TabItem(
+            activeIcon: Icon(
+              Icons.home,
+              color: Theme.of(context).primaryColor,
             ),
-            icon: Icon(Icons.home),
-
-          ),
-          BottomNavigationBarItem(
-            title: Text(
-              "Search",
-              style: MyThemeData.blackBold12,
+            icon: Icon(
+              Icons.home,
+              color: Colors.grey,
             ),
-            icon: Icon(Icons.search),
           ),
-          BottomNavigationBarItem(
-            title: Text(
-              "Post",
-              style: MyThemeData.blackBold12,
+          TabItem(
+              icon: Icon(
+                Icons.search,
+                color: Colors.grey,
+              ),
+              activeIcon: Icon(
+                Icons.search,
+                color: Theme.of(context).primaryColor,
+              )),
+          TabItem(
+            icon: Icon(
+              Icons.add,
+              color: Colors.white,
             ),
-            icon: Icon(Icons.add),
           ),
-          BottomNavigationBarItem(
-            title: Text(
-              "Messages",
-              style: MyThemeData.blackBold12,
-            ),
-            icon: Icon(Icons.message),
-          ),
-          BottomNavigationBarItem(
-            title: Text(
-              "Alert",
-              style: MyThemeData.blackBold12,
-            ),
-            icon: Icon(Icons.add_alert),
-          ),
+          TabItem(
+              icon: Icon(
+                Icons.message,
+                color: Colors.grey,
+              ),
+              activeIcon: Icon(
+                Icons.message,
+                color: Theme.of(context).primaryColor,
+              )),
+          TabItem(
+              icon: Icon(
+                Icons.add_alert,
+                color: Colors.grey,
+              ),
+              activeIcon: Icon(
+                Icons.add_alert,
+                color: Theme.of(context).primaryColor,
+              )),
         ],
       ),
     );

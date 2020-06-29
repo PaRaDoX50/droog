@@ -134,7 +134,8 @@ class FeedTile extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: GestureDetector(
-                    child: Icon(Icons.message),
+                    child: Icon(Icons.message,color: Colors.grey,),
+
                     onTap: () => Navigator.of(context).pushNamed(
                       NewResponse.route,
                       arguments: post,
@@ -148,7 +149,9 @@ class FeedTile extends StatelessWidget {
                   child: GestureDetector(
                     onTap: (){Navigator.of(context).pushNamed(ShareScreen.route,arguments: post.postId);},
                     child: Icon(
-                      Icons.share,
+                      Icons.send,
+                      color: Colors.grey,
+                      semanticLabel: "Share",
                     ),
                   ),
                 ),
@@ -158,6 +161,8 @@ class FeedTile extends StatelessWidget {
                   ),
                   child: Icon(
                     Icons.content_paste,
+                    color: Colors.grey,
+
                   ),
                 ),
               ],
