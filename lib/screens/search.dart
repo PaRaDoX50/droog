@@ -5,6 +5,7 @@ import 'package:droog/screens/chat_screen.dart';
 import 'package:droog/screens/user_profile.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
+import 'package:droog/widgets/search_textfield.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
@@ -28,48 +29,48 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() {});
   }
 
-  Widget _buildSearchTextField() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SizedBox(
-              height: 35,
-              child: TextField(
-                maxLines: null,
-                controller: searchController,
-                style: TextStyle(color: Colors.black),
-                onChanged: (_) => getSearchResults(),
-                decoration: InputDecoration(
-                  hintText: "Type your message",
-                  hintStyle: TextStyle(color: Colors.white),
-                  contentPadding: EdgeInsets.only(
-                    left: 16,
-                  ),
-
-//              focusedBorder: OutlineInputBorder(
+//  Widget _buildSearchTextField() {
+//    return Row(
+//      crossAxisAlignment: CrossAxisAlignment.center,
+//      children: <Widget>[
+//        Expanded(
+//          child: Padding(
+//            padding: const EdgeInsets.all(8.0),
+//            child: SizedBox(
+//              height: 35,
+//              child: TextField(
+//                maxLines: null,
+//                controller: searchController,
+//                style: TextStyle(color: Colors.black),
+//                onChanged: (_) => getSearchResults(),
+//                decoration: InputDecoration(
+//                  hintText: "Search Users",
+//                  hintStyle: TextStyle(color: Colors.white),
+//                  contentPadding: EdgeInsets.only(
+//                    left: 16,
+//                  ),
 //
-//                borderSide: BorderSide(style: BorderStyle.solid),
-//                borderRadius: BorderRadius.circular(20),
+////              focusedBorder: OutlineInputBorder(
+////
+////                borderSide: BorderSide(style: BorderStyle.solid),
+////                borderRadius: BorderRadius.circular(20),
+////              ),
+//                  border: OutlineInputBorder(
+//                    borderSide: BorderSide(style: BorderStyle.solid),
+//                    borderRadius: BorderRadius.circular(20),
+//                  ),
+//                ),
 //              ),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(style: BorderStyle.solid),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Icon(Icons.search),
-        ),
-      ],
-    );
-  }
+//            ),
+//          ),
+//        ),
+//        Padding(
+//          padding: const EdgeInsets.all(8.0),
+//          child: Icon(Icons.search),
+//        ),
+//      ],
+//    );
+//  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +78,7 @@ class _SearchScreenState extends State<SearchScreen> {
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            _buildSearchTextField(),
+            SearchTextField(onTextChanged: getSearchResults,controller: searchController,),
             Expanded(
                 child: ListView.builder(
                   itemCount: searchResults.length,

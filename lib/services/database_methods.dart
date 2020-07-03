@@ -56,6 +56,17 @@ class DatabaseMethods {
         .setData(data, merge: true);
   }
 
+  Future editSkills({List<String> skills, List<String> achievements}) async {
+    await _database
+        .collection("users")
+        .document(Constants.uid)
+        .updateData({"skills": skills});
+    await _database
+        .collection("users")
+        .document(Constants.uid)
+        .updateData({"achievements": achievements});
+  }
+
   Future createHalfUserProfile(
       {String userEmail, String mobileNo, String uid}) async {
     List<String> searchParams = [];
@@ -92,7 +103,7 @@ class DatabaseMethods {
     return _userFromFirebaseUser(userDocument: data);
   }
 
-  Future getUserDetailsByUid({String targetUid}) async {
+  Future<User> getUserDetailsByUid({String targetUid}) async {
     DocumentSnapshot snapshot =
         await _database.collection("users").document(targetUid).get();
 
@@ -104,7 +115,7 @@ class DatabaseMethods {
   Future<Post> getPostByPostId({String postId}) async {
     DocumentSnapshot snapshot =
         await _database.collection("posts").document(postId).get();
-    return _postFromFirebasePost(documentSnapshot: snapshot);
+    return postFromFirebasePost(documentSnapshot: snapshot);
   }
 
   Future<List<User>> searchUser(String keyword) async {
@@ -113,23 +124,40 @@ class DatabaseMethods {
         .where("searchParams", arrayContains: keyword)
         .getDocuments();
 
-    List<User> searchResults = [];
+    List<User> searchResults = snapshot.documents.map((e) => _userFromFirebaseUser(userDocument: e)).toList();
 
-    for (int i = 0; i < snapshot.documents.length; i++) {
-      List<DocumentSnapshot> data = snapshot.documents;
-      searchResults.add(User(
-        userEmail: data[i]["email"],
-        phoneNo: data[i]["phoneNo"],
-        uid: data[i]["uid"],
-        description: data[i]["description"],
-        profilePictureUrl: data[i]["profilePictureUrl"],
-        userName: data[i]["userName"],
-        lastName: data[i]["lastName"],
-        firstName: data[i]["firstName"],
-      ));
-    }
+
 
     return searchResults;
+  }
+
+  Future<List<User>> searchUserForANewMessage({String keyword}) async {
+    QuerySnapshot snapshotFollowing = await _database
+        .collection("users")
+        .document(Constants.uid)
+        .collection("following")
+        .getDocuments();
+    QuerySnapshot snapshotFollowers = await _database
+        .collection("users")
+        .document(Constants.uid)
+        .collection("followers")
+        .getDocuments();
+//    _database.collection("users").where()
+    final uids =
+        (snapshotFollowing.documents.map((e) => e["uid"]).toList());
+    uids.addAll(
+        snapshotFollowers.documents.map((e) => e["uid"]).toList());
+    if(uids.isNotEmpty) {
+      QuerySnapshot snapshotResults = await _database.collection("users").where(
+          "uid", whereIn: uids)
+          .where("searchParams", arrayContains: keyword)
+          .getDocuments();
+      List<User> results = snapshotResults.documents.map((e) =>
+          _userFromFirebaseUser(userDocument: e)).toList();
+      return results;
+
+    }
+    else{return [];}
   }
 
   Future sendMessage(
@@ -171,23 +199,36 @@ class DatabaseMethods {
     }
   }
 
-  Future deleteMessage(
-      {DocumentReference documentReference,}) async {
+  Future deleteMessage({
+    DocumentReference documentReference,
+  }) async {
     await documentReference.delete();
-
   }
 
-  Stream<List<Message>> getAConversation({String targetUserName}) {
+  Stream<List<Message>> getAConversation({String targetUserName,bool limitToOne}) {
     String chatRoomId = _chatRoomIdGenerator(targetUserName: targetUserName);
-    Stream<QuerySnapshot> stream = _database
-        .collection("chatRooms")
-        .document(chatRoomId)
-        .collection("chats")
-        .orderBy("time", descending: true)
-        .snapshots();
-    return stream.map((querySnapshot) => querySnapshot.documents
-        .map((e) => _messageFromFirebaseMessage(documentSnapshot: e))
-        .toList());
+    if (!limitToOne) {
+      Stream<QuerySnapshot> stream = _database
+          .collection("chatRooms")
+          .document(chatRoomId)
+          .collection("chats")
+          .orderBy("time", descending: true)
+          .snapshots();
+      return stream.map((querySnapshot) => querySnapshot.documents
+          .map((e) => _messageFromFirebaseMessage(documentSnapshot: e))
+          .toList());
+    }
+    else{
+      Stream<QuerySnapshot> stream = _database
+          .collection("chatRooms")
+          .document(chatRoomId)
+          .collection("chats")
+          .orderBy("time", descending: true).limit(1)
+          .snapshots();
+      return stream.map((querySnapshot) => querySnapshot.documents
+          .map((e) => _messageFromFirebaseMessage(documentSnapshot: e))
+          .toList());
+    }
   }
 
   Future uploadPicture({File file, String address}) async {
@@ -212,15 +253,20 @@ class DatabaseMethods {
       "description": description,
       "imageUrl": imageUrl,
       "postBy": Constants.userName,
+      "postByUid": Constants.uid,
       "time": DateTime.now().millisecondsSinceEpoch
     };
     DocumentReference reference = await _database.collection("posts").add(data);
-    Map<String, String> documentIdData = {"documentID": reference.documentID};
+    Map<String, String> documentIdData = {"postId": reference.documentID};
     await _database
         .collection("users")
         .document(Constants.uid)
         .collection("posts")
         .add(documentIdData);
+    await _database
+        .collection("posts")
+        .document(reference.documentID)
+        .updateData(documentIdData);
   }
 
   Future makeAResponse(
@@ -241,12 +287,10 @@ class DatabaseMethods {
 
     DocumentSnapshot documentSnapshot =
         await _database.collection("posts").document(postId).get();
-    String postBy = documentSnapshot["postBy"];
-    QuerySnapshot snapshot = await _database
-        .collection("users")
-        .where('userName', isEqualTo: postBy)
-        .getDocuments();
-    await snapshot.documents[0].reference.collection("updates").add({
+    String postByUid = documentSnapshot["postByUid"];
+    DocumentSnapshot snapshot =
+        await _database.collection("users").document(postByUid).get();
+    await snapshot.reference.collection("updates").add({
       "updateType": 0,
       "uidInvolved": Constants.uid,
       "postInvolved": postId,
@@ -399,7 +443,7 @@ class DatabaseMethods {
     });
   }
 
-  Stream<QuerySnapshot> getPostsForFeed() async* {
+  Future<List<String>> getFollowingUids() async {
     QuerySnapshot snapshotFollowing = await _database
         .collection("users")
         .document(Constants.uid)
@@ -409,12 +453,84 @@ class DatabaseMethods {
     for (int i = 0; i < snapshotFollowing.documents.length; i++) {
       followingUids.add(snapshotFollowing.documents[i].data["uid"]);
     }
-    Stream stream = _database
+    return followingUids;
+  }
+
+  Future<List<DocumentSnapshot>> getMorePostsForFeed({
+    List<String> followingUids,
+    DocumentSnapshot documentSnapshot,
+  }) async {
+    if (followingUids.isNotEmpty) {
+      QuerySnapshot snapshot = await _database
+          .collection("posts")
+          .where("postByUid", whereIn: followingUids)
+          .orderBy("time", descending: true)
+          .startAfterDocument(documentSnapshot)
+          .limit(10)
+          .getDocuments();
+      List<DocumentSnapshot> moreDocuments = snapshot.documents;
+      //    List<Post> morePosts = moreDocuments.map((e) => _postFromFirebasePost(documentSnapshot: e)).toList();
+      return moreDocuments;
+    }
+    else{
+      return null;
+    }
+  }
+
+  Stream<QuerySnapshot> getPostsForFeed(
+      {List<String> followingUids,
+      bool isFirstTime,
+      DocumentSnapshot documentSnapshot}) {
+    if (followingUids.isNotEmpty) {
+      Stream stream = _database
+          .collection("posts")
+          .where("postByUid", whereIn: followingUids)
+          .orderBy("time", descending: true)
+          .limit(10)
+          .snapshots();
+      return stream;
+    }
+    else{
+      return null;
+    }
+  }
+
+  Future clipPost({String postId}) async {
+    await _database.collection("users").document(Constants.uid).updateData({
+      "clippedPosts": FieldValue.arrayUnion([postId])
+    });
+  }
+
+  Future loadMoreClips({DocumentSnapshot documentSnapshot}) async {
+    DocumentSnapshot snapshot =
+        await _database.collection("users").document(Constants.uid).get();
+    QuerySnapshot qSnapshot = await _database
         .collection("posts")
-        .where("postBy", whereIn: followingUids)
+        .where("postId", whereIn: snapshot["clippedPosts"])
         .orderBy("time", descending: true)
-        .snapshots();
-    yield* stream;
+        .startAfterDocument(documentSnapshot)
+        .limit(10)
+        .getDocuments();
+    List<Post> posts = qSnapshot.documents
+        .map((e) => postFromFirebasePost(documentSnapshot: e))
+        .toList();
+    return posts;
+  }
+
+  Future<List<DocumentSnapshot>> getClips() async {
+    DocumentSnapshot snapshot =
+        await _database.collection("users").document(Constants.uid).get();
+    print(snapshot["clippedPosts"].toString());
+
+    QuerySnapshot qSnapshot = await _database
+        .collection("posts")
+        .where("postId", whereIn: snapshot.data["clippedPosts"])
+        .orderBy("time", descending: true)
+        .limit(10)
+        .getDocuments();
+    return qSnapshot.documents;
+
+//    List<Post> posts = qSnapshot.documents.map((e) => postFromFirebasePost(documentSnapshot: e)).toList();
   }
 
   unFollowUser({String targetUid}) async {
@@ -449,6 +565,15 @@ class DatabaseMethods {
         .map((document) => _responseFromFirebaseResponse(document))
         .toList();
   }
+  Future<int> getResponsesCountByPostId(String postId) async {
+    QuerySnapshot snapshot = await _database
+        .collection("responses")
+        .where("postId", isEqualTo: postId)
+        .getDocuments();
+    List<DocumentSnapshot> documents = snapshot.documents;
+    return documents.length;
+  }
+
 
   Future<void> toggleSolutionForPost(
       {DocumentSnapshot responseDocument, bool markAsSolution}) async {
@@ -544,19 +669,24 @@ class DatabaseMethods {
 
   User _userFromFirebaseUser({DocumentSnapshot userDocument}) {
     return User(
-        description: userDocument["description"],
-        userName: userDocument["userName"],
-        lastName: userDocument["lastName"],
-        profilePictureUrl: userDocument["profilePictureUrl"],
-        userEmail: userDocument["userEmail"],
-        firstName: userDocument["firstName"],
-        uid: userDocument["uid"],
-        phoneNo: userDocument["phoneNo"]);
+      description: userDocument["description"],
+      userName: userDocument["userName"],
+      lastName: userDocument["lastName"],
+      profilePictureUrl: userDocument["profilePictureUrl"],
+      userEmail: userDocument["userEmail"],
+      firstName: userDocument["firstName"],
+      uid: userDocument["uid"],
+      phoneNo: userDocument["phoneNo"],
+      achievements: userDocument["achievements"],
+      skills: userDocument["skills"],
+    );
   }
 
   Message _messageFromFirebaseMessage({DocumentSnapshot documentSnapshot}) {
     if (documentSnapshot["messageType"] == MessageType.onlyText.index) {
       return Message(
+        isSeen: documentSnapshot["isSeen"] != null ? documentSnapshot["isSeen"] : false,
+        documentSnapshot: documentSnapshot,
           time: documentSnapshot["time"],
           byUid: documentSnapshot["byUid"],
           byUserName: documentSnapshot["byUserName"],
@@ -564,6 +694,8 @@ class DatabaseMethods {
           text: documentSnapshot["text"]);
     } else if (documentSnapshot["messageType"] == MessageType.image.index) {
       return Message(
+          isSeen: documentSnapshot["isSeen"] != null ? documentSnapshot["isSeen"] : false,
+          documentSnapshot: documentSnapshot,
           time: documentSnapshot["time"],
           byUid: documentSnapshot["byUid"],
           byUserName: documentSnapshot["byUserName"],
@@ -573,6 +705,8 @@ class DatabaseMethods {
     } else if (documentSnapshot["messageType"] ==
         MessageType.sharedPost.index) {
       return Message(
+          isSeen: documentSnapshot["isSeen"] != null ? documentSnapshot["isSeen"] : false,
+          documentSnapshot: documentSnapshot,
           time: documentSnapshot["time"],
           byUid: documentSnapshot["byUid"],
           byUserName: documentSnapshot["byUserName"],
@@ -611,7 +745,7 @@ class DatabaseMethods {
     return Update();
   }
 
-  Post _postFromFirebasePost({DocumentSnapshot documentSnapshot}) {
+  Post postFromFirebasePost({DocumentSnapshot documentSnapshot}) {
     return documentSnapshot != null
         ? Post(
             postId: documentSnapshot.documentID,
@@ -619,7 +753,8 @@ class DatabaseMethods {
             description: documentSnapshot["description"],
             imageUrl: documentSnapshot["imageUrl"],
             postBy: documentSnapshot["postBy"],
-            time: documentSnapshot["time"])
+            time: documentSnapshot["time"],
+            postByUid: documentSnapshot["postByUid"])
         : null;
   }
 }

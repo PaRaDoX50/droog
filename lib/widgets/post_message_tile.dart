@@ -132,14 +132,14 @@ class _PostMessageWidgetState extends State<PostMessageWidget> {
                         ),
                       );
                     }),
-                Padding(
+                widget.post.description != "" ? Padding(
                   padding: const EdgeInsets.all(
                     8.0,
                   ),
                   child: ExpandableText(
                     text: widget.post.description,
-                  ),
-                ),
+                  )
+                ):Container(),
                 widget.post.imageUrl != null
                     ? AspectRatio(
                         aspectRatio: 4 / 3,

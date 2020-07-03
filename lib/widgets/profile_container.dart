@@ -145,12 +145,8 @@ class _ProfileContainerState extends State<ProfileContainer> {
         SizedBox(
           width: double.infinity,
           child: SkillsContainer(
-            skills: [
-              "Xyz",
-            ],
-            achievements: [
-              "Xyz",
-            ],
+            skills:widget.user.skills,
+            achievements: widget.user.achievements,
           ),
         ),
       ],

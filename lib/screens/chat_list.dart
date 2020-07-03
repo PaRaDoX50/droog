@@ -1,12 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/data/constants.dart';
 import 'package:droog/models/message.dart';
 import 'package:droog/models/user.dart';
 import 'package:droog/screens/chat_screen.dart';
+import 'package:droog/screens/new_message_screen.dart';
 import 'package:droog/services/database_methods.dart';
+import 'package:droog/utils/theme_data.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 
 class ChatList extends StatefulWidget {
@@ -68,25 +72,17 @@ class _ChatListState extends State<ChatList> {
       ),
     );
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushReplacementNamed(context, NewMessageScreen.route);
+        },
+        child: Icon(Icons.message),
+      ),
       backgroundColor: Colors.white,
       body: CustomScrollView(
         slivers: <Widget>[
-          SliverAppBar(
-            bottom: PreferredSize(
-              // Add this code
-              preferredSize: Size.fromHeight(60.0), // Add this code
-              child: Text(''), // Add this code
-            ),
-            backgroundColor: Theme
-                .of(context)
-                .primaryColor,
-            flexibleSpace: SafeArea(child: searchTextField),
-          ),
           SliverToBoxAdapter(
-            child: Container(
-                color: Theme
-                    .of(context)
-                    .primaryColor, child: curveContainer),
+            child: Container(),
           ),
           StreamBuilder<QuerySnapshot>(
               stream: _databaseMethods.getCurrentUserChats(
@@ -97,25 +93,26 @@ class _ChatListState extends State<ChatList> {
                   return SliverList(
                     delegate: SliverChildBuilderDelegate((_, index) {
                       final targetUserName =
-                      data[index]["users"][1] == Constants.userName
-                          ? data[index]["users"][0]
-                          : data[index]["users"][1];
+                          data[index]["users"][1] == Constants.userName
+                              ? data[index]["users"][0]
+                              : data[index]["users"][1];
 
                       return InkWell(
                         onTap: () async {
                           try {
-                            User user = await _databaseMethods
-                                .getUserDetailsByUsername(targetUserName: targetUserName);
-                            Navigator.pushNamed(
-                                context, ChatScreen.route,
+                            User user =
+                                await _databaseMethods.getUserDetailsByUsername(
+                                    targetUserName: targetUserName);
+                            Navigator.pushNamed(context, ChatScreen.route,
                                 arguments: user);
-                          }  catch (e) {
+                          } catch (e) {
                             print(e.toString());
                           }
                         },
                         child: ChatTile(
-                        targetUserName: targetUserName,
-                      ),);
+                          targetUserName: targetUserName,
+                        ),
+                      );
                     }, childCount: data.length),
                   );
                 } else {
@@ -138,10 +135,28 @@ class ChatTile extends StatelessWidget {
 
   ChatTile({this.targetUserName});
 
+  bool isNotSeen = false;
+
+  TextStyle getAppropriateStyle() {
+    if (lastMessage.byUserName == Constants.userName) {
+      isNotSeen = false;
+      return TextStyle();
+    } else {
+      if (lastMessage.isSeen) {
+        isNotSeen = false;
+        return TextStyle();
+      } else {
+        isNotSeen = true;
+        return MyThemeData.blackBold12.copyWith(fontSize: 28 / 2);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Message>>(
-        stream: _databaseMethods.getAConversation(targetUserName: targetUserName),
+        stream: _databaseMethods.getAConversation(
+            targetUserName: targetUserName, limitToOne: true),
         builder: (context, snapshot) {
           List<Message> data = [];
           if (snapshot.hasData) {
@@ -151,32 +166,52 @@ class ChatTile extends StatelessWidget {
 //            });
             lastMessage = data.first;
             DateTime temp =
-
-            DateTime.fromMillisecondsSinceEpoch(lastMessage.time);
+                DateTime.fromMillisecondsSinceEpoch(lastMessage.time);
             date = DateFormat.MMMd().format(temp);
+            return FutureBuilder<User>(
+                future: _databaseMethods.getUserDetailsByUid(
+                    targetUid: lastMessage.byUid),
+                builder: (context, snapshot) {
+                  return Container(
+                    color: Colors.white,
+                    child: Column(
+                      children: <Widget>[
+                        ListTile(
+                          leading: CircleAvatar(
+                            radius: 25,
+                            child: snapshot.hasData
+                                ? ClipOval(
+                                    child: CachedNetworkImage(
+                                    imageUrl: snapshot.data.profilePictureUrl,
+                                  ))
+                                : Icon(Icons.account_circle),
+                          ),
+                          title: Text(
+                            targetUserName,
+                            overflow: TextOverflow.ellipsis,
+                            style: getAppropriateStyle(),
+                          ),
+                          subtitle: Text(
+                            lastMessage.text != null ? lastMessage.text : " ",
+                            overflow: TextOverflow.ellipsis,
+                            style: getAppropriateStyle(),
+                          ),
+                          trailing: Text(
+                            date,
+                            style: getAppropriateStyle(),
+                          ),
+                        ),
+                        Divider(
+                          height: 1,
+                          color: Colors.grey,
+                        )
+                      ],
+                    ),
+                  );
+                });
+          } else {
+            return Container();
           }
-          return Container(
-            color: Colors.white,
-            child: Column(
-              children: <Widget>[
-                ListTile(
-                  leading: CircleAvatar(
-                    child: Icon(Icons.account_circle),
-                  ),
-                  title: Text(targetUserName, overflow: TextOverflow.ellipsis),
-                  subtitle: Text(
-                    lastMessage != null ?( lastMessage.text != null ? lastMessage.text : " ") : " ",
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: Text(date),
-                ),
-                Divider(
-                  height: 1,
-                  color: Colors.grey,
-                )
-              ],
-            ),
-          );
         });
   }
 }

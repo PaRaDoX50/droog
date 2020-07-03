@@ -4,12 +4,14 @@ import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:droog/data/constants.dart';
 import 'package:droog/screens/chat_list.dart';
 import 'package:droog/screens/feed.dart';
+import 'package:droog/screens/myclips_screen.dart';
 import 'package:droog/screens/new_post.dart';
 import 'package:droog/screens/notifications_screen.dart';
 import 'package:droog/screens/search.dart';
 import 'package:droog/utils/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Home extends StatefulWidget {
   static final String route = "/home";
@@ -108,7 +110,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _createDrawerItem(IconData icon, Text title) {
+  Widget _createDrawerItem(IconData icon, Text title,String route) {
     return Padding(
       padding: const EdgeInsets.all(0.0),
       child: ListTile(
@@ -116,6 +118,9 @@ class _HomeState extends State<Home> {
         title: title,
         onTap: () {
           Navigator.pop(context);
+          if(route != Home.route) {
+            Navigator.pushNamed(context, route);
+          }
         },
       ),
     );
@@ -125,7 +130,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_getAppBarTitle()),
+        title: Text(_getAppBarTitle(),style: GoogleFonts.montserrat(),),
         flexibleSpace: Container(
           decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -139,18 +144,15 @@ class _HomeState extends State<Home> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             _createDrawerHeader(),
-            _createDrawerItem(Icons.home, Text("Home")),
+            _createDrawerItem(Icons.home, Text("Home"),Home.route),
             Divider(
               thickness: .5,
             ),
-            _createDrawerItem(Icons.home, Text("Home")),
+            _createDrawerItem(Icons.home, Text("My Clips"),MyClipsScreen.route),
             Divider(
               thickness: .5,
             ),
-            _createDrawerItem(Icons.home, Text("Home")),
-            Divider(
-              thickness: .5,
-            ),
+
           ],
         ),
       ),

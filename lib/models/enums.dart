@@ -45,3 +45,7 @@ enum MessageType{
   image,
   sharedPost,
 }
+enum QualityType{
+  skill,
+  achievement,
+}

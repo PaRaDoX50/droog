@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
 import 'package:droog/models/message.dart';
@@ -18,6 +19,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 class ChatScreen extends StatefulWidget {
   static final String route = "/chat_screen";
@@ -52,8 +54,10 @@ class _ChatScreenState extends State<ChatScreen> {
         ratioX: 4,
         ratioY: 3,
         pictureFor: PictureFor.messagePicture);
-    Navigator.of(context).pushNamed(ImageMessageScreen.route,
-        arguments: {"file": croppedFile, "targetUserName": user.userName});
+    if(croppedFile != null) {
+      Navigator.of(context).pushNamed(ImageMessageScreen.route,
+          arguments: {"file": croppedFile, "targetUserName": user.userName});
+    }
   }
 
   returnAppropriateTile(Message message) {
@@ -99,6 +103,16 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   List<String> messages = ["hello boi"];
+  markIsSeen({DocumentSnapshot documentSnapshot}) async {
+   try {
+     await documentSnapshot.reference.updateData({"isSeen":true});
+     print("markedSeen");
+
+   }  catch (e) {
+     // TODO
+     print(e.message);
+   }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +165,7 @@ class _ChatScreenState extends State<ChatScreen> {
             )
           ],
         ));
-
+    int largestIndexOfTargetUserMessage = 0;
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: CustomAppBar(
@@ -169,7 +183,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   bottom: MediaQuery.of(context).padding.bottom + 70),
               child: StreamBuilder<List<Message>>(
                   stream: _databaseMethods.getAConversation(
-                      targetUserName: user.userName),
+                      targetUserName: user.userName,limitToOne: false),
                   builder: (context, snapshot) {
                     List<Message> data = [];
 
@@ -178,11 +192,17 @@ class _ChatScreenState extends State<ChatScreen> {
 //                      data.sort((b, a) {
 //                        return a["time"].compareTo(b["time"]);
 //                      });
+                      if(data.first.byUserName != Constants.userName){
+                       markIsSeen(documentSnapshot: snapshot.data.first.documentSnapshot);
+                      }
                     }
 
+
                     return ListView.builder(
+
                       reverse: true,
                       itemBuilder: (_, index) {
+
                         return returnAppropriateTile(data[index]);
                       },
                       itemCount: data.length,
@@ -343,7 +363,7 @@ class TextMessageTile extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(width / 60),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment:alignment == Alignment.centerRight ? MainAxisAlignment.end : MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: getWidgets(width),
       ),
@@ -408,7 +428,7 @@ class ImageMessageTile extends StatelessWidget {
         SizedBox(
           width: width / 30,
         ),
-      ].reversed.toList();
+      ];
     }
   }
 
@@ -418,7 +438,8 @@ class ImageMessageTile extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(width / 60),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+
+        mainAxisAlignment:alignment == Alignment.centerRight ? MainAxisAlignment.end : MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: getWidgets(width),
       ),
@@ -491,7 +512,7 @@ class PostMessageTile extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(width / 60),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: alignment == Alignment.centerRight ? MainAxisAlignment.end : MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: getWidgets(width),
       ),

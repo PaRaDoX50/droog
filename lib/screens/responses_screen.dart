@@ -22,7 +22,6 @@ class ResponseScreenState extends State<ResponseScreen> {
   int buildMethodCount = 0;
   bool _showLoading = false;
 
-
   @override
   void initState() {
     // TODO: implement initState
@@ -30,23 +29,23 @@ class ResponseScreenState extends State<ResponseScreen> {
 //    print("asdaddddddddddddddddddddd"+post.postId);
   }
 
-  solutionChanged({DocumentSnapshot documentSnapshot,bool markAsSolution}) async {
+  solutionChanged(
+      {DocumentSnapshot documentSnapshot, bool markAsSolution}) async {
 //    responses = _databaseMethods.getResponsesByPostId(post.postId);
 //    setState(() {
 //
 //    });
-     await _databaseMethods.toggleSolutionForPost(responseDocument: documentSnapshot,markAsSolution: markAsSolution);
-     if (markAsSolution) {
-       post.solutionId = documentSnapshot.documentID;
-     }
-     else{
-       post.solutionId = null;
-     }
-     setState(() {
-
-     });
+    await _databaseMethods.toggleSolutionForPost(
+        responseDocument: documentSnapshot, markAsSolution: markAsSolution);
+    if (markAsSolution) {
+      post.solutionId = documentSnapshot.documentID;
+    } else {
+      post.solutionId = null;
+    }
+    setState(() {});
   }
-  toggleLoading(){
+
+  toggleLoading() {
     setState(() {
       _showLoading = !_showLoading;
     });
@@ -54,17 +53,15 @@ class ResponseScreenState extends State<ResponseScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     post = ModalRoute.of(context).settings.arguments as Post;
 
-      if (buildMethodCount == 0) {
-        responses = _databaseMethods.getResponsesByPostId(post.postId);
-      }
+    if (buildMethodCount == 0) {
+      responses = _databaseMethods.getResponsesByPostId(post.postId);
+    }
 
     buildMethodCount++;
 
     return Scaffold(
-
       appBar: AppBar(
         title: Text("Responses"),
       ),
@@ -77,6 +74,7 @@ class ResponseScreenState extends State<ResponseScreen> {
                 SliverToBoxAdapter(
                   child: FeedTile(
                     post: post,
+                    showBottomOptions: false,
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -90,10 +88,14 @@ class ResponseScreenState extends State<ResponseScreen> {
                       return snapshot.hasData
                           ? SliverList(
                               delegate: SliverChildBuilderDelegate((_, index) {
-                                bool isSolution = snapshot.data[index].document.documentID == post.solutionId ? true: false;
+                                bool isSolution =
+                                    snapshot.data[index].document.documentID ==
+                                            post.solutionId
+                                        ? true
+                                        : false;
                                 return ResponseTile(
-                                  isSolution: isSolution,
-                                  toggleLoading: toggleLoading,
+                                    isSolution: isSolution,
+                                    toggleLoading: toggleLoading,
                                     solutionChanged: solutionChanged,
                                     response: snapshot.data[index],
                                     postBy: post.postBy);
@@ -108,7 +110,15 @@ class ResponseScreenState extends State<ResponseScreen> {
               ],
             ),
           ),
-          _showLoading ? Container(height:double.infinity,width:double.infinity,color:Colors.transparent,child: Center(child: CircularProgressIndicator(),)) : Container(),
+          _showLoading
+              ? Container(
+                  height: double.infinity,
+                  width: double.infinity,
+                  color: Colors.transparent,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ))
+              : Container(),
         ],
       ),
     );

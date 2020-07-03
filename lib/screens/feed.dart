@@ -2,53 +2,126 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/models/post.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/widgets/feed_tile.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 
 class Feed extends StatefulWidget {
+  static final feedScaffoldKey = GlobalKey<ScaffoldState>();
   @override
   _FeedState createState() => _FeedState();
 }
 
-class _FeedState extends State<Feed>{
+class _FeedState extends State<Feed> {
   final DatabaseMethods _databaseMethods = DatabaseMethods();
+  List<Post> posts = [];
+  List<String> followingUids = [];
+  DocumentSnapshot lastDocument;
+  int countOfMoreDocs;
+  bool _isLoading = false;
+  bool _isFirstTime = true;
+  bool _isFirstSnapshot = true;
+  bool _rebuildDueToSetState =  false;
+  int buildCount = 0;
+
+
+  // loadMore() async {
+  //   if(posts.isEmpty){
+  //     _databaseMethods.getPostsForFeed();
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
 
     return Scaffold(
+      key: Feed.feedScaffoldKey,
       backgroundColor: Colors.grey[300],
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _databaseMethods.getPosts(),
-        builder: (_, snapshot) {
-          if (snapshot.hasData) {
+      body: FutureBuilder<List<String>>(
+          future: _databaseMethods.getFollowingUids(),
+          builder: (_, snapshot) {
+            if (snapshot.hasData) {
+              followingUids = snapshot.data;
+              Stream<QuerySnapshot> stream = _databaseMethods.getPostsForFeed(
+                  followingUids: followingUids);
+              return StreamBuilder<QuerySnapshot>(
+                stream:stream,
+                builder: (_, snapshot) {
 
-            return ListView.builder(
+                  print("build"+(++buildCount).toString());
+                  if (snapshot.hasData) {
 
-              itemCount: snapshot.data.documents.length,
-                itemBuilder: (_, index) {
-              final post = _postFromFirebasePost(snapshot.data.documents[index]);
-              return FeedTile(
-                post: post,
+
+                    if (_isFirstTime && snapshot.data.documents.length != 0) {
+                      print("first time");
+                      lastDocument = snapshot.data.documents.last;
+                      posts = snapshot.data.documents.map((e) => _postFromFirebasePost(documentSnapshot: e)).toList();
+                      countOfMoreDocs = posts.length;
+//                      _isFirstTime = false;
+                    }
+//                    if (!listEquals(snapshot.data.documents.map((e) => e.documentID).toList(), snapshot.data.documentChanges.map((e) => e.document.documentID).toList())) {
+//                        print("changes");
+//                        print(snapshot.data.documentChanges.length);
+//                        if(snapshot.data.documentChanges.isNotEmpty){
+//                          for(int i = 0; i < snapshot.data.documentChanges.length;i++){
+//                            if (snapshot.data.documentChanges[i].type == DocumentChangeType.added) {
+//                              posts.insert(0, _postFromFirebasePost(documentSnapshot: snapshot.data.documentChanges[i].document));
+//                            }
+//                            else if(snapshot.data.documentChanges[i].type == DocumentChangeType.removed){
+//                              posts.removeAt(snapshot.data.documentChanges[i].oldIndex);
+//                            }
+//                          }
+//                        }
+//                    }
+
+                    return posts.length != 0 ? LazyLoadScrollView(
+                      onEndOfPage: countOfMoreDocs == 10 ?_loadMore : (){},
+                      isLoading: _isLoading,
+                      scrollOffset: 100,
+                      child: ListView(
+                          children:posts.map((e) => FeedTile(post: e,)).toList() ,),
+                    ) : Center(child: Text("No Posts To Display"),);
+                  }
+
+                  return Center(child: Text("Loading...."));
+                },
               );
-            });
-          }
-
-
-          return Center(child: Text("Loading...."));
-        },
-      ),
+            } else {
+              return Center(child: Text("Loading...."));
+            }
+          }),
     );
+  }
+
+  void _loadMore() async {
+    print("loadingmore");
+    setState(() {
+      _isFirstTime = false;
+      _isLoading = true;
+//      _rebuildDueToSetState = true;
+    });
+    List<DocumentSnapshot> moreDocuments = await _databaseMethods.getMorePostsForFeed(followingUids: followingUids,documentSnapshot: lastDocument,);
+    lastDocument = moreDocuments.last;
+    List<Post> morePosts = moreDocuments.map((e) => _postFromFirebasePost(documentSnapshot: e)).toList();
+    countOfMoreDocs = morePosts.length;
+    posts.addAll(morePosts);
+    setState(() {
+//      _rebuildDueToSetState = true;
+      _isFirstTime = false;
+      _isLoading = false;
+    });
   }
 }
 
-
-Post _postFromFirebasePost(DocumentSnapshot documentSnapshot) {
-
-  return documentSnapshot != null ? Post(
+Post _postFromFirebasePost({DocumentSnapshot documentSnapshot}) {
+  return documentSnapshot != null
+      ? Post(
       description: documentSnapshot["description"],
       imageUrl: documentSnapshot["imageUrl"],
       postBy: documentSnapshot["postBy"],
       time: documentSnapshot["time"],
-  postId: documentSnapshot.documentID,
-  solutionId: documentSnapshot["solutionId"]): null;
+      postId: documentSnapshot.documentID,
+      postByUid: documentSnapshot["postByUid"],
+      solutionId: documentSnapshot["solutionId"])
+      : null;
 }

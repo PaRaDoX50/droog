@@ -11,6 +11,7 @@ import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 
 class NotificationsScreen extends StatefulWidget {
@@ -270,7 +271,7 @@ class UpdateTile extends StatelessWidget {
                         }),
                   TextSpan(
                       text: " has accepted your request",
-                      style: MyThemeData.blackBold12),
+                      style: GoogleFonts.montserrat(color: Colors.black)),
                 ])),
               ),
             ],
@@ -323,7 +324,7 @@ class UpdateTile extends StatelessWidget {
                         }),
                   TextSpan(
                       text: " marked your response as solution",
-                      style: MyThemeData.blackBold12),
+                      style: GoogleFonts.montserrat(color: Colors.black)),
                 ])),
               ],
             ),
@@ -375,7 +376,7 @@ class UpdateTile extends StatelessWidget {
                     }),
               TextSpan(
                   text: " responded to your post",
-                  style: MyThemeData.blackBold12),
+                  style: GoogleFonts.montserrat(color: Colors.black)),
             ]))
           ],
         ),

@@ -3,9 +3,12 @@ import 'package:droog/screens/chat_list.dart';
 import 'package:droog/screens/chat_screen.dart';
 import 'package:droog/screens/feed.dart';
 import 'package:droog/screens/image_message_screen.dart';
+import 'package:droog/screens/myclips_screen.dart';
+import 'package:droog/screens/new_message_screen.dart';
 import 'package:droog/screens/new_response_screen.dart';
 import 'package:droog/screens/responses_screen.dart';
 import 'package:droog/screens/share_screen.dart';
+import 'package:droog/screens/skills_setup.dart';
 import 'package:droog/screens/user_profile.dart';
 
 import 'package:droog/screens/home.dart';
@@ -88,6 +91,8 @@ class _MyAppState extends State<MyApp> {
         NewResponse.route:(_) => NewResponse(),
         ImageMessageScreen.route:(_) => ImageMessageScreen(),
         ShareScreen.route:(_) => ShareScreen(),
+        NewMessageScreen.route:(_) => NewMessageScreen(),
+        MyClipsScreen.route:(_)=> MyClipsScreen(),
       },
     );
   }

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:droog/models/post.dart';
 import 'package:droog/models/user.dart';
+import 'package:droog/screens/feed.dart';
 import 'package:droog/screens/new_response_screen.dart';
 import 'package:droog/screens/responses_screen.dart';
 import 'package:droog/screens/share_screen.dart';
@@ -8,23 +9,29 @@ import 'package:droog/services/database_methods.dart';
 import 'package:droog/widgets/expandable_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class FeedTile extends StatelessWidget {
   final Post post;
   String responses = "6";
+  bool showBottomOptions;
 
   FeedTile({
     this.post,
+    this.showBottomOptions
   });
 
   DatabaseMethods _databaseMethods = DatabaseMethods();
 
   Future<User> _getUserDetails() async {
-    print("asdasd" + post.postBy + post.postId);
+//    print("asdasd" + post.postBy + post.postId);
     return await _databaseMethods.getUserDetailsByUsername(
       targetUserName: post.postBy,
     );
+  }
+  clipPost () async{await _databaseMethods.clipPost(postId: post.postId);
+  Feed.feedScaffoldKey.currentState.showSnackBar(SnackBar(content: Text("Post Clipped")));
   }
 
   @override
@@ -67,6 +74,7 @@ class FeedTile extends StatelessWidget {
                       ? Text(
                           snapshot.data.userName,
                     overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.montserrat(),
                         )
                       : Text(
                           "",
@@ -84,14 +92,14 @@ class FeedTile extends StatelessWidget {
                   ),
                 );
               }),
-          Padding(
-            padding: const EdgeInsets.all(
-              8.0,
-            ),
-            child: ExpandableText(
-              text: post.description,
-            ),
-          ),
+          post.description != "" ? Padding(
+              padding: const EdgeInsets.all(
+                8.0,
+              ),
+              child: ExpandableText(
+                text: post.description,
+              )
+          ):Container(),
           post.imageUrl != null
               ? AspectRatio(
                   aspectRatio: 4 / 3,
@@ -115,7 +123,7 @@ class FeedTile extends StatelessWidget {
             padding: const EdgeInsets.all(
               8.0,
             ),
-            child: Row(
+            child: showBottomOptions != false ? Row(
               children: <Widget>[
                 Expanded(
                   child: GestureDetector(
@@ -124,10 +132,20 @@ class FeedTile extends StatelessWidget {
                       ResponseScreen.route,
                       arguments: post,
                     ),
-                    child: Text(
-                      "$responses Responses",
-                      style: TextStyle(color: Theme.of(context).primaryColor),
-                      overflow: TextOverflow.ellipsis,
+                    child: FutureBuilder<int>(
+                      future: _databaseMethods.getResponsesCountByPostId(post.postId),
+                      builder: (context, snapshot) {
+                        return Row(mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Text(
+                              snapshot.hasData ?
+                              "See all ${snapshot.data} Responses":"See all Responses" ,
+                              style: TextStyle(color: Theme.of(context).primaryColor),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        );
+                      }
                     ),
                   ),
                 ),
@@ -159,14 +177,17 @@ class FeedTile extends StatelessWidget {
                   padding: const EdgeInsets.all(
                     8.0,
                   ),
-                  child: Icon(
-                    Icons.content_paste,
-                    color: Colors.grey,
+                  child: GestureDetector(
+                    onTap: clipPost,
+                    child: Icon(
+                      Icons.content_paste,
+                      color: Colors.grey,
 
+                    ),
                   ),
                 ),
               ],
-            ),
+            ):Container(),
           )
         ],
       ),

@@ -29,6 +29,7 @@ class _ImageMessageScreenState extends State<ImageMessageScreen> {
     setState(() {
       _showLoading = true;
     });
+
     String imageUrl = await _databaseMethods.uploadPicture(
         file: image, address: "messagePictures");
     final message = {
@@ -52,8 +53,8 @@ class _ImageMessageScreenState extends State<ImageMessageScreen> {
         .settings
         .arguments as Map<String, dynamic>;
 
-    image = arguments["file"];
-    targetUserName = arguments["targetUserName"];
+    image = arguments["file"] as File;
+    targetUserName = arguments["targetUserName"] as String;
 
 
     final messageTextField = Container(
