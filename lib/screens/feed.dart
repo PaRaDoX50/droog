@@ -7,12 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 
 class Feed extends StatefulWidget {
-  static final feedScaffoldKey = GlobalKey<ScaffoldState>();
   @override
   _FeedState createState() => _FeedState();
 }
 
 class _FeedState extends State<Feed> {
+  final _feedScaffoldKey = GlobalKey<ScaffoldState>();
+
   final DatabaseMethods _databaseMethods = DatabaseMethods();
   List<Post> posts = [];
   List<String> followingUids = [];
@@ -35,7 +36,7 @@ class _FeedState extends State<Feed> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      key: Feed.feedScaffoldKey,
+      key: _feedScaffoldKey,
       backgroundColor: Colors.grey[300],
       body: FutureBuilder<List<String>>(
           future: _databaseMethods.getFollowingUids(),
@@ -77,7 +78,7 @@ class _FeedState extends State<Feed> {
                       isLoading: _isLoading,
                       scrollOffset: 100,
                       child: ListView(
-                          children:posts.map((e) => FeedTile(post: e,)).toList() ,),
+                          children:posts.map((e) => FeedTile(post: e,feedKey: _feedScaffoldKey,)).toList() ,),
                     ) : Center(child: Text("No Posts To Display"),);
                   }
                   else {

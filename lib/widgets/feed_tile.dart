@@ -16,10 +16,11 @@ class FeedTile extends StatelessWidget {
   final Post post;
   String responses = "6";
   bool showBottomOptions;
-
+  final GlobalKey<ScaffoldState> feedKey;
   FeedTile({
     this.post,
-    this.showBottomOptions
+    this.showBottomOptions,
+    this.feedKey
   });
 
   DatabaseMethods _databaseMethods = DatabaseMethods();
@@ -31,7 +32,7 @@ class FeedTile extends StatelessWidget {
     );
   }
   clipPost () async{await _databaseMethods.clipPost(postId: post.postId);
-  Feed.feedScaffoldKey.currentState.showSnackBar(SnackBar(content: Text("Post Clipped")));
+  feedKey.currentState.showSnackBar(SnackBar(content: Text("Post Clipped")));
   }
 
   @override

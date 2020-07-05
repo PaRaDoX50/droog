@@ -30,7 +30,11 @@ class _NewPostState extends State<NewPost> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[300],
-      body: NewPostBox(postIs: PostIs.normalPost,)
+      body: Stack(
+        children: <Widget>[
+          Center(child: NewPostBox(postIs: PostIs.normalPost,)),
+        ],
+      )
     );
   }
 }

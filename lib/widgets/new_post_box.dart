@@ -131,89 +131,91 @@ class _NewPostBoxState extends State<NewPostBox> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 0,horizontal: 8/2),
-        child: Center(
-          child: Card(
-            elevation: 10,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  _buildUserTile(),
-                  SizedBox(
-                    height: 16,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: _buildTextField(),
-                  ),
-                  Row(
-                    children: <Widget>[
-                      SizedBox(
-                        height: 50,
-                        width: 50,
-                        child: InkWell(
-                          onTap: () async {
-                            File image = await _pickImage
-                                .takePicture(imageSource: ImageSource.camera);
-                            File croppedImage;
-                            if (image != null) {
-                              croppedImage = await _pickImage.cropImage(
-                                  image: image,
-                                  pictureFor: PictureFor.postPicture,
-                                  ratioX: 4,
-                                  ratioY: 3);
-                            }
-                            if (croppedImage != null) {
-                              setState(() {
-                                _attachedImage = croppedImage;
-                              });
-                            }
-                          },
-                          child: Icon(Icons.camera_alt),
+    return SingleChildScrollView(
+          child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 0,horizontal: 8/2),
+          child: Center(
+            child: Card(
+              elevation: 10,
+              shape:
+                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    _buildUserTile(),
+                    SizedBox(
+                      height: 16,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: _buildTextField(),
+                    ),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(
+                          height: 50,
+                          width: 50,
+                          child: InkWell(
+                            onTap: () async {
+                              File image = await _pickImage
+                                  .takePicture(imageSource: ImageSource.camera);
+                              File croppedImage;
+                              if (image != null) {
+                                croppedImage = await _pickImage.cropImage(
+                                    image: image,
+                                    pictureFor: PictureFor.postPicture,
+                                    ratioX: 4,
+                                    ratioY: 3);
+                              }
+                              if (croppedImage != null) {
+                                setState(() {
+                                  _attachedImage = croppedImage;
+                                });
+                              }
+                            },
+                            child: Icon(Icons.camera_alt),
+                          ),
                         ),
-                      ),
-                      SizedBox(
-                        height: 50,
-                        width: 50,
-                        child: InkWell(
-                          onTap: () async {
-                            File image = await _pickImage
-                                .takePicture(imageSource: ImageSource.gallery);
-                            File croppedImage;
-                            if (image != null) {
-                              croppedImage = await _pickImage.cropImage(
-                                  image: image,
-                                  pictureFor: PictureFor.postPicture);
-                            }
-                            if (croppedImage != null) {
-                              setState(() {
-                                _attachedImage = croppedImage;
-                              });
-                            }
-                          },
-                          child: Icon(Icons.attachment),
+                        SizedBox(
+                          height: 50,
+                          width: 50,
+                          child: InkWell(
+                            onTap: () async {
+                              File image = await _pickImage
+                                  .takePicture(imageSource: ImageSource.gallery);
+                              File croppedImage;
+                              if (image != null) {
+                                croppedImage = await _pickImage.cropImage(
+                                    image: image,
+                                    pictureFor: PictureFor.postPicture);
+                              }
+                              if (croppedImage != null) {
+                                setState(() {
+                                  _attachedImage = croppedImage;
+                                });
+                              }
+                            },
+                            child: Icon(Icons.attachment),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  _attachedImage != null
-                      ? Image.file(
-                          _attachedImage,
-                          height: 80,
-                          width: 80,
-                        )
-                      : Container(),
-                  _buildShareButton(),
-                ],
+                      ],
+                    ),
+                    _attachedImage != null
+                        ? Image.file(
+                            _attachedImage,
+                            height: 80,
+                            width: 80,
+                          )
+                        : Container(),
+                    _buildShareButton(),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      );
+    );
   }
 }

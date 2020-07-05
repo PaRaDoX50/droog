@@ -530,10 +530,16 @@ class DatabaseMethods {
           .orderBy("time", descending: true)
           .limit(10)
           .getDocuments();
-      return qSnapshot.documents;
+      print(qSnapshot.documents.length.toString()+"ccccc");
+      if(qSnapshot.documents.isNotEmpty) {
+        return qSnapshot.documents;
+      }
+      else{
+        return  null;
+      }
     }
     else{
-      return emptyList;
+      return null;
     }
 
 
