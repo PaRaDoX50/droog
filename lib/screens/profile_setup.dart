@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:droog/models/enums.dart';
+import 'package:droog/screens/home.dart';
 import 'package:droog/screens/new_post.dart';
 import 'package:droog/services/database_methods.dart';
 import 'file:///P:/androidProjects/Droog/droog/lib/utils/image_picker.dart';
@@ -225,7 +226,7 @@ class _ProfileSetupState extends State<ProfileSetup> {
                               userName: userNameController.text,
                               loggedInStatus: LoggedInStatus.loggedIn);
                           Navigator.pushReplacementNamed(
-                              context, NewPost.route);
+                              context, Home.route);
                           setState(() {
                             showLoading = false;
                           });

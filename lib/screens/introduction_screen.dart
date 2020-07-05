@@ -4,16 +4,18 @@ import 'package:droog/screens/signup.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+int currentIndex = 0;
+  PageController pageController = PageController();
+  Image droogLogo;
+  List<SliderData> listData;
 class IntroductionScreen extends StatefulWidget {
   @override
   _IntroductionScreenState createState() => _IntroductionScreenState();
 }
 
 class _IntroductionScreenState extends State<IntroductionScreen> {
-  List<SliderData> listData;
-  int currentIndex = 0;
-  PageController pageController = PageController();
-  Image droogLogo;
+  
+  
 
   @override
   void initState() {
@@ -36,6 +38,7 @@ class _IntroductionScreenState extends State<IntroductionScreen> {
       backgroundColor: Colors.white,
       body: PageView.builder(
         controller: pageController,
+
         onPageChanged: (index) {
           setState(() {
             currentIndex = index;
@@ -50,55 +53,7 @@ class _IntroductionScreenState extends State<IntroductionScreen> {
         },
         itemCount: listData.length,
       ),
-      bottomSheet: currentIndex != listData.length - 1
-          ? Container(
-              color: Color(0Xffdf1d38),
-              child: Padding(
-                padding: const EdgeInsets.only(
-                    top: 8.0, left: 8, right: 8, bottom: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    GestureDetector(
-                      onTap: () => pageController.animateToPage(
-                          listData.length - 1,
-                          duration: Duration(milliseconds: 400),
-                          curve: Curves.linear),
-                      child: Text(
-                        "Skip",
-                        style: TextStyle(fontSize: 25, color: Colors.white),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () => pageController.animateToPage(
-                          currentIndex + 1,
-                          duration: Duration(milliseconds: 400),
-                          curve: Curves.linear),
-                      child: Text(
-                        "Next",
-                        style: TextStyle(fontSize: 25, color: Colors.white),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            )
-          : Container(
-              width: double.infinity,
-              color: Color(0Xffdf1d38),
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: GestureDetector(
-                  onTap: () =>
-                      Navigator.pushReplacementNamed(context, SignUp.route),
-                  child: Text(
-                    "Done",
-                    style: TextStyle(fontSize: 25, color: Colors.white),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-            ),
+     
     );
   }
 }
@@ -123,28 +78,33 @@ class SliderTile extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        
         children: <Widget>[
           Image.asset(
             imagePath,
             width: double.infinity,
             height: (heightAvailable) * .6,
           ),
+          Spacer(),
           Stack(
             overflow: Overflow.visible,
             children: <Widget>[
               Container(
-                padding: EdgeInsets.all(8),
+                padding: EdgeInsets.only(top:8,left: 8,right: 8),
                 height: (heightAvailable) * .3,
                 width: double.infinity,
                 child: Center(
                     child: Text(
                   body,
+
                   style: textStyle,
                   textAlign: TextAlign.center,
                 )),
                 decoration: BoxDecoration(
-                  color: Color(0Xffdf1d38),
+                    gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: <Color>[Theme.of(context).primaryColor, Colors.blue]),
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(30),
                     topRight: Radius.circular(30),
@@ -156,8 +116,59 @@ class SliderTile extends StatelessWidget {
                 top: -35,
                 child: logo,
               ),
+              Positioned(bottom: 0,
+                child: currentIndex != listData.length - 1
+          ? SizedBox(width: MediaQuery.of(context).size.width,
+                      child: Row(
+                   
+                    children: <Widget>[
+                      GestureDetector(
+                        onTap: () => pageController.animateToPage(
+                            listData.length - 1,
+                            duration: Duration(milliseconds: 400),
+                            curve: Curves.linear),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            "Skip",
+                            style: TextStyle(fontSize: 25, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      Spacer(),
+                      GestureDetector(
+                        onTap: () => pageController.animateToPage(
+                            currentIndex + 1,
+                            duration: Duration(milliseconds: 400),
+                            curve: Curves.linear),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            "Next",
+                            style: TextStyle(fontSize: 25, color: Colors.white),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+          ):Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: GestureDetector(
+                  onTap: () =>
+                      Navigator.pushReplacementNamed(context, SignUp.route),
+                  child: Container(width: MediaQuery.of(context).size.width,
+                                      child: Text(
+                      "Done",
+                      style: TextStyle(fontSize: 25, color: Colors.white),
+                      textAlign: TextAlign.center,
+                    ),
+                    alignment: Alignment.center,
+                  ),
+                ),
+              ),)
             ],
           ),
+           
         ],
       ),
     );
