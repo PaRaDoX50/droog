@@ -5,6 +5,7 @@ class ExpandableText extends StatefulWidget {
   final String text;
   bool isExpanded = false;
 
+
   ExpandableText({this.text});
 
   @override

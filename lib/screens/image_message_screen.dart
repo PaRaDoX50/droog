@@ -74,19 +74,19 @@ class _ImageMessageScreenState extends State<ImageMessageScreen> {
                 style: TextStyle(color: Colors.black),
                 decoration: InputDecoration(
                   hintText: "Type your message",
-                  hintStyle: TextStyle(color: Colors.white),
+                  hintStyle: TextStyle(color: Colors.grey),
                   contentPadding: EdgeInsets.only(
                     left: 16,
                   ),
                   filled: true,
-                  fillColor: Colors.grey[300],
+                  fillColor: Colors.white,
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(style: BorderStyle.solid),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(style: BorderStyle.solid),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
@@ -108,6 +108,7 @@ class _ImageMessageScreenState extends State<ImageMessageScreen> {
           Center(child: AspectRatio(aspectRatio: 4 / 3,
             child: Image.file(image, width: double.infinity,),)),
           Align(alignment: Alignment.bottomCenter, child: messageTextField),
+          _showLoading ? Center(child: CircularProgressIndicator(),) : Container(),
 
         ],),
       ),

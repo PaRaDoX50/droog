@@ -134,19 +134,19 @@ class _ChatScreenState extends State<ChatScreen> {
                 style: TextStyle(color: Colors.black),
                 decoration: InputDecoration(
                   hintText: "Type your message",
-                  hintStyle: TextStyle(color: Colors.white),
+                  hintStyle: TextStyle(color: Colors.grey),
                   contentPadding: EdgeInsets.only(
                     left: 16,
                   ),
                   filled: true,
-                  fillColor: Colors.grey[300],
+                  fillColor: Colors.white,
                   focusedBorder: OutlineInputBorder(
                     borderSide: BorderSide(style: BorderStyle.solid),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(style: BorderStyle.solid),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
@@ -280,12 +280,10 @@ class CustomAppBar extends PreferredSize {
                 ],
               ),
             ),
-            InkWell(
-              onTap: () => Navigator.pushNamed(context, SearchScreen.route),
-              child: Icon(
+             Icon(
                 Icons.more_vert,
                 color: Colors.white,
-              ),
+
             ),
           ],
         ),
@@ -341,11 +339,12 @@ class TextMessageTile extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.grey[300],
+            color:Color(0xff2f66af),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(
             message,
+            style: TextStyle(color: Colors.white),
           ),
           constraints: BoxConstraints(maxWidth: width / 1.5),
         ),
@@ -358,11 +357,11 @@ class TextMessageTile extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.grey[300],
+            color: Color(0xffe8f5fd),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(
-            message,
+            message
           ),
           constraints: BoxConstraints(maxWidth: width / 1.5),
         ),
@@ -400,7 +399,7 @@ class ImageMessageTile extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.grey[300],
+            color: Color(0xff2f66af),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Column(
@@ -411,7 +410,8 @@ class ImageMessageTile extends StatelessWidget {
               SizedBox(
                 height: 2,
               ),
-              Text(text)
+              Text(text,
+                style: TextStyle(color: Colors.white),)
             ],
           ),
           constraints: BoxConstraints(maxWidth: width / 1.5),
@@ -425,7 +425,7 @@ class ImageMessageTile extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.grey[300],
+            color: Color(0xffe8f5fd),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Column(
@@ -480,7 +480,7 @@ class PostMessageTile extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.grey[300],
+            color: Color(0xff2f66af),
             borderRadius: BorderRadius.circular(10),
           ),
           child: FutureBuilder<Post>(
@@ -502,7 +502,7 @@ class PostMessageTile extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.grey[300],
+            color: Color(0xffe8f5fd),
             borderRadius: BorderRadius.circular(10),
           ),
           child: FutureBuilder<Post>(
