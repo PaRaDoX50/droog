@@ -11,9 +11,9 @@ enum PictureFor{
 
 }
 
-enum FollowStatus{
+enum ConnectionStatus{
   requestSent,
-  following,
+  droogs,
   requestNotSent,
 }
 

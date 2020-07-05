@@ -39,12 +39,12 @@ class _FeedState extends State<Feed> {
       key: _feedScaffoldKey,
       backgroundColor: Colors.grey[300],
       body: FutureBuilder<List<String>>(
-          future: _databaseMethods.getFollowingUids(),
+          future: _databaseMethods.getConnectionUids(),
           builder: (_, snapshot) {
             if (snapshot.hasData) {
               followingUids = snapshot.data;
               Stream<QuerySnapshot> stream = _databaseMethods.getPostsForFeed(
-                  followingUids: followingUids);
+                  droogsUids: followingUids);
               return StreamBuilder<QuerySnapshot>(
                 stream:stream,
                 builder: (_, snapshot) {
@@ -106,7 +106,7 @@ class _FeedState extends State<Feed> {
       _isLoading = true;
 //      _rebuildDueToSetState = true;
     });
-    List<DocumentSnapshot> moreDocuments = await _databaseMethods.getMorePostsForFeed(followingUids: followingUids,documentSnapshot: lastDocument,);
+    List<DocumentSnapshot> moreDocuments = await _databaseMethods.getMorePostsForFeed(droogsUids: followingUids,documentSnapshot: lastDocument,);
     lastDocument = moreDocuments.last;
     List<Post> morePosts = moreDocuments.map((e) => _postFromFirebasePost(documentSnapshot: e)).toList();
     countOfMoreDocs = morePosts.length;

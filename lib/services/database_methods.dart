@@ -132,21 +132,21 @@ class DatabaseMethods {
   }
 
   Future<List<User>> searchUserForANewMessage({String keyword}) async {
-    QuerySnapshot snapshotFollowing = await _database
+    QuerySnapshot snapshotDroogs = await _database
         .collection("users")
         .document(Constants.uid)
-        .collection("following")
+        .collection("droogs")
         .getDocuments();
-    QuerySnapshot snapshotFollowers = await _database
-        .collection("users")
-        .document(Constants.uid)
-        .collection("followers")
-        .getDocuments();
+//    QuerySnapshot snapshotFollowers = await _database
+//        .collection("users")
+//        .document(Constants.uid)
+//        .collection("followers")
+//        .getDocuments();
 //    _database.collection("users").where()
     final uids =
-        (snapshotFollowing.documents.map((e) => e["uid"]).toList());
-    uids.addAll(
-        snapshotFollowers.documents.map((e) => e["uid"]).toList());
+        (snapshotDroogs.documents.map((e) => e["uid"]).toList());
+//    uids.addAll(
+//        snapshotFollowers.documents.map((e) => e["uid"]).toList());
     if(uids.isNotEmpty) {
       QuerySnapshot snapshotResults = await _database.collection("users").where(
           "uid", whereIn: uids)
@@ -319,7 +319,7 @@ class DatabaseMethods {
     }
   }
 
-  Future<void> sendFollowRequest({String targetUid}) async {
+  Future<void> sendConnectionRequest({String targetUid}) async {
 //    print(Constants.userName + "hellllsldla");
     print(targetUid + "hellllsldla");
 
@@ -334,7 +334,7 @@ class DatabaseMethods {
     //Access target user by its uid -> under collections of "requests", add document  naming it the uid of the user who sent the request.
   }
 
-  Future<void> cancelFollowRequest({String targetUid}) async {
+  Future<void> cancelConnectionRequest({String targetUid}) async {
     //Un-send Follow Request
     await _database
         .collection("users")
@@ -386,11 +386,18 @@ class DatabaseMethods {
     }
   }
 
-  Future<FollowStatus> getFollowStatus({String targetUid}) async {
-    QuerySnapshot snapshotFollowers = await _database
+  Future<ConnectionStatus> getConnectionStatus({String targetUid}) async {
+//    QuerySnapshot snapshotFollowers = await _database
+//        .collection("users")
+//        .document(targetUid)
+//        .collection("followers")
+//        .where("uid", isEqualTo: Constants.uid)
+//        .getDocuments();
+
+    QuerySnapshot snapshotDroogs = await _database
         .collection("users")
         .document(targetUid)
-        .collection("followers")
+        .collection("droogs")
         .where("uid", isEqualTo: Constants.uid)
         .getDocuments();
 
@@ -400,28 +407,28 @@ class DatabaseMethods {
         .collection("requests")
         .where("uid", isEqualTo: Constants.uid)
         .getDocuments();
-    if (snapshotFollowers.documents.isEmpty &&
+    if (snapshotDroogs.documents.isEmpty &&
         snapshotRequests.documents.isEmpty) {
-      return FollowStatus.requestNotSent;
-    } else if (snapshotFollowers.documents.isNotEmpty) {
-      return FollowStatus.following;
+      return ConnectionStatus.requestNotSent;
+    } else if (snapshotDroogs.documents.isNotEmpty) {
+      return ConnectionStatus.droogs;
     } else {
-      return FollowStatus.requestSent;
+      return ConnectionStatus.requestSent;
     }
   }
 
-  Future acceptFollowRequest({String targetUid}) async {
+  Future acceptConnectionRequest({String targetUid}) async {
     await _database
         .collection("users")
         .document(Constants.uid)
-        .collection("followers")
+        .collection("droogs")
         .document(targetUid)
         .setData({"uid": targetUid});
 
     await _database
         .collection("users")
         .document(targetUid)
-        .collection("following")
+        .collection("droogs")
         .document(Constants.uid)
         .setData({"uid": Constants.uid});
 
@@ -443,27 +450,27 @@ class DatabaseMethods {
     });
   }
 
-  Future<List<String>> getFollowingUids() async {
-    QuerySnapshot snapshotFollowing = await _database
+  Future<List<String>> getConnectionUids() async {
+    QuerySnapshot snapshotDroogs = await _database
         .collection("users")
         .document(Constants.uid)
-        .collection("following")
+        .collection("droogs")
         .getDocuments();
-    List<String> followingUids = [];
-    for (int i = 0; i < snapshotFollowing.documents.length; i++) {
-      followingUids.add(snapshotFollowing.documents[i].data["uid"]);
+    List<String> droogsUids = [];
+    for (int i = 0; i < snapshotDroogs.documents.length; i++) {
+      droogsUids.add(snapshotDroogs.documents[i].data["uid"]);
     }
-    return followingUids;
+    return droogsUids;
   }
 
   Future<List<DocumentSnapshot>> getMorePostsForFeed({
-    List<String> followingUids,
+    List<String> droogsUids,
     DocumentSnapshot documentSnapshot,
   }) async {
-    if (followingUids.isNotEmpty) {
+    if (droogsUids.isNotEmpty) {
       QuerySnapshot snapshot = await _database
           .collection("posts")
-          .where("postByUid", whereIn: followingUids)
+          .where("postByUid", whereIn: droogsUids)
           .orderBy("time", descending: true)
           .startAfterDocument(documentSnapshot)
           .limit(10)
@@ -478,13 +485,13 @@ class DatabaseMethods {
   }
 
   Stream<QuerySnapshot> getPostsForFeed(
-      {List<String> followingUids,
+      {List<String> droogsUids,
       bool isFirstTime,
       DocumentSnapshot documentSnapshot}) {
-    if (followingUids.isNotEmpty) {
+    if (droogsUids.isNotEmpty) {
       Stream stream = _database
           .collection("posts")
-          .where("postByUid", whereIn: followingUids)
+          .where("postByUid", whereIn: droogsUids)
           .orderBy("time", descending: true)
           .limit(10)
           .snapshots();
@@ -547,12 +554,18 @@ class DatabaseMethods {
 //    List<Post> posts = qSnapshot.documents.map((e) => postFromFirebasePost(documentSnapshot: e)).toList();
   }
 
-  unFollowUser({String targetUid}) async {
+  disconnectFromUser({String targetUid}) async {
     await _database
         .collection("users")
         .document(targetUid)
-        .collection("followers")
+        .collection("droogs")
         .document(Constants.uid)
+        .delete();
+    await _database
+        .collection("users")
+        .document(Constants.uid)
+        .collection("droogs")
+        .document(targetUid)
         .delete();
   }
 

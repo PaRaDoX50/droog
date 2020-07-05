@@ -141,12 +141,12 @@ class RequestTile extends StatelessWidget {
   final DatabaseMethods _databaseMethods = DatabaseMethods();
 
   acceptFollowRequest() async {
-    await _databaseMethods.acceptFollowRequest(targetUid: user.uid);
+    await _databaseMethods.acceptConnectionRequest(targetUid: user.uid);
     snackBarAndSetState("Joined");
   }
 
   deleteFollowRequest() async {
-    await _databaseMethods.cancelFollowRequest(targetUid: user.uid);
+    await _databaseMethods.cancelConnectionRequest(targetUid: user.uid);
     snackBarAndSetState("Deleted");
   }
 

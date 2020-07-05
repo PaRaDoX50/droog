@@ -105,7 +105,7 @@ class SearchTile extends StatefulWidget {
 }
 
 class _SearchTileState extends State<SearchTile> {
-  FollowStatus _followStatus;
+  ConnectionStatus _connectionStatus;
   bool _showLoading = false;
 
   getAppropriateChild(String data) {
@@ -174,14 +174,14 @@ class _SearchTileState extends State<SearchTile> {
               color: MyThemeData.buttonColorBlue,
               textColor: Colors.white,
               onPressed: () {
-                switch (_followStatus) {
-                  case FollowStatus.requestNotSent:
+                switch (_connectionStatus) {
+                  case ConnectionStatus.requestNotSent:
                     _sendRequest();
                     break;
-                  case FollowStatus.requestSent:
+                  case ConnectionStatus.requestSent:
                     _cancelRequest();
                     break;
-                  case FollowStatus.following:
+                  case ConnectionStatus.droogs:
                     _unFollow();
                     break;
                 }
@@ -198,15 +198,15 @@ class _SearchTileState extends State<SearchTile> {
   }
 
   Future<String> get _followButtonText async {
-    _followStatus =
-    await _databaseMethods.getFollowStatus(targetUid: widget.user.uid);
-    switch (_followStatus) {
-      case FollowStatus.requestSent:
+    _connectionStatus =
+    await _databaseMethods.getConnectionStatus(targetUid: widget.user.uid);
+    switch (_connectionStatus) {
+      case ConnectionStatus.requestSent:
         return "Cancel Request";
-      case FollowStatus.following:
-        return "Un-follow";
-      case FollowStatus.requestNotSent:
-        return "Follow";
+      case ConnectionStatus.droogs:
+        return "Disconnect";
+      case ConnectionStatus.requestNotSent:
+        return "Connect";
       default:
         return "";
     }
@@ -218,7 +218,7 @@ class _SearchTileState extends State<SearchTile> {
     setState(() {
       _showLoading = true;
     });
-    await _databaseMethods.sendFollowRequest(targetUid: widget.user.uid);
+    await _databaseMethods.sendConnectionRequest(targetUid: widget.user.uid);
 
     setState(() {
       _showLoading = false;
@@ -229,7 +229,7 @@ class _SearchTileState extends State<SearchTile> {
     setState(() {
       _showLoading = true;
     });
-    await _databaseMethods.cancelFollowRequest(targetUid: widget.user.uid);
+    await _databaseMethods.cancelConnectionRequest(targetUid: widget.user.uid);
     print("Sed");
     setState(() {
       _showLoading = false;
@@ -240,7 +240,7 @@ class _SearchTileState extends State<SearchTile> {
     setState(() {
       _showLoading = true;
     });
-    await _databaseMethods.unFollowUser(targetUid: widget.user.uid);
+    await _databaseMethods.disconnectFromUser(targetUid: widget.user.uid);
     print("Snd");
     setState(() {
       _showLoading = false;

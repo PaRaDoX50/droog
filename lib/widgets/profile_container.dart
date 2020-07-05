@@ -17,7 +17,7 @@ class ProfileContainer extends StatefulWidget {
 }
 
 class _ProfileContainerState extends State<ProfileContainer> {
-  FollowStatus _followStatus;
+  ConnectionStatus _connectionStatus;
 
   final _databaseMethods = DatabaseMethods();
 
@@ -58,14 +58,14 @@ class _ProfileContainerState extends State<ProfileContainer> {
                   ),
                   trailing: RaisedButton(
                     onPressed: () {
-                      switch(_followStatus){
-                        case FollowStatus.requestNotSent:
+                      switch(_connectionStatus){
+                        case ConnectionStatus.requestNotSent:
                           _sendRequest();
                           break;
-                        case FollowStatus.requestSent:
+                        case ConnectionStatus.requestSent:
                           _cancelRequest();
                           break;
-                        case FollowStatus.following:
+                        case ConnectionStatus.droogs:
                           _unFollow();
                           break;
                       }
@@ -156,11 +156,11 @@ class _ProfileContainerState extends State<ProfileContainer> {
 
 
   Future<String> get _followButtonText async {
-    _followStatus = await _databaseMethods.getFollowStatus(targetUid: widget.user.uid);
-    switch (_followStatus) {
-      case FollowStatus.requestSent:
+    _connectionStatus = await _databaseMethods.getConnectionStatus(targetUid: widget.user.uid);
+    switch (_connectionStatus) {
+      case ConnectionStatus.requestSent:
         return "Cancel Request";
-      case FollowStatus.following:
+      case ConnectionStatus.droogs:
         return "Un-follow";
       default:
         return "Follow";
@@ -170,7 +170,7 @@ class _ProfileContainerState extends State<ProfileContainer> {
   Future _sendRequest() async {
     print(widget.user.firstName);
     print(widget.user.uid.toString());
-    await _databaseMethods.sendFollowRequest(targetUid:widget.user.uid);
+    await _databaseMethods.sendConnectionRequest(targetUid:widget.user.uid);
 
 
     setState(() {
@@ -179,7 +179,7 @@ class _ProfileContainerState extends State<ProfileContainer> {
   }
 
   Future _cancelRequest() async {
-    await _databaseMethods.cancelFollowRequest(targetUid:widget.user.uid);
+    await _databaseMethods.cancelConnectionRequest(targetUid:widget.user.uid);
     print("Sed");
     setState(() {
 
@@ -187,7 +187,7 @@ class _ProfileContainerState extends State<ProfileContainer> {
   }
 
   Future _unFollow() async {
-    await _databaseMethods.unFollowUser(targetUid:widget.user.uid);
+    await _databaseMethods.disconnectFromUser(targetUid:widget.user.uid);
     print("Snd");
     setState(() {
 
