@@ -1,4 +1,5 @@
 import 'package:droog/models/enums.dart';
+import 'package:droog/screens/home.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class SkillsSetup extends StatefulWidget {
+  static final String route = "/skills_setup";
   @override
   _SkillsSetupState createState() => _SkillsSetupState();
 }
@@ -99,9 +101,8 @@ class _SkillsSetupState extends State<SkillsSetup> {
         _showLoading = true;
       });
       await _databaseMethods.editSkills(skills: skills,achievements: achievements);
-      setState(() {
-        _showLoading = false;
-      });
+
+      Navigator.pushReplacementNamed(context, Home.route);
     }  catch (e) {
       // TODO
       setState(() {

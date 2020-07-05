@@ -30,7 +30,7 @@ class _HomeState extends State<Home> {
     ChatList(),
     NotificationsScreen(),
   ];
-  int _currentIndex;
+  int _currentIndex =0;
 
   @override
   void initState() {
@@ -128,7 +128,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    _currentIndex = 0;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(_getAppBarTitle(),style: GoogleFonts.montserrat(),),

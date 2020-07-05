@@ -93,6 +93,7 @@ class _MyAppState extends State<MyApp> {
         ShareScreen.route:(_) => ShareScreen(),
         NewMessageScreen.route:(_) => NewMessageScreen(),
         MyClipsScreen.route:(_)=> MyClipsScreen(),
+        SkillsSetup.route:(_)=>SkillsSetup(),
       },
     );
   }

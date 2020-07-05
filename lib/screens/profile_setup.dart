@@ -3,15 +3,18 @@ import 'dart:io';
 import 'package:droog/models/enums.dart';
 import 'package:droog/screens/home.dart';
 import 'package:droog/screens/new_post.dart';
+import 'package:droog/screens/skills_setup.dart';
 import 'package:droog/services/database_methods.dart';
 import 'file:///P:/androidProjects/Droog/droog/lib/utils/image_picker.dart';
 import 'package:droog/services/sharedprefs_methods.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfileSetup extends StatefulWidget {
-  static final String route= "/profile_setup";
+  static final String route = "/profile_setup";
+
   @override
   _ProfileSetupState createState() => _ProfileSetupState();
 }
@@ -35,6 +38,65 @@ class _ProfileSetupState extends State<ProfileSetup> {
     _scaffoldKey.currentState.showSnackBar(SnackBar(
       content: Text(content),
     ));
+  }
+  showImageSourceOptions(){
+    showDialog(
+
+        context: context,
+        builder: (_) => AlertDialog(contentPadding: EdgeInsets.zero,
+            content: Container(
+              decoration: BoxDecoration(
+                  gradient:  LinearGradient(
+                      colors: [
+                        Color(0xff1948a0),
+                        Color(0xff2d63ad),
+                        Color(0xff4481bc)
+                      ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
+              height: 100,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  IconButton(icon: FaIcon(FontAwesomeIcons.camera,color: Colors.white,),onPressed: (){
+                    Navigator.pop(context);
+                    addImage(imageSource: ImageSource.camera);},),
+                  IconButton(icon: FaIcon(FontAwesomeIcons.image,color: Colors.white,),onPressed: (){
+                    Navigator.pop(context);
+                    addImage(imageSource: ImageSource.gallery);
+                  },)
+                ],),
+            ),
+            elevation: 5,
+
+            ));
+
+
+  }
+
+  addImage({ImageSource imageSource}) async {
+    File image =
+    await _imagePicker.takePicture(imageSource:imageSource);
+    if (image != null) {
+      File croppedImage = await _imagePicker.cropImage(
+          image: image,
+          pictureFor: PictureFor.profilePicture, ratioY: 1, ratioX: 1);
+      if (croppedImage != null) {
+        print("Reached cropped");
+
+        setState(() {
+          imageCache.clear();
+          imageCache.clearLiveImages();
+          _takenImage = croppedImage;
+        });
+        print("Reached cropped2");
+        await _sharedPrefsMethods
+            .saveProfilePicturePath(croppedImage.path);
+        print("Reached cropped3");
+      } else {
+        _showSnackBar("Something went wrong.");
+      }
+    } else {
+      _showSnackBar("Something went wrong.");
+    }
   }
 
   Widget _buildForm() {
@@ -94,7 +156,7 @@ class _ProfileSetupState extends State<ProfileSetup> {
 
     final descriptionField = TextFormField(
       controller: descriptionController,
-      maxLines: 10,
+      maxLines: 5,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.only(left: 8, right: 0, top: 16, bottom: 0),
         hintText: "Describe yourself",
@@ -130,7 +192,7 @@ class _ProfileSetupState extends State<ProfileSetup> {
 
   @override
   Widget build(BuildContext context) {
-    final mainWidget = SingleChildScrollView(
+    Widget mainWidget = SingleChildScrollView(
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
@@ -140,69 +202,73 @@ class _ProfileSetupState extends State<ProfileSetup> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text(
-                "Profile Setup",
-                style: Theme.of(context).textTheme.headline6,
+              FittedBox(
+                child: Text(
+                  "Profile Setup",
+                  style: Theme
+                      .of(context)
+                      .textTheme
+                      .headline6,
+                ),
               ),
               SizedBox(
-                height: 16,
+                height: 8,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Stack(
+
                 children: <Widget>[
-                  _takenImage != null
-                      ? ClipOval(
-                          child: Image.file(
-                            _takenImage,
-                            width: 70,
-                            height: 70,
-                          ),
-                        )
-                      : Icon(
-                          Icons.account_circle,
-                          size: 80,
-                        ),
-                  RaisedButton(
-                    child:
-                        Text("Add", style: Theme.of(context).textTheme.button),
-                    color: Theme.of(context).buttonColor,
-                    onPressed: () async {
-                      File image =
-                          await _imagePicker.takePicture(imageSource: ImageSource.camera);
-                      if (image != null) {
-                        File croppedImage = await _imagePicker.cropImage(
-                            image: image,
-                            pictureFor: PictureFor.profilePicture,ratioY: 1,ratioX: 1);
-                        if (croppedImage != null) {
-                          setState(() {
-                            _takenImage = croppedImage;
-                          });
-                          await _sharedPrefsMethods
-                              .saveProfilePicturePath(croppedImage.path);
-                        } else {
-                          _showSnackBar("Something went wrong.");
-                        }
-                      } else {
-                        _showSnackBar("Something went wrong.");
-                      }
-                    },
+                  SizedBox(
+                    width: double.infinity,
+                    child:_takenImage != null
+                      ? Center(
+                        child: ClipOval(
+                    child: Image.file(
+                        _takenImage,
+                        width: 70,
+                        height: 70,
+                        key: ValueKey(_takenImage.lengthSync()),
+                    ),
+                  ),
+                      )
+                      : Center(
+                        child: Icon(
+                    Icons.account_circle,
+                    size: 80,
+                  ),
+                      ),),
+                  Positioned(right: 20,
+                    top: 8,
+                    child: RaisedButton(
+                      child:
+                      Text("Add", style: Theme
+                          .of(context)
+                          .textTheme
+                          .button),
+                      color: Theme
+                          .of(context)
+                          .buttonColor,
+                      onPressed:showImageSourceOptions,
+                    ),
                   )
                 ],
               ),
               SizedBox(
-                height: 16,
+                height: 8,
               ),
               _buildForm(),
               SizedBox(
-                height: 16,
+                height: 8,
               ),
               RaisedButton(
                 child:
-                    Text("Submit", style: Theme.of(context).textTheme.button),
+                Text("Submit", style: Theme
+                    .of(context)
+                    .textTheme
+                    .button),
                 onPressed: () async {
                   if (_formKey.currentState.validate()) {
                     if (await _databaseMethods
-                        .userNameAvailable(userName:userNameController.text)) {
+                        .userNameAvailable(userName: userNameController.text)) {
                       if (_takenImage != null) {
                         setState(() {
                           showLoading = true;
@@ -210,7 +276,8 @@ class _ProfileSetupState extends State<ProfileSetup> {
 
                         try {
                           String downloadUrl = await _databaseMethods
-                              .uploadPicture(file: _takenImage,address: "profilePictures");
+                              .uploadPicture(
+                              file: _takenImage, address: "profilePictures");
                           if (downloadUrl != null) {
                             await _databaseMethods.completeUserProfile(
                                 userName: userNameController.text,
@@ -226,7 +293,7 @@ class _ProfileSetupState extends State<ProfileSetup> {
                               userName: userNameController.text,
                               loggedInStatus: LoggedInStatus.loggedIn);
                           Navigator.pushReplacementNamed(
-                              context, Home.route);
+                              context, SkillsSetup.route);
                           setState(() {
                             showLoading = false;
                           });
@@ -246,10 +313,12 @@ class _ProfileSetupState extends State<ProfileSetup> {
                     }
                   }
                 },
-                color: Theme.of(context).buttonColor,
+                color: Theme
+                    .of(context)
+                    .buttonColor,
               ),
               SizedBox(
-                height: 16,
+                height: 8,
               ),
             ],
           ),
@@ -262,11 +331,13 @@ class _ProfileSetupState extends State<ProfileSetup> {
         height: double.infinity,
         width: double.infinity,
         decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [
-          Color(0xff1948a0),
-          Color(0xff2d63ad),
-          Color(0xff4481bc)
-        ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
+
+            gradient: LinearGradient(
+                stops: [1, 0, 0], colors: [
+              Color(0xff1948a0),
+              Color(0xff2d63ad),
+              Color(0xff4481bc)
+            ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
         child: Stack(
           children: <Widget>[
             Center(
