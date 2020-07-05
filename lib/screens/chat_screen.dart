@@ -35,15 +35,18 @@ class _ChatScreenState extends State<ChatScreen> {
 
   sendMessage(String userName) async {
     print(userName + messageController.text);
-    Map<String, dynamic> message = {
-      "messageType": MessageType.onlyText.index,
-      "text": messageController.text,
-      "byUid": Constants.uid,
-      "byUserName": Constants.userName,
-      "time": DateTime.now().millisecondsSinceEpoch,
-    };
-    await _databaseMethods.sendMessage(
-        targetUserName: userName, message: message);
+    if (messageController.text.isNotEmpty) {
+      Map<String, dynamic> message = {
+        "messageType": MessageType.onlyText.index,
+        "text": messageController.text,
+        "byUid": Constants.uid,
+        "byUserName": Constants.userName,
+        "time": DateTime.now().millisecondsSinceEpoch,
+      };
+      await _databaseMethods.sendMessage(
+          targetUserName: userName, message: message);
+      messageController.clear();
+    }
   }
 
   pickImage(ImageSource imageSource) async {
@@ -120,9 +123,9 @@ class _ChatScreenState extends State<ChatScreen> {
     final messageTextField = Container(
         constraints:
             BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 5),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Expanded(
               child: TextField(
@@ -151,17 +154,26 @@ class _ChatScreenState extends State<ChatScreen> {
             SizedBox(
               width: 8,
             ),
-            IconButton(
-              icon: Icon(Icons.camera_alt),
-              onPressed: () => pickImage(ImageSource.camera),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: InkWell(
+                child: Icon(Icons.camera_alt),
+                onTap: () => pickImage(ImageSource.camera),
+              ),
             ),
-            IconButton(
-              icon: Icon(Icons.attachment),
-              onPressed: () => pickImage(ImageSource.gallery),
-            ),
-            IconButton(
-              icon: Icon(Icons.send),
-              onPressed: () => sendMessage(user.userName),
+           Padding(
+             padding: const EdgeInsets.all(8.0),
+             child: InkWell(
+                child: Icon(Icons.attachment),
+                onTap: () => pickImage(ImageSource.gallery),
+              ),
+           ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: InkWell(
+                child: Icon(Icons.send),
+                onTap: () => sendMessage(user.userName),
+              ),
             )
           ],
         ));
@@ -188,14 +200,17 @@ class _ChatScreenState extends State<ChatScreen> {
                     List<Message> data = [];
 
                     if (snapshot.hasData) {
-                      data = snapshot.data;
-//                      data.sort((b, a) {
-//                        return a["time"].compareTo(b["time"]);
-//                      });
-                      if(data.first.byUserName != Constants.userName){
-                       markIsSeen(documentSnapshot: snapshot.data.first.documentSnapshot);
+                      if (snapshot.data.isNotEmpty) {
+                        data = snapshot.data;
+                        //                      data.sort((b, a) {
+                        //                        return a["time"].compareTo(b["time"]);
+                        //                      });
+                        if(data.first.byUserName != Constants.userName){
+                         markIsSeen(documentSnapshot: snapshot.data.first.documentSnapshot);
+                        }
                       }
                     }
+
 
 
                     return ListView.builder(
@@ -247,6 +262,7 @@ class CustomAppBar extends PreferredSize {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   CircleAvatar(
+                    radius: 25,
                     child: ClipOval(
                       child: CachedNetworkImage(
                         imageUrl: userProfilePictureUrl,

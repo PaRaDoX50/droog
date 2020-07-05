@@ -95,13 +95,14 @@ class _ImageMessageScreenState extends State<ImageMessageScreen> {
               width: 8,
             ),
             IconButton(
-              icon: Icon(Icons.send),
+              icon: Icon(Icons.send,color: Colors.white,),
               onPressed: sendMessage,
             )
           ],
         ));
 
     return Scaffold(
+      appBar: AppBar(backgroundColor: Colors.black,actionsIconTheme: IconThemeData(color: Colors.white),title: Text("Send message"),),
       body: Container(color: Colors.black,
         child: Stack(children: <Widget>[
           Center(child: AspectRatio(aspectRatio: 4 / 3,
