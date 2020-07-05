@@ -129,6 +129,9 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
 print(_currentIndex.toString()+"asdasd");
+//setState(() {
+//  _currentIndex = _currentIndex;
+//});
     return Scaffold(
       appBar: AppBar(
         title: Text(_getAppBarTitle(),style: GoogleFonts.montserrat(),),
@@ -157,12 +160,13 @@ print(_currentIndex.toString()+"asdasd");
           ],
         ),
       ),
-//      body: IndexedStack(
-//        children: widgets,
-//        index: _currentIndex,
-//
-//      ),
-    body: widgets[_currentIndex],
+      body: IndexedStack(
+
+        children: widgets,
+        index: _currentIndex,
+
+      ),
+
       bottomNavigationBar: ConvexAppBar(
         onTap: onTabTapped,
         initialActiveIndex: _currentIndex,

@@ -59,20 +59,18 @@ class _FeedState extends State<Feed> {
                       countOfMoreDocs = posts.length;
 //                      _isFirstTime = false;
                     }
-//                    if (!listEquals(snapshot.data.documents.map((e) => e.documentID).toList(), snapshot.data.documentChanges.map((e) => e.document.documentID).toList())) {
-//                        print("changes");
-//                        print(snapshot.data.documentChanges.length);
-//                        if(snapshot.data.documentChanges.isNotEmpty){
-//                          for(int i = 0; i < snapshot.data.documentChanges.length;i++){
-//                            if (snapshot.data.documentChanges[i].type == DocumentChangeType.added) {
-//                              posts.insert(0, _postFromFirebasePost(documentSnapshot: snapshot.data.documentChanges[i].document));
-//                            }
-//                            else if(snapshot.data.documentChanges[i].type == DocumentChangeType.removed){
-//                              posts.removeAt(snapshot.data.documentChanges[i].oldIndex);
-//                            }
-//                          }
-//                        }
-//                    }
+                    if (!listEquals(snapshot.data.documents.map((e) => e.documentID).toList(), snapshot.data.documentChanges.map((e) => e.document.documentID).toList())) {
+                        print("changes");
+                        print(snapshot.data.documentChanges.length);
+                        if(snapshot.data.documentChanges.isNotEmpty){
+
+                            if (snapshot.data.documentChanges[0].type == DocumentChangeType.added) {
+                              posts.insert(0, _postFromFirebasePost(documentSnapshot: snapshot.data.documentChanges[0].document));
+
+
+                          }
+                        }
+                    }
 
                     return posts.length != 0 ? LazyLoadScrollView(
                       onEndOfPage: countOfMoreDocs == 10 ?_loadMore : (){},
@@ -82,12 +80,19 @@ class _FeedState extends State<Feed> {
                           children:posts.map((e) => FeedTile(post: e,)).toList() ,),
                     ) : Center(child: Text("No Posts To Display"),);
                   }
-
-                  return Center(child: Text("Loading...."));
+                  else {
+                    if(snapshot.connectionState == ConnectionState.done){
+                      return Center(child: Text("No Posts To Display"),);
+                    }
+                    return Center(child: CircularProgressIndicator());
+                  }
                 },
               );
             } else {
-              return Center(child: Text("Loading...."));
+              if(snapshot.connectionState == ConnectionState.done){
+                return Center(child: Text("No Posts To Display"),);
+              }
+              return Center(child:  CircularProgressIndicator());
             }
           }),
     );

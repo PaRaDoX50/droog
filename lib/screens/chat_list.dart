@@ -74,7 +74,7 @@ class _ChatListState extends State<ChatList> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushReplacementNamed(context, NewMessageScreen.route);
+          Navigator.pushNamed(context, NewMessageScreen.route);
         },
         child: Icon(Icons.message),
       ),

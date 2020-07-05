@@ -518,17 +518,25 @@ class DatabaseMethods {
   }
 
   Future<List<DocumentSnapshot>> getClips() async {
+    List<DocumentSnapshot> emptyList = [];
     DocumentSnapshot snapshot =
         await _database.collection("users").document(Constants.uid).get();
     print(snapshot["clippedPosts"].toString());
+    print(snapshot.data["clippedPosts"].toString()+"clipped");
+    if ((snapshot["clippedPosts"] as List).isNotEmpty) {
+      QuerySnapshot qSnapshot = await _database
+          .collection("posts")
+          .where("postId", whereIn: snapshot["clippedPosts"])
+          .orderBy("time", descending: true)
+          .limit(10)
+          .getDocuments();
+      return qSnapshot.documents;
+    }
+    else{
+      return emptyList;
+    }
 
-    QuerySnapshot qSnapshot = await _database
-        .collection("posts")
-        .where("postId", whereIn: snapshot.data["clippedPosts"])
-        .orderBy("time", descending: true)
-        .limit(10)
-        .getDocuments();
-    return qSnapshot.documents;
+
 
 //    List<Post> posts = qSnapshot.documents.map((e) => postFromFirebasePost(documentSnapshot: e)).toList();
   }

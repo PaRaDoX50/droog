@@ -66,16 +66,26 @@ class _MyClipsScreenState extends State<MyClipsScreen> {
             _countOfMoreDocuments = snapshot.data.length;
             _lastDocument = snapshot.data.last;
           }
-          return LazyLoadScrollView(
-            isLoading: _isLoading,
-            onEndOfPage:_countOfMoreDocuments == 10 ?  _loadMoreClips:(){},
-            scrollOffset: 100,
-            child: ListView.builder(itemBuilder: (_,index){
-              return FeedTile(post: posts[index],);
-            },itemCount: posts.length,),
-          );
+          if (posts.isNotEmpty) {
+            return LazyLoadScrollView(
+              isLoading: _isLoading,
+              onEndOfPage:_countOfMoreDocuments == 10 ?  _loadMoreClips:(){},
+              scrollOffset: 100,
+              child: ListView.builder(itemBuilder: (_,index){
+                return FeedTile(post: posts[index],);
+              },itemCount: posts.length,),
+            );
+          }
+          else{
+            return Center(child: Text("No clips"),);
+          }
         }
         else{
+
+          if(snapshot.connectionState == ConnectionState.done){
+            return Center(child: Text("No clips"),);
+
+          }
           return Center(child: CircularProgressIndicator(),);
         }
       }
