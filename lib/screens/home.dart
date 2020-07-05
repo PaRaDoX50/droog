@@ -128,7 +128,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-
+print(_currentIndex.toString()+"asdasd");
     return Scaffold(
       appBar: AppBar(
         title: Text(_getAppBarTitle(),style: GoogleFonts.montserrat(),),
@@ -157,13 +157,15 @@ class _HomeState extends State<Home> {
           ],
         ),
       ),
-      body: IndexedStack(
-        children: widgets,
-        index: _currentIndex,
-      ),
+//      body: IndexedStack(
+//        children: widgets,
+//        index: _currentIndex,
+//
+//      ),
+    body: widgets[_currentIndex],
       bottomNavigationBar: ConvexAppBar(
         onTap: onTabTapped,
-        initialActiveIndex: 0,
+        initialActiveIndex: _currentIndex,
         backgroundColor: Colors.white,
         style: TabStyle.fixedCircle,
         color: Theme.of(context).primaryColor,
