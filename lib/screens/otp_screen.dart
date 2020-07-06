@@ -42,7 +42,7 @@ class _OTPscreenState extends State<OTPscreen> {
 
       await _databaseMethods.createHalfUserProfile(
           userEmail: user.email, mobileNo: user.phoneNumber, uid: user.uid);
-      Navigator.pushReplacementNamed(context, ProfileSetup.route);
+      Navigator.pushReplacementNamed(context, ProfileSetup.route,arguments: RoutedProfileSetupFor.setup);
       print("doneeeeeee");
     } catch (e) {
       setState(() {

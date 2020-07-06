@@ -1,12 +1,15 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:droog/data/constants.dart';
+import 'package:droog/models/enums.dart';
 import 'package:droog/screens/chat_list.dart';
 import 'package:droog/screens/feed.dart';
 import 'package:droog/screens/myclips_screen.dart';
 import 'package:droog/screens/new_post.dart';
 import 'package:droog/screens/notifications_screen.dart';
+import 'package:droog/screens/profile_setup.dart';
 import 'package:droog/screens/search.dart';
 import 'package:droog/utils/theme_data.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +24,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  Future _profilePicturePath;
+
+//  Future _profilePicturePath;
   String appBarTitle = "Feed";
   List<Widget> widgets = [
     Feed(),
@@ -36,12 +40,12 @@ class _HomeState extends State<Home> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _getProfilePicturePath();
+//    _getProfilePicturePath();
   }
 
-  _getProfilePicturePath() {
-    _profilePicturePath = Constants.getProfilePicturePath();
-  }
+//  _getProfilePicturePath() {
+//    _profilePicturePath = Constants.getProfilePicturePath();
+//  }
 
   String _getAppBarTitle() {
     switch (_currentIndex) {
@@ -72,23 +76,19 @@ class _HomeState extends State<Home> {
         child: Center(
           child: ListTile(
             leading: ClipOval(
-              child: FutureBuilder(
-                  future: _profilePicturePath,
-                  builder: (context, snapshot) {
-                    return Image.file(
-                      File(snapshot.hasData ? snapshot.data : " "),
-                      errorBuilder: (x, y, z) => Icon(Icons.error_outline),
-                    );
-                  }),
+              child: CachedNetworkImage(imageUrl: Constants.profilePictureUrl,)
             ),
             title: Text(
               Constants.fullName,
               style: MyThemeData.whiteBold14,
               overflow: TextOverflow.ellipsis,
             ),
-            trailing: Icon(
-              Icons.edit,
-              color: Colors.white,
+            trailing: GestureDetector(
+              onTap: () => Navigator.of(context).pushNamed(ProfileSetup.route,arguments: RoutedProfileSetupFor.edit),
+              child: Icon(
+                Icons.edit,
+                color: Colors.white,
+              ),
             ),
           ),
         ),

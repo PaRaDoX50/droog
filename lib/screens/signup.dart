@@ -67,6 +67,7 @@ class SignUp extends StatelessWidget {
                       userEmail: firebaseUser.email,
                       userPhone: firebaseUser.phoneNumber,
                       uid: firebaseUser.uid,
+
                       loggedInStatus: LoggedInStatus.loggedIn,user: user);
                   //building constants
                   Navigator.pushReplacementNamed(context, Home.route);
@@ -78,7 +79,7 @@ class SignUp extends StatelessWidget {
                     uid: firebaseUser.uid,
                     loggedInStatus: LoggedInStatus.halfProfileLeft,);
                   //building constants
-                  Navigator.pushReplacementNamed(context, ProfileSetup.route);
+                  Navigator.pushReplacementNamed(context, ProfileSetup.route,arguments: RoutedProfileSetupFor.setup);
                 }
               }
             }

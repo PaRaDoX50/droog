@@ -45,16 +45,16 @@ class PickImage{
 
 
 //    final fileName = basename(croppedImageFile.path);
-    File savedImage;
-    if(pictureFor == PictureFor.profilePicture) {
-      String profilePicturePath =await Constants.getProfilePicturePath();
-      savedImage =
-      await croppedImageFile.copy(profilePicturePath);
-      return savedImage;
-    }
-    else  {
+//    File savedImage;
+//    if(pictureFor == PictureFor.profilePicture) {
+//      String profilePicturePath =await Constants.getProfilePicturePath();
+//      savedImage =
+//      await croppedImageFile.copy(profilePicturePath);
+//      return savedImage;
+//    }
+//    else  {
       return croppedImageFile;
-    }
+//    }
 
 
   }

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
 import 'package:droog/models/post.dart';
@@ -25,14 +26,14 @@ class _NewPostBoxState extends State<NewPostBox> {
   DatabaseMethods _databaseMethods = DatabaseMethods();
   PickImage _pickImage = PickImage();
 
-  Future _getProfilePicture() async {
-    try {
-      final profilePicturePath = await Constants.getProfilePicturePath();
-      return File(profilePicturePath);
-    } catch (e) {
-      print(e.toString());
-    }
-  }
+//  Future _getProfilePicture() async {
+//    try {
+//      final profilePicturePath = await Constants.getProfilePicturePath();
+//      return File(profilePicturePath);
+//    } catch (e) {
+//      print(e.toString());
+//    }
+//  }
 
   @override
   void initState() {
@@ -109,22 +110,23 @@ class _NewPostBoxState extends State<NewPostBox> {
 
   Widget _buildUserTile() {
     return ListTile(
-      leading: ClipOval(
-        child: FutureBuilder(
-          future: _getProfilePicture(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return Image.file(
-                snapshot.data,
-              );
-            }
-            return CircleAvatar(
-                child: Icon(
-              Icons.account_circle,
-            ));
-          },
-        ),
-      ),
+//      leading: ClipOval(
+//        child: FutureBuilder(
+//          future: _getProfilePicture(),
+//          builder: (context, snapshot) {
+//            if (snapshot.hasData) {
+//              return Image.file(
+//                snapshot.data,
+//              );
+//            }
+//            return CircleAvatar(
+//                child: Icon(
+//              Icons.account_circle,
+//            ));
+//          },
+//        ),
+//      ),
+    leading: CircleAvatar(child: ClipOval(child: CachedNetworkImage(imageUrl: Constants.profilePictureUrl,),),),
       title: Text(Constants.userName),
     );
   }

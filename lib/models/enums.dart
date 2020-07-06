@@ -49,3 +49,8 @@ enum QualityType{
   skill,
   achievement,
 }
+
+enum RoutedProfileSetupFor{
+  edit,
+  setup,
+}
