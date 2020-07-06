@@ -457,7 +457,7 @@ class DatabaseMethods {
         .document(Constants.uid)
         .collection("droogs")
         .getDocuments();
-    List<String> droogsUids = [];
+    List<String> droogsUids = [Constants.uid];
     for (int i = 0; i < snapshotDroogs.documents.length; i++) {
       droogsUids.add(snapshotDroogs.documents[i].data["uid"]);
     }

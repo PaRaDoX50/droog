@@ -101,7 +101,12 @@ class _ShareScreenState extends State<ShareScreen> {
             searchResults.isNotEmpty ? Expanded(child: ListView.builder(
               itemCount: searchResults.length,
               itemBuilder: (_, index) {
-                return ShareTile(user: searchResults[index],);
+                if(searchResults[index].userName != Constants.userName) {
+                  return ShareTile(user: searchResults[index],);
+                }
+                else{
+                  return Container();
+                }
               },)) :
             Expanded(
                 child: Center(

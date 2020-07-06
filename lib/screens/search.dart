@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
 import 'package:droog/models/user.dart';
 import 'package:droog/screens/chat_screen.dart';
@@ -88,9 +89,15 @@ class _SearchScreenState extends State<SearchScreen> {
                     child: ListView.builder(
                     itemCount: searchResults.length,
                     itemBuilder: (_, index) {
-                      return SearchTile(
-                        user: searchResults[index],
-                      );
+
+                      if(searchResults[index].userName != Constants.userName) {
+                        return SearchTile(
+                          user: searchResults[index],
+                        );
+                      }
+                      else{
+                        return Container();
+                      }
                     },
                   ))
                 : Expanded(
