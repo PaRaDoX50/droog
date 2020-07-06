@@ -206,10 +206,9 @@ class _ResponseTileState extends State<ResponseTile> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
               children: <Widget>[
-                Expanded(
-                  child: Row(
+                 Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       FittedBox(child: Icon(Icons.check_circle)),
@@ -217,12 +216,9 @@ class _ResponseTileState extends State<ResponseTile> {
                       FittedBox(child: Text("${widget.response.votes} Votes")),
                     ],
                   ),
-                ),
-                Expanded(child: _getCenterButton()),
-                Expanded(child: Align(alignment: Alignment.centerRight,child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Icon(Icons.message),
-                )))
+                  SizedBox(width: 20,),
+                 _getCenterButton()
+
               ],
             ),
           )

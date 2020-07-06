@@ -37,7 +37,8 @@ class FeedTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return Card(color: Color(0xfffcfcfd),
+      elevation: 5,
       margin: EdgeInsets.symmetric(
         vertical: 8 / 2,
         horizontal: 8,

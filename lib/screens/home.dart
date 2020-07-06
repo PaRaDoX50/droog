@@ -161,20 +161,14 @@ class _HomeState extends State<Home> {
 //});
     return Scaffold(
       appBar: AppBar(
+        iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
+        elevation: 5,
+        backgroundColor:Color(0xfffcfcfd),
         title: Text(
           _getAppBarTitle(),
-          style: GoogleFonts.montserrat(),
+          style: GoogleFonts.montserrat(color: Theme.of(context).primaryColor),
         ),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: <Color>[
-                Theme.of(context).primaryColor,
-                Colors.blue
-              ])),
-        ),
+
       ),
       drawer: Drawer(
         child: ListView(
@@ -205,9 +199,10 @@ class _HomeState extends State<Home> {
         index: _currentIndex,
       ),
       bottomNavigationBar: ConvexAppBar(
+
         onTap: onTabTapped,
         initialActiveIndex: _currentIndex,
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xfffcfcfd),
         style: TabStyle.fixedCircle,
         color: Theme.of(context).primaryColor,
         activeColor: Theme.of(context).primaryColor,

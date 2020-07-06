@@ -37,7 +37,7 @@ class _FeedState extends State<Feed> {
 
     return Scaffold(
       key: _feedScaffoldKey,
-      backgroundColor: Colors.grey[300],
+      backgroundColor: Color(0xfffcfcfd),
       body: FutureBuilder<List<String>>(
           future: _databaseMethods.getConnectionUids(),
           builder: (_, snapshot) {

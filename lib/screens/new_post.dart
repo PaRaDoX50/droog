@@ -17,7 +17,8 @@ class NewPost extends StatefulWidget {
 
 class _NewPostState extends State<NewPost> {
 
-
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _showLoading = false;
   @override
   void initState() {
     // TODO: implement initState
@@ -25,14 +26,19 @@ class _NewPostState extends State<NewPost> {
   }
 
 
-
+  toggleLoading(){
+    setState(() {
+      _showLoading = !_showLoading;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[300],
+      backgroundColor: Color(0xfffcfcfd),
       body: Stack(
         children: <Widget>[
-          Center(child: NewPostBox(postIs: PostIs.normalPost,)),
+          Center(child: NewPostBox(postIs: PostIs.normalPost,toggleLoading: toggleLoading,)),
+          _showLoading ? Center(child: CircularProgressIndicator(),) : Container(),
         ],
       )
     );

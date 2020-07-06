@@ -75,19 +75,32 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            SearchTextField(onTextChanged: getSearchResults,controller: searchController,),
-            Expanded(
-                child: ListView.builder(
-                  itemCount: searchResults.length,
-                  itemBuilder: (_, index) {
-                    return SearchTile(
-                      user: searchResults[index],
-                    );
-                  },
-                ))
+            SearchTextField(
+              onTextChanged: getSearchResults,
+              controller: searchController,
+            ),
+            searchResults.isNotEmpty
+                ? Expanded(
+                    child: ListView.builder(
+                    itemCount: searchResults.length,
+                    itemBuilder: (_, index) {
+                      return SearchTile(
+                        user: searchResults[index],
+                      );
+                    },
+                  ))
+                : Expanded(
+                    child: Center(
+                        child: AspectRatio(
+                            aspectRatio: 1,
+                            child: Image.asset(
+                              "assets/images/no_results.png",
+                              width: double.infinity,
+                            )))),
           ],
         ),
       ),
@@ -110,24 +123,19 @@ class _SearchTileState extends State<SearchTile> {
 
   getAppropriateChild(String data) {
     return _showLoading
-        ?
-        SizedBox(
+        ? SizedBox(
             height: 20,
             width: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
               backgroundColor: Colors.white,
-            ),)
-        :
-        FittedBox(
+            ),
+          )
+        : FittedBox(
             child: Text(
-              data,
-              style: Theme
-                  .of(context)
-                  .textTheme
-                  .button,
-            )
-        );
+            data,
+            style: Theme.of(context).textTheme.button,
+          ));
   }
 
   @override
@@ -164,12 +172,12 @@ class _SearchTileState extends State<SearchTile> {
                     return snapshot.hasData
                         ? getAppropriateChild(snapshot.data)
                         : SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          backgroundColor: Colors.white,
-                          strokeWidth: 2,
-                        ));
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              backgroundColor: Colors.white,
+                              strokeWidth: 2,
+                            ));
                   }),
               color: MyThemeData.buttonColorBlue,
               textColor: Colors.white,
@@ -199,7 +207,7 @@ class _SearchTileState extends State<SearchTile> {
 
   Future<String> get _followButtonText async {
     _connectionStatus =
-    await _databaseMethods.getConnectionStatus(targetUid: widget.user.uid);
+        await _databaseMethods.getConnectionStatus(targetUid: widget.user.uid);
     switch (_connectionStatus) {
       case ConnectionStatus.requestSent:
         return "Cancel Request";

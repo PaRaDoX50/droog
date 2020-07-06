@@ -13,6 +13,7 @@ import 'package:droog/models/enums.dart';
 
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 String postId;
 class ShareScreen extends StatefulWidget {
   static final String route = "/Share_screen";
@@ -82,25 +83,36 @@ class _ShareScreenState extends State<ShareScreen> {
   Widget build(BuildContext context) {
     postId = ModalRoute.of(context).settings.arguments as String;
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar:  AppBar(
-        title: Text("Share"),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: <Color>[Theme.of(context).primaryColor, Colors.blue])),
+        iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
+        elevation: 5,
+        backgroundColor:Color(0xfffcfcfd),
+        title: Text(
+          "Share",
+          style: GoogleFonts.montserrat(color: Theme.of(context).primaryColor),
         ),
       ),
       body: SafeArea(
-        child: Column(children: <Widget>[
-          SearchTextField(controller: searchController,onTextChanged: getSearchResults,),
-          Expanded(child: ListView.builder(
-            itemCount: searchResults.length,
-            itemBuilder: (_, index) {
-              return ShareTile(user: searchResults[index],);
-            },))
-        ],),
+        child: Padding(
+          padding: const EdgeInsets.only(top:8.0),
+          child: Column(children: <Widget>[
+            SearchTextField(controller: searchController,onTextChanged: getSearchResults,),
+            searchResults.isNotEmpty ? Expanded(child: ListView.builder(
+              itemCount: searchResults.length,
+              itemBuilder: (_, index) {
+                return ShareTile(user: searchResults[index],);
+              },)) :
+            Expanded(
+                child: Center(
+                    child: AspectRatio(
+                        aspectRatio: 1,
+                        child: Image.asset(
+                          "assets/images/no_results.png",
+                          width: double.infinity,
+                        )))),
+          ],),
+        ),
       ),
     );
   }

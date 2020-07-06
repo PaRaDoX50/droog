@@ -7,6 +7,7 @@ import 'package:droog/widgets/feed_tile.dart';
 import 'package:droog/widgets/response_tile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ResponseScreen extends StatefulWidget {
   static String route = "/response_screen";
@@ -63,7 +64,12 @@ class ResponseScreenState extends State<ResponseScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Responses"),
+        iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
+        elevation: 5,
+        backgroundColor: Color(0xfffcfcfd),
+        title: Text("Responses",
+            style:
+                GoogleFonts.montserrat(color: Theme.of(context).primaryColor)),
       ),
       body: Stack(
         children: <Widget>[

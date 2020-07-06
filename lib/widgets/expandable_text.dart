@@ -36,7 +36,7 @@ class _ExpandableTextState extends State<ExpandableText>
                         widget.isExpanded = !widget.isExpanded;
                       });
                     },
-                    child: Text("Show less"),
+                    child: Text("Show less",style: TextStyle(color: Colors.grey),),
                   ),
                 ],
               );
