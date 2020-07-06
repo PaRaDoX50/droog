@@ -16,6 +16,7 @@ class DatabaseMethods {
   Firestore _database = Firestore.instance;
   FirebaseStorage _storage = FirebaseStorage.instance;
 
+
   Future<bool> userNameAvailable({String userName}) async {
     QuerySnapshot data = await _database
         .collection("users")
@@ -56,7 +57,7 @@ class DatabaseMethods {
         .setData(data, merge: true);
   }
 
-  Future editSkills({List<String> skills, List<String> achievements}) async {
+  Future editSkills({List<dynamic> skills, List<dynamic> achievements}) async {
     await _database
         .collection("users")
         .document(Constants.uid)

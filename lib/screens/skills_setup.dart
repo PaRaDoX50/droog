@@ -1,4 +1,6 @@
+import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
+import 'package:droog/models/user.dart';
 import 'package:droog/screens/home.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
@@ -8,6 +10,7 @@ import 'package:flutter/widgets.dart';
 
 class SkillsSetup extends StatefulWidget {
   static final String route = "/skills_setup";
+
   @override
   _SkillsSetupState createState() => _SkillsSetupState();
 }
@@ -15,14 +18,22 @@ class SkillsSetup extends StatefulWidget {
 class _SkillsSetupState extends State<SkillsSetup> {
   bool _showLoading = false;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  List<String> skills = [];
-  List<String> achievements = [];
+
+  List<dynamic> skills = [];
+  List<dynamic> achievements = [];
   TextEditingController skillController = TextEditingController();
   TextEditingController achievementController = TextEditingController();
   DatabaseMethods _databaseMethods = DatabaseMethods();
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loadInitialData();
+  }
+
   bool addQuality({QualityType qualityType}) {
-    if(qualityType == QualityType.skill) {
+    if (qualityType == QualityType.skill) {
       if (skills.contains(skillController.text)) {
         _scaffoldKey.currentState
             .showSnackBar(SnackBar(content: Text("Skill already added")));
@@ -35,7 +46,7 @@ class _SkillsSetupState extends State<SkillsSetup> {
       });
       return true;
     }
-    else{
+    else {
       if (skills.contains(achievementController.text)) {
         _scaffoldKey.currentState
             .showSnackBar(SnackBar(content: Text("Achievement already added")));
@@ -50,20 +61,20 @@ class _SkillsSetupState extends State<SkillsSetup> {
     }
   }
 
-  deleteQuality({QualityType qualityType,String targetText}) {
+  deleteQuality({QualityType qualityType, String targetText}) {
     print("hello");
     if (qualityType == QualityType.skill) {
       setState(() {
-        skills.removeWhere((element)=> element == targetText
+        skills.removeWhere((element) => element == targetText
         );
       });
     }
-    else{
+    else {
       setState(() {
-        achievements.removeWhere((element)=> element == targetText
+        achievements.removeWhere((element) => element == targetText
         );
       });
-}
+    }
   }
 
   _buildTextField({QualityType qualityType}) {
@@ -72,16 +83,20 @@ class _SkillsSetupState extends State<SkillsSetup> {
       children: <Widget>[
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(left:8.0,top: 8,bottom: 8,),
+            padding: const EdgeInsets.only(left: 8.0, top: 8, bottom: 8,),
             child: TextField(
               maxLines: 1,
-              controller: qualityType == QualityType.skill ? skillController : achievementController,
+              controller: qualityType == QualityType.skill
+                  ? skillController
+                  : achievementController,
               decoration: InputDecoration(
-                contentPadding: EdgeInsets.only(left: 8),
+                  contentPadding: EdgeInsets.only(left: 8),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: Colors.grey),
                   ),
-                  hintText: qualityType == QualityType.skill ? "Skill" : "Achievement"),
+                  hintText: qualityType == QualityType.skill
+                      ? "Skill"
+                      : "Achievement"),
             ),
           ),
         ),
@@ -95,95 +110,165 @@ class _SkillsSetupState extends State<SkillsSetup> {
     );
   }
 
-  submitData() async{
+  submitData() async {
     try {
       setState(() {
         _showLoading = true;
       });
-      await _databaseMethods.editSkills(skills: skills,achievements: achievements);
+      await _databaseMethods.editSkills(
+          skills: skills, achievements: achievements);
 
-      Navigator.pushReplacementNamed(context, Home.route);
-    }  catch (e) {
+      Navigator.pushNamedAndRemoveUntil(context, Home.route,(r) => false);
+    } catch (e) {
       // TODO
+      print(e.toString());
       setState(() {
         _showLoading = false;
       });
     }
   }
 
+  Future<bool> loadInitialData() async {
+    try {
+      setState(() {
+        _showLoading = true;
+      });
+      print(Constants.uid + "tryyy");
+      User user = await _databaseMethods.getUserDetailsByUid(
+          targetUid: Constants.uid);
+
+        skills  = user.skills != null ? user.skills : [];
+        achievements = user.achievements != null ? user.achievements : [];
+     setState(() {
+       _showLoading = false;
+     });
+      return true;
+    } catch (e) {
+      setState(() {
+        _showLoading = false;
+      });
+      print(e.toString() + "adsaasd");
+      _scaffoldKey.currentState.showSnackBar(
+          SnackBar(content: Text(
+            "Something went wrong", style: TextStyle(color: Colors.white),),));
+
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: Theme.of(context).primaryColor,
-      body: Stack(
-        children: <Widget>[
-          Center(
-            child: SingleChildScrollView(
-              child: Card(
-                margin: EdgeInsets.all(20),
+        appBar: AppBar(elevation: 0,),
+        key: _scaffoldKey,
+        backgroundColor: Theme
+            .of(context)
+            .primaryColor,
+        body:
+        Stack(
+          children: <Widget>[
+            Center(
+              child: SingleChildScrollView(
+                child: Card(
+                  margin: EdgeInsets.all(20),
 
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: <Widget>[
-                      Column(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: <Widget>[
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
 
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            Text("Skills",style: MyThemeData.blackBold12.copyWith(fontSize: 20),),
+                            Text("Skills",
+                              style: MyThemeData.blackBold12.copyWith(
+                                  fontSize: 20),),
 
                             Container(
-                              constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height /8,),
-                              child: Column(children: skills.map((e) => Tile(qualityType: QualityType.skill,text: e,deleteFunction: deleteQuality,)).toList(),)),
+                                constraints: BoxConstraints(
+                                  minHeight: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .height / 8,),
+                                child: Column(
+                                  children: [...skills
+                                      .map((e) =>
+                                      Tile(
+                                        qualityType: QualityType.skill,
+                                        text: e,
+                                        deleteFunction: deleteQuality,))
+                                      .toList()
+                                  ],)),
                             SizedBox(height: 8,),
-                            _buildTextField(qualityType: QualityType.skill),
+                            _buildTextField(
+                                qualityType: QualityType.skill),
                           ],
                         ),
 
-                      SizedBox(height: 16,),
-                       Column(
+                        SizedBox(height: 16,),
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
 
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            Text("Achievements",style: MyThemeData.blackBold12.copyWith(fontSize: 20),),
+                            Text("Achievements",
+                              style: MyThemeData.blackBold12.copyWith(
+                                  fontSize: 20),),
 
                             Container(
-                                constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height /8,),
-                                child: Column(children: achievements.map((e) => Tile(deleteFunction: deleteQuality,qualityType: QualityType.achievement,text: e,)).toList(),)),
+                                constraints: BoxConstraints(
+                                  minHeight: MediaQuery
+                                      .of(context)
+                                      .size
+                                      .height / 8,),
+                                child: Column(
+                                  children: [...achievements.map((e) =>
+                                      Tile(
+                                        deleteFunction: deleteQuality,
+                                        qualityType: QualityType.achievement,
+                                        text: e,)).toList()
+                                  ],)),
                             SizedBox(height: 8,),
-                            _buildTextField(qualityType: QualityType.achievement),
+                            _buildTextField(
+                                qualityType: QualityType.achievement),
                           ],
 
                         ),
-                      SizedBox(height: 16,),
-                  RaisedButton(
-                    child:
-                    Text("Submit", style: Theme.of(context).textTheme.button),
-                    color: Theme.of(context).buttonColor,
-                    onPressed: submitData,
-                  ),
-                    ],
+                        SizedBox(height: 16,),
+                        RaisedButton(
+                          child:
+                          Text("Submit", style: Theme
+                              .of(context)
+                              .textTheme
+                              .button),
+                          color: Theme
+                              .of(context)
+                              .buttonColor,
+                          onPressed: _showLoading == false ? submitData : null,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          _showLoading ? Center(child: CircularProgressIndicator(),) : Container(),
-        ],
-      ),
-    );
+            _showLoading
+                ? Center(child: CircularProgressIndicator(),)
+                : Container(),
+          ],
+        ));
+
+
   }
 }
 
 class Tile extends StatelessWidget {
-  String text;
-  Function deleteFunction;
-  QualityType qualityType;
+  final String text;
+  final Function deleteFunction;
+  final QualityType qualityType;
 
-  Tile({this.text, this.deleteFunction,this.qualityType});
+  Tile({this.text, this.deleteFunction, this.qualityType});
 
   @override
   Widget build(BuildContext context) {
@@ -192,9 +277,14 @@ class Tile extends StatelessWidget {
       child: ListTile(
         dense: true,
         contentPadding: EdgeInsets.symmetric(horizontal: 0),
-        leading: CircleAvatar(child: Center(child: Text("\u2022 ")),backgroundColor: Colors.white,),
-        title: Text(text,style: MyThemeData.primary14.copyWith(fontWeight: FontWeight.bold,fontSize: 16),overflow: TextOverflow.ellipsis,),
-        trailing: GestureDetector(onTap:()=>deleteFunction(qualityType: qualityType,targetText:text),child: Icon(Icons.delete)),
+        leading: CircleAvatar(child: Center(child: Text("\u2022 ")),
+          backgroundColor: Colors.white,),
+        title: Text(text, style: MyThemeData.primary14.copyWith(
+            fontWeight: FontWeight.bold, fontSize: 16),
+          overflow: TextOverflow.ellipsis,),
+        trailing: GestureDetector(onTap: () =>
+            deleteFunction(qualityType: qualityType, targetText: text),
+            child: Icon(Icons.delete)),
       ),
     );
   }

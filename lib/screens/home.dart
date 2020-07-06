@@ -11,9 +11,13 @@ import 'package:droog/screens/new_post.dart';
 import 'package:droog/screens/notifications_screen.dart';
 import 'package:droog/screens/profile_setup.dart';
 import 'package:droog/screens/search.dart';
+import 'package:droog/screens/signup.dart';
+import 'package:droog/screens/skills_setup.dart';
+import 'package:droog/services/auth.dart';
 import 'package:droog/utils/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class Home extends StatefulWidget {
@@ -24,9 +28,10 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
+  AuthService _authService = AuthService();
 //  Future _profilePicturePath;
   String appBarTitle = "Feed";
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Widget> widgets = [
     Feed(),
     SearchScreen(),
@@ -34,7 +39,7 @@ class _HomeState extends State<Home> {
     ChatList(),
     NotificationsScreen(),
   ];
-  int _currentIndex =0;
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -76,15 +81,17 @@ class _HomeState extends State<Home> {
         child: Center(
           child: ListTile(
             leading: ClipOval(
-              child: CachedNetworkImage(imageUrl: Constants.profilePictureUrl,)
-            ),
+                child: CachedNetworkImage(
+              imageUrl: Constants.profilePictureUrl,
+            )),
             title: Text(
               Constants.fullName,
               style: MyThemeData.whiteBold14,
               overflow: TextOverflow.ellipsis,
             ),
             trailing: GestureDetector(
-              onTap: () => Navigator.of(context).pushNamed(ProfileSetup.route,arguments: RoutedProfileSetupFor.edit),
+              onTap: () => Navigator.of(context).pushNamed(ProfileSetup.route,
+                  arguments: RoutedProfileSetupFor.edit),
               child: Icon(
                 Icons.edit,
                 color: Colors.white,
@@ -100,7 +107,7 @@ class _HomeState extends State<Home> {
               Theme.of(context).primaryColor,
 //              Color(0xff1948a0),
 //              Color(0xff4481bc),
-            Colors.blue
+              Colors.blue
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -109,16 +116,36 @@ class _HomeState extends State<Home> {
       ),
     );
   }
+  Widget _logoutItem(){
+    return  Padding(
+      padding: const EdgeInsets.all(0.0),
+      child: ListTile(
+        leading: FaIcon(FontAwesomeIcons.doorOpen),
+        title: SizedBox(child: Text("Logout")),
+        onTap: () {
+          try{
+            _authService.logout();
+            Navigator.pushNamedAndRemoveUntil(context, SignUp.route, (route) => false);
+          }
+          catch(e){
+            _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("Something went wrong"),));
+            print(e.message);
+          }
 
-  Widget _createDrawerItem(IconData icon, Text title,String route) {
+
+        },
+      ),
+    );
+  }
+  Widget _createDrawerItem(IconData icon, Text title, String route) {
     return Padding(
       padding: const EdgeInsets.all(0.0),
       child: ListTile(
-        leading: Icon(icon),
-        title: title,
+        leading: FaIcon(icon),
+        title: SizedBox(child: title),
         onTap: () {
           Navigator.pop(context);
-          if(route != Home.route) {
+          if (route != Home.route) {
             Navigator.pushNamed(context, route);
           }
         },
@@ -128,19 +155,25 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-print(_currentIndex.toString()+"asdasd");
+    print(_currentIndex.toString() + "asdasd");
 //setState(() {
 //  _currentIndex = _currentIndex;
 //});
     return Scaffold(
       appBar: AppBar(
-        title: Text(_getAppBarTitle(),style: GoogleFonts.montserrat(),),
+        title: Text(
+          _getAppBarTitle(),
+          style: GoogleFonts.montserrat(),
+        ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
               gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: <Color>[Theme.of(context).primaryColor, Colors.blue])),
+                  colors: <Color>[
+                Theme.of(context).primaryColor,
+                Colors.blue
+              ])),
         ),
       ),
       drawer: Drawer(
@@ -148,32 +181,35 @@ print(_currentIndex.toString()+"asdasd");
           padding: EdgeInsets.zero,
           children: <Widget>[
             _createDrawerHeader(),
-            _createDrawerItem(Icons.home, Text("Home"),Home.route),
+            _createDrawerItem(Icons.home, Text("Home"), Home.route),
             Divider(
               thickness: .5,
             ),
-            _createDrawerItem(Icons.home, Text("My Clips"),MyClipsScreen.route),
+            _createDrawerItem(
+                Icons.content_paste, Text("My Clips"), MyClipsScreen.route),
             Divider(
               thickness: .5,
             ),
-
+            _createDrawerItem(
+                FontAwesomeIcons.medal, Text("Skills and Achievements"), SkillsSetup.route),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal:16.0,vertical: 8),
+              child: Text("More",style: MyThemeData.blackBold12,),
+            ),
+            _logoutItem(),
           ],
         ),
       ),
       body: IndexedStack(
-
         children: widgets,
         index: _currentIndex,
-
       ),
-
       bottomNavigationBar: ConvexAppBar(
         onTap: onTabTapped,
         initialActiveIndex: _currentIndex,
         backgroundColor: Colors.white,
         style: TabStyle.fixedCircle,
         color: Theme.of(context).primaryColor,
-
         activeColor: Theme.of(context).primaryColor,
         items: [
           TabItem(
