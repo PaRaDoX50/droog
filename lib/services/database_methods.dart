@@ -460,7 +460,12 @@ class DatabaseMethods {
     for (int i = 0; i < snapshotDroogs.documents.length; i++) {
       droogsUids.add(snapshotDroogs.documents[i].data["uid"]);
     }
-    return droogsUids;
+    if(droogsUids.isNotEmpty) {
+      return droogsUids;
+    }
+    else{
+      return null;
+    }
   }
 
   Future<List<DocumentSnapshot>> getMorePostsForFeed({

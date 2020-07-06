@@ -82,7 +82,7 @@ class _FeedState extends State<Feed> {
                     ) : Center(child: Text("No Posts To Display"),);
                   }
                   else {
-                    if(snapshot.connectionState == ConnectionState.done){
+                    if(snapshot.connectionState == ConnectionState.done ){
                       return Center(child: Text("No Posts To Display"),);
                     }
                     return Center(child: CircularProgressIndicator());
