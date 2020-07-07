@@ -61,9 +61,7 @@ class _ResponseTileState extends State<ResponseTile> {
                       child:
                       ListTile(leading: Column(mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          Icon(Icons.report, color: Theme
-                              .of(context)
-                              .primaryColor,),
+                          Icon(Icons.report, color:Color(0xff4481bc)),
                         ],
                       ),
                         title: Text("Report"),

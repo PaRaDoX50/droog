@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/data/constants.dart';
+import 'package:droog/models/enums.dart';
 import 'package:droog/models/message.dart';
 import 'package:droog/models/user.dart';
 import 'package:droog/screens/chat_screen.dart';
@@ -191,11 +192,30 @@ class ChatTile extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: getAppropriateStyle(),
                           ),
-                          subtitle: Text(
-                            lastMessage.text != null ? lastMessage.text : " ",
-                            overflow: TextOverflow.ellipsis,
-                            style: getAppropriateStyle(),
-                          ),
+                          subtitle:
+                              lastMessage.messageType == MessageType.onlyText
+                                  ? Text(
+                                      lastMessage.text != null
+                                          ? lastMessage.text
+                                          : " ",
+                                      overflow: TextOverflow.ellipsis,
+                                      style: getAppropriateStyle(),
+                                    )
+                                  : Row(
+                                      children: <Widget>[
+                                        Icon(
+                                          Icons.image,
+                                          color: Colors.grey,
+                                        ),
+                                        SizedBox(
+                                          width: 8,
+                                        ),
+                                        Text(lastMessage.messageType ==
+                                                MessageType.image
+                                            ? "Image"
+                                            : "Post")
+                                      ],
+                                    ),
                           trailing: Text(
                             date,
                             style: getAppropriateStyle(),

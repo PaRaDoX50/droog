@@ -280,11 +280,7 @@ class CustomAppBar extends PreferredSize {
                 ],
               ),
             ),
-             Icon(
-                Icons.more_vert,
-                color: Colors.white,
-
-            ),
+            SizedBox(width: 25,),
           ],
         ),
       ),
@@ -339,7 +335,7 @@ class TextMessageTile extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color:Color(0xff2f66af),
+            color:Color(0xff4481bc),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(
@@ -397,9 +393,9 @@ class ImageMessageTile extends StatelessWidget {
     if (alignment == Alignment.centerRight) {
       return [
         Container(
-          padding: EdgeInsets.all(10),
+          padding: EdgeInsets.all(8/2),
           decoration: BoxDecoration(
-            color: Color(0xff2f66af),
+            color: Color(0xff4481bc),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Column(
@@ -407,11 +403,14 @@ class ImageMessageTile extends StatelessWidget {
               CachedNetworkImage(
                 imageUrl: imageUrl,
               ),
+              text != ""?
               SizedBox(
                 height: 2,
-              ),
+              ):Container(),
+              text != ""
+                  ?
               Text(text,
-                style: TextStyle(color: Colors.white),)
+                style: TextStyle(color: Colors.white),):Container()
             ],
           ),
           constraints: BoxConstraints(maxWidth: width / 1.5),
@@ -423,7 +422,7 @@ class ImageMessageTile extends StatelessWidget {
     } else {
       return [
         Container(
-          padding: EdgeInsets.all(10),
+          padding: EdgeInsets.all(8/2),
           decoration: BoxDecoration(
             color: Color(0xffe8f5fd),
             borderRadius: BorderRadius.circular(10),
@@ -480,7 +479,7 @@ class PostMessageTile extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Color(0xff2f66af),
+            color: Color(0xff4481bc),
             borderRadius: BorderRadius.circular(10),
           ),
           child: FutureBuilder<Post>(

@@ -69,9 +69,7 @@ class _FeedTileState extends State<FeedTile> {
                     child:
                         ListTile(leading: Column(mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Icon(Icons.report, color: Theme
-                                .of(context)
-                                .primaryColor,),
+                            Icon(Icons.report, color: Color(0xff4481bc),),
                           ],
                         ),
                             title: Text("Report"),
@@ -103,9 +101,7 @@ class _FeedTileState extends State<FeedTile> {
                     child: ListTile(leading: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Icon(Icons.clear, color: Theme
-                            .of(context)
-                            .primaryColor,),
+                        Icon(Icons.clear, color: Color(0xff4481bc),),
                       ],
                     ),
                         title: Text("Disconnect"),
