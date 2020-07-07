@@ -22,6 +22,7 @@ class ResponseScreenState extends State<ResponseScreen> {
   Future<List<Response>> responses;
   int buildMethodCount = 0;
   bool _showLoading = false;
+  final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -63,6 +64,7 @@ class ResponseScreenState extends State<ResponseScreen> {
     buildMethodCount++;
 
     return Scaffold(
+      key: scaffoldKey,
       appBar: AppBar(
         iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
         elevation: 5,
@@ -104,7 +106,8 @@ class ResponseScreenState extends State<ResponseScreen> {
                                     toggleLoading: toggleLoading,
                                     solutionChanged: solutionChanged,
                                     response: snapshot.data[index],
-                                    postBy: post.postBy);
+                                    scaffoldKey: scaffoldKey,
+                                    postByUserName: post.postByUserName);
                               }, childCount: snapshot.data.length),
                             )
                           : SliverToBoxAdapter(

@@ -1,6 +1,8 @@
 import 'package:droog/models/user.dart';
 import 'package:droog/screens/feed.dart';
+import 'package:droog/widgets/asked_doubts.dart';
 import 'package:droog/widgets/profile_container.dart';
+import 'package:droog/widgets/solved_doubts.dart';
 import 'package:flutter/material.dart';
 
 class UserProfile extends StatefulWidget {
@@ -15,7 +17,7 @@ class _UserProfileState extends State<UserProfile>
 
 
   TabController tabController;
-
+ final scaffoldKey = GlobalKey<ScaffoldState>();
   int selectedTab = 0;
 
   @override
@@ -64,7 +66,8 @@ class _UserProfileState extends State<UserProfile>
     }
 
     return Scaffold(
-      backgroundColor: Colors.grey[300],
+      key: scaffoldKey,
+      backgroundColor: Color(0xfffcfcfd),
       body: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
@@ -108,7 +111,7 @@ class _UserProfileState extends State<UserProfile>
             ),
 
           ),
-          SliverFillRemaining(child: TabBarView(children: <Widget>[Feed(),Feed()],controller: tabController,),)
+         selectedTab == 0 ? AskedDoubts(scaffoldKey: scaffoldKey,targetUid: user.uid,) :SolvedDoubts(targetUid: user.uid,scaffoldKey: scaffoldKey,),
         ],
       ),
     );

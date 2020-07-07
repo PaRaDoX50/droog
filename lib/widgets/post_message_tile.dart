@@ -37,7 +37,7 @@ class _PostMessageWidgetState extends State<PostMessageWidget> {
   Future<User> _getUserDetails() async {
 //    print("asdasd" + widget.post.postBy + widget.post.postId);
     return await _databaseMethods.getUserDetailsByUsername(
-      targetUserName: widget.post.postBy,
+      targetUserName: widget.post.postByUserName,
     );
   }
 

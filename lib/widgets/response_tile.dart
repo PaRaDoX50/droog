@@ -12,12 +12,13 @@ import 'package:intl/intl.dart';
 
 class ResponseTile extends StatefulWidget {
   final Response response;
-  final String postBy;
+  final String postByUserName;
+  final GlobalKey<ScaffoldState> scaffoldKey;
   Function solutionChanged;
   Function toggleLoading;
   bool isSolution;
 
-  ResponseTile({this.response, this.postBy, this.solutionChanged,this.toggleLoading,this.isSolution});
+  ResponseTile({this.response, this.postByUserName, this.solutionChanged,this.toggleLoading,this.isSolution,this.scaffoldKey});
 
   @override
   _ResponseTileState createState() => _ResponseTileState();
@@ -30,8 +31,53 @@ class _ResponseTileState extends State<ResponseTile> {
   DatabaseMethods _databaseMethods = DatabaseMethods();
 
   Future<User> _getUserDetails() async {
-    return await _databaseMethods.getUserDetailsByUsername(
-        targetUserName: widget.response.responseBy);
+    return await _databaseMethods.getUserDetailsByUid(
+        targetUid: widget.response.responseByUid);
+  }
+  showOptions() {
+    showDialog(
+        context: context,
+        builder: (_) =>
+            AlertDialog(
+              contentPadding: EdgeInsets.zero,
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  InkWell(
+                      onTap: () async {
+                        try {
+                          await _databaseMethods.reportAResponse(
+                              targetUid: widget.response.responseByUid,
+                              responseId: widget.response.document.documentID);
+                          Navigator.pop(context);
+                        } catch (e) {
+                          // TODO
+                          widget.scaffoldKey.currentState.showSnackBar(SnackBar(
+                            content: Text("Something went wrong"),
+                          ));
+                          Navigator.pop(context);
+                        }
+                      },
+                      child:
+                      ListTile(leading: Column(mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(Icons.report, color: Theme
+                              .of(context)
+                              .primaryColor,),
+                        ],
+                      ),
+                        title: Text("Report"),
+                        subtitle: Text("This response is inappropriate")
+
+                        ,)
+
+
+
+                  ),
+
+                  ],
+              ),
+            ));
   }
 
   Widget _buildSolutionButton() {
@@ -129,9 +175,9 @@ class _ResponseTileState extends State<ResponseTile> {
 
   Widget _getCenterButton() {
 
-    return (widget.postBy == Constants.userName && widget.isSolution)
+    return (widget.postByUserName == Constants.userName && widget.isSolution)
         ? _buildMarkedSolutionButton()
-        : ((widget.postBy == Constants.userName && !widget.isSolution)
+        : ((widget.postByUserName == Constants.userName && !widget.isSolution)
             ? _buildSolutionButton()
             : _buildVoteButton());
   }
@@ -175,7 +221,7 @@ class _ResponseTileState extends State<ResponseTile> {
                       ),
                     ),
                   ),
-                  trailing: Icon(Icons.more_vert),
+                  trailing: IconButton(icon:Icon(Icons.more_vert), onPressed: showOptions,),
                 );
               }),
           Padding(

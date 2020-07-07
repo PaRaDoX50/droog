@@ -253,7 +253,7 @@ class DatabaseMethods {
     data = {
       "description": description,
       "imageUrl": imageUrl,
-      "postBy": Constants.userName,
+      "postByUserName": Constants.userName,
       "postByUid": Constants.uid,
       "time": DateTime.now().millisecondsSinceEpoch
     };
@@ -276,12 +276,12 @@ class DatabaseMethods {
     data = {
       "response": description,
       "imageUrl": imageUrl,
-      "responseBy": Constants.userName,
+      "responseByUserName": Constants.userName,
       "postId": postId,
       "time": DateTime.now().millisecondsSinceEpoch,
       "isSolution": false,
       "votes": 0,
-      "uid": Constants.uid,
+      "responseByUid": Constants.uid,
     };
     DocumentReference reference =
         await _database.collection("responses").add(data);
@@ -507,6 +507,35 @@ class DatabaseMethods {
       return null;
     }
   }
+Future<List<Post>> getAUsersPosts(
+      {String targetUid,}) async {
+
+      QuerySnapshot snapshot = await _database
+          .collection("posts")
+          .where("postByUid", isEqualTo: targetUid)
+          .orderBy("time", descending: true)
+          .getDocuments();
+      return snapshot.documents.map((e) => postFromFirebasePost(documentSnapshot: e)).toList();
+
+  }
+  Future<List<Post>> getAUsersSolvedDoubts(
+      {String targetUid,}) async {
+
+    QuerySnapshot snapshot = await _database
+        .collection("users")
+        .document(targetUid).collection("solvedDoubts").getDocuments();
+
+    List<Post> solved = [];
+
+    for(int i = 0; i < snapshot.documents.length; i++){
+      DocumentSnapshot documentSnapshot = await _database.collection("posts").document(snapshot.documents[i]["postId"]).get();
+
+        solved.add(postFromFirebasePost(documentSnapshot:documentSnapshot ));
+
+    }
+    return solved;
+
+  }
 
   Future clipPost({String postId}) async {
     await _database.collection("users").document(Constants.uid).updateData({
@@ -579,11 +608,11 @@ class DatabaseMethods {
     return Response(
         time: documentSnapshot["time"],
         imageUrl: documentSnapshot["imageUrl"],
-        isSolution: documentSnapshot["isSolution"],
+//        isSolution: documentSnapshot["isSolution"],
         postId: documentSnapshot["postId"],
         response: documentSnapshot["response"],
-        responseBy: documentSnapshot["responseBy"],
-        uid: documentSnapshot["uid"],
+        responseByUserName: documentSnapshot["responseByUserName"],
+        responseByUid: documentSnapshot["responseByUid"],
         votes: documentSnapshot["votes"],
         document: documentSnapshot);
   }
@@ -618,8 +647,9 @@ class DatabaseMethods {
           .updateData({"solutionId": responseDocument.documentID});
       DocumentSnapshot snapshot = await _database
           .collection("users")
-          .document(responseDocument["uid"])
+          .document(responseDocument["responseByUid"])
           .get();
+      snapshot.reference.collection("solvedDoubts").document(postId).setData({"postId":postId});
       snapshot.reference.collection("updates").add({
         "updateType": 1,
         "uidInvolved": Constants.uid,
@@ -628,6 +658,10 @@ class DatabaseMethods {
         "time": DateTime.now().millisecondsSinceEpoch,
       });
     } else {
+      await _database
+          .collection("users")
+          .document(responseDocument["responseByUid"])
+          .collection("solvedDoubts").document(postId).delete();
       await _database
           .collection("posts")
           .document(postId)
@@ -699,6 +733,15 @@ class DatabaseMethods {
       return VoteStatus.notVoted;
     }
   }
+
+  Future reportAPost({String targetUid,String postId }) async {
+    await _database.collection("reports").add({"uid":targetUid,"postId": postId,"reportByUid":Constants.uid});
+  }
+  Future reportAResponse({String targetUid,String responseId }) async {
+    await _database.collection("reports").add({"uid":targetUid,"responseId":responseId,"reportByUid":Constants.uid});
+  }
+
+
 
   User _userFromFirebaseUser({DocumentSnapshot userDocument}) {
     return User(
@@ -785,7 +828,7 @@ class DatabaseMethods {
             solutionId: documentSnapshot["solutionId"],
             description: documentSnapshot["description"],
             imageUrl: documentSnapshot["imageUrl"],
-            postBy: documentSnapshot["postBy"],
+            postByUserName: documentSnapshot["postByUserName"],
             time: documentSnapshot["time"],
             postByUid: documentSnapshot["postByUid"])
         : null;

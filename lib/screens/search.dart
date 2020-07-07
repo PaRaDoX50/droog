@@ -90,7 +90,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     itemCount: searchResults.length,
                     itemBuilder: (_, index) {
 
-                      if(searchResults[index].userName != Constants.userName) {
+                      if(searchResults[index].userName == Constants.userName) {
                         return SearchTile(
                           user: searchResults[index],
                         );

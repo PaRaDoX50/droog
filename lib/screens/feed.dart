@@ -124,7 +124,7 @@ Post _postFromFirebasePost({DocumentSnapshot documentSnapshot}) {
       ? Post(
       description: documentSnapshot["description"],
       imageUrl: documentSnapshot["imageUrl"],
-      postBy: documentSnapshot["postBy"],
+      postByUserName: documentSnapshot["postByUserName"],
       time: documentSnapshot["time"],
       postId: documentSnapshot.documentID,
       postByUid: documentSnapshot["postByUid"],
