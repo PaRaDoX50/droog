@@ -52,7 +52,7 @@ class _NewPostBoxState extends State<NewPostBox> {
       maxLines: maxLines,
       decoration: InputDecoration(
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        hintText: "Describe your doubt",
+        hintText: widget.postIs == PostIs.normalPost ? "Describe your doubt" : "Your Response",
       ),
     );
   }

@@ -57,7 +57,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ratioX: 4,
         ratioY: 3,
         pictureFor: PictureFor.messagePicture);
-    if(croppedFile != null) {
+    if (croppedFile != null) {
       Navigator.of(context).pushNamed(ImageMessageScreen.route,
           arguments: {"file": croppedFile, "targetUserName": user.userName});
     }
@@ -89,11 +89,9 @@ class _ChatScreenState extends State<ChatScreen> {
         text: message.text,
         alignment: Alignment.centerLeft,
       );
-    }
-    else{
+    } else {
       if (message.byUserName == Constants.userName) {
         return PostMessageTile(
-
           postId: message.postId,
           alignment: Alignment.centerRight,
         );
@@ -106,15 +104,15 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   List<String> messages = ["hello boi"];
-  markIsSeen({DocumentSnapshot documentSnapshot}) async {
-   try {
-     await documentSnapshot.reference.updateData({"isSeen":true});
-     print("markedSeen");
 
-   }  catch (e) {
-     // TODO
-     print(e.message);
-   }
+  markIsSeen({DocumentSnapshot documentSnapshot}) async {
+    try {
+      await documentSnapshot.reference.updateData({"isSeen": true});
+      print("markedSeen");
+    } catch (e) {
+      // TODO
+      print(e.message);
+    }
   }
 
   @override
@@ -161,13 +159,13 @@ class _ChatScreenState extends State<ChatScreen> {
                 onTap: () => pickImage(ImageSource.camera),
               ),
             ),
-           Padding(
-             padding: const EdgeInsets.all(8.0),
-             child: InkWell(
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: InkWell(
                 child: Icon(Icons.attachment),
                 onTap: () => pickImage(ImageSource.gallery),
               ),
-           ),
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: InkWell(
@@ -195,7 +193,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   bottom: MediaQuery.of(context).padding.bottom + 70),
               child: StreamBuilder<List<Message>>(
                   stream: _databaseMethods.getAConversation(
-                      targetUserName: user.userName,limitToOne: false),
+                      targetUserName: user.userName, limitToOne: false),
                   builder: (context, snapshot) {
                     List<Message> data = [];
 
@@ -205,19 +203,17 @@ class _ChatScreenState extends State<ChatScreen> {
                         //                      data.sort((b, a) {
                         //                        return a["time"].compareTo(b["time"]);
                         //                      });
-                        if(data.first.byUserName != Constants.userName){
-                         markIsSeen(documentSnapshot: snapshot.data.first.documentSnapshot);
+                        if (data.first.byUserName != Constants.userName) {
+                          markIsSeen(
+                              documentSnapshot:
+                                  snapshot.data.first.documentSnapshot);
                         }
                       }
                     }
 
-
-
                     return ListView.builder(
-
                       reverse: true,
                       itemBuilder: (_, index) {
-
                         return returnAppropriateTile(data[index]);
                       },
                       itemCount: data.length,
@@ -239,7 +235,7 @@ class CustomAppBar extends PreferredSize {
   CustomAppBar({this.userProfilePictureUrl, this.userFullName});
 
   @override
-  Size get preferredSize => Size.fromHeight(100);
+  Size get preferredSize => Size.fromHeight(150);
 
   @override
   Widget build(BuildContext context) {
@@ -262,7 +258,7 @@ class CustomAppBar extends PreferredSize {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   CircleAvatar(
-                    radius: 25,
+                    radius: 35,
                     child: ClipOval(
                       child: CachedNetworkImage(
                         imageUrl: userProfilePictureUrl,
@@ -272,15 +268,19 @@ class CustomAppBar extends PreferredSize {
                   SizedBox(
                     height: 16,
                   ),
-                  Text(
-                    userFullName,
-                    style: TextStyle(color: Colors.white),
-                    overflow: TextOverflow.ellipsis,
+                  FittedBox(
+                    child: Text(
+                      userFullName,
+                      style: TextStyle(color: Colors.white),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
             ),
-            SizedBox(width: 25,),
+            SizedBox(
+              width: 25,
+            ),
           ],
         ),
       ),
@@ -335,7 +335,7 @@ class TextMessageTile extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color:Color(0xff4481bc),
+            color: Color(0xff4481bc),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Text(
@@ -356,9 +356,7 @@ class TextMessageTile extends StatelessWidget {
             color: Color(0xffe8f5fd),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Text(
-            message
-          ),
+          child: Text(message),
           constraints: BoxConstraints(maxWidth: width / 1.5),
         ),
         SizedBox(
@@ -374,7 +372,9 @@ class TextMessageTile extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(width / 60),
       child: Row(
-        mainAxisAlignment:alignment == Alignment.centerRight ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: alignment == Alignment.centerRight
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: getWidgets(width),
       ),
@@ -393,7 +393,7 @@ class ImageMessageTile extends StatelessWidget {
     if (alignment == Alignment.centerRight) {
       return [
         Container(
-          padding: EdgeInsets.all(8/2),
+          padding: EdgeInsets.all(8 / 2),
           decoration: BoxDecoration(
             color: Color(0xff4481bc),
             borderRadius: BorderRadius.circular(10),
@@ -403,14 +403,17 @@ class ImageMessageTile extends StatelessWidget {
               CachedNetworkImage(
                 imageUrl: imageUrl,
               ),
-              text != ""?
-              SizedBox(
-                height: 2,
-              ):Container(),
               text != ""
-                  ?
-              Text(text,
-                style: TextStyle(color: Colors.white),):Container()
+                  ? SizedBox(
+                      height: 2,
+                    )
+                  : Container(),
+              text != ""
+                  ? Text(
+                      text,
+                      style: TextStyle(color: Colors.white),
+                    )
+                  : Container()
             ],
           ),
           constraints: BoxConstraints(maxWidth: width / 1.5),
@@ -422,7 +425,7 @@ class ImageMessageTile extends StatelessWidget {
     } else {
       return [
         Container(
-          padding: EdgeInsets.all(8/2),
+          padding: EdgeInsets.all(8 / 2),
           decoration: BoxDecoration(
             color: Color(0xffe8f5fd),
             borderRadius: BorderRadius.circular(10),
@@ -453,8 +456,9 @@ class ImageMessageTile extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(width / 60),
       child: Row(
-
-        mainAxisAlignment:alignment == Alignment.centerRight ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: alignment == Alignment.centerRight
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: getWidgets(width),
       ),
@@ -486,9 +490,13 @@ class PostMessageTile extends StatelessWidget {
               future: _getPost(),
               builder: (_, snapshot) {
                 if (snapshot.hasData) {
-                  return PostMessageWidget(post: snapshot.data,);
+                  return PostMessageWidget(
+                    post: snapshot.data,
+                  );
                 }
-                return Center(child: CircularProgressIndicator(),);
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
               }),
           constraints: BoxConstraints(maxWidth: width / 1.5),
         ),
@@ -508,9 +516,13 @@ class PostMessageTile extends StatelessWidget {
               future: _getPost(),
               builder: (_, snapshot) {
                 if (snapshot.hasData) {
-                  return PostMessageWidget(post: snapshot.data,);
+                  return PostMessageWidget(
+                    post: snapshot.data,
+                  );
                 }
-                return Center(child: CircularProgressIndicator(),);
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
               }),
           constraints: BoxConstraints(maxWidth: width / 1.5),
         ),
@@ -527,7 +539,9 @@ class PostMessageTile extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(width / 60),
       child: Row(
-        mainAxisAlignment: alignment == Alignment.centerRight ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: alignment == Alignment.centerRight
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: getWidgets(width),
       ),

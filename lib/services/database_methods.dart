@@ -10,12 +10,12 @@ import 'package:droog/models/update.dart';
 import 'package:droog/models/user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 
 class DatabaseMethods {
   Firestore _database = Firestore.instance;
   FirebaseStorage _storage = FirebaseStorage.instance;
-
 
   Future<bool> userNameAvailable({String userName}) async {
     QuerySnapshot data = await _database
@@ -44,12 +44,24 @@ class DatabaseMethods {
       String description,
       String userName,
       String profilePictureUrl}) async {
-    Map<String, String> data = {
+    List<String> searchParams = [];
+    for (int i = 0; i < userName.length; i++) {
+      print(userName.substring(0, i + 1));
+      searchParams.add(userName.substring(0, i + 1));
+    }
+    for (int i = 0; i < firstName.length + lastName.length + 1; i++) {
+      String fullName = "$firstName $lastName";
+      print(fullName.substring(0, i + 1));
+      searchParams.add(fullName.substring(0, i + 1));
+    }
+
+    Map<String, dynamic> data = {
       "firstName": firstName,
       "lastName": lastName,
       "description": description,
       "userName": userName,
-      "profilePictureUrl": profilePictureUrl
+      "profilePictureUrl": profilePictureUrl,
+      "searchParams": searchParams,
     };
     _database
         .collection("users")
@@ -70,16 +82,10 @@ class DatabaseMethods {
 
   Future createHalfUserProfile(
       {String userEmail, String mobileNo, String uid}) async {
-    List<String> searchParams = [];
-    for (int i = 0; i < userEmail.length; i++) {
-      print(userEmail.substring(0, i + 1));
-      searchParams.add(userEmail.substring(0, i + 1));
-    }
     Map<String, dynamic> data = {
       "email": userEmail,
       "phone": mobileNo,
       "uid": uid,
-      "searchParams": searchParams
     };
 
     return _database.collection("users").document(uid).setData(data);
@@ -125,9 +131,9 @@ class DatabaseMethods {
         .where("searchParams", arrayContains: keyword)
         .getDocuments();
 
-    List<User> searchResults = snapshot.documents.map((e) => _userFromFirebaseUser(userDocument: e)).toList();
-
-
+    List<User> searchResults = snapshot.documents
+        .map((e) => _userFromFirebaseUser(userDocument: e))
+        .toList();
 
     return searchResults;
   }
@@ -144,21 +150,30 @@ class DatabaseMethods {
 //        .collection("followers")
 //        .getDocuments();
 //    _database.collection("users").where()
-    final uids =
-        (snapshotDroogs.documents.map((e) => e["uid"]).toList());
+    final uids = (snapshotDroogs.documents.map((e) => e["uid"]).toList());
 //    uids.addAll(
 //        snapshotFollowers.documents.map((e) => e["uid"]).toList());
-    if(uids.isNotEmpty) {
-      QuerySnapshot snapshotResults = await _database.collection("users").where(
-          "uid", whereIn: uids)
+    if (uids.isNotEmpty) {
+      QuerySnapshot snapshotResults = await _database
+          .collection("users")
+          .where("uid", whereIn: uids)
           .where("searchParams", arrayContains: keyword)
           .getDocuments();
-      List<User> results = snapshotResults.documents.map((e) =>
-          _userFromFirebaseUser(userDocument: e)).toList();
+      List<User> results = snapshotResults.documents
+          .map((e) => _userFromFirebaseUser(userDocument: e))
+          .toList();
       return results;
-
+    } else {
+      return [];
     }
-    else{return [];}
+  }
+
+  Future sendFeedback({String feedback}) async {
+    await _database.collection("feedback").add({
+      "feedbackByUid": Constants.uid,
+      "feedbackByUserName": Constants.userName,
+      "feedback": feedback
+    });
   }
 
   Future sendMessage(
@@ -206,7 +221,8 @@ class DatabaseMethods {
     await documentReference.delete();
   }
 
-  Stream<List<Message>> getAConversation({String targetUserName,bool limitToOne}) {
+  Stream<List<Message>> getAConversation(
+      {String targetUserName, bool limitToOne}) {
     String chatRoomId = _chatRoomIdGenerator(targetUserName: targetUserName);
     if (!limitToOne) {
       Stream<QuerySnapshot> stream = _database
@@ -218,13 +234,13 @@ class DatabaseMethods {
       return stream.map((querySnapshot) => querySnapshot.documents
           .map((e) => _messageFromFirebaseMessage(documentSnapshot: e))
           .toList());
-    }
-    else{
+    } else {
       Stream<QuerySnapshot> stream = _database
           .collection("chatRooms")
           .document(chatRoomId)
           .collection("chats")
-          .orderBy("time", descending: true).limit(1)
+          .orderBy("time", descending: true)
+          .limit(1)
           .snapshots();
       return stream.map((querySnapshot) => querySnapshot.documents
           .map((e) => _messageFromFirebaseMessage(documentSnapshot: e))
@@ -264,6 +280,10 @@ class DatabaseMethods {
         .document(Constants.uid)
         .collection("posts")
         .add(documentIdData);
+    await _database
+        .collection("users")
+        .document(Constants.uid)
+        .updateData({"askedCount": FieldValue.increment(1)});
     await _database
         .collection("posts")
         .document(reference.documentID)
@@ -372,17 +392,21 @@ class DatabaseMethods {
       print("reachedsnapshot2");
       return users;
     } else {
+      print("reached else");
       QuerySnapshot snapshot = await _database
           .collection("users")
           .document(Constants.uid)
           .collection("requests")
           .getDocuments();
+      print("reached else2");
       List<DocumentSnapshot> documents = snapshot.documents;
-      List<User> users;
+      print("reached else" + documents.length.toString());
+      List<User> users = [];
       for (int i = 0; i < documents.length; i++) {
         User user = await getUserDetailsByUid(targetUid: documents[i]["uid"]);
         users.add(user);
       }
+//      print("reached else3");
       return users;
     }
   }
@@ -432,6 +456,15 @@ class DatabaseMethods {
         .collection("droogs")
         .document(Constants.uid)
         .setData({"uid": Constants.uid});
+    await _database
+        .collection("users")
+        .document(Constants.uid)
+        .updateData({"droogsCount": FieldValue.increment(1)});
+
+    await _database
+        .collection("users")
+        .document(targetUid)
+        .updateData({"droogsCount": FieldValue.increment(1)});
 
 //    sleep(Duration(milliseconds: 200));
     await _database
@@ -461,10 +494,9 @@ class DatabaseMethods {
     for (int i = 0; i < snapshotDroogs.documents.length; i++) {
       droogsUids.add(snapshotDroogs.documents[i].data["uid"]);
     }
-    if(droogsUids.isNotEmpty) {
+    if (droogsUids.isNotEmpty) {
       return droogsUids;
-    }
-    else{
+    } else {
       return null;
     }
   }
@@ -484,8 +516,7 @@ class DatabaseMethods {
       List<DocumentSnapshot> moreDocuments = snapshot.documents;
       //    List<Post> morePosts = moreDocuments.map((e) => _postFromFirebasePost(documentSnapshot: e)).toList();
       return moreDocuments;
-    }
-    else{
+    } else {
       return null;
     }
   }
@@ -502,39 +533,44 @@ class DatabaseMethods {
           .limit(10)
           .snapshots();
       return stream;
-    }
-    else{
+    } else {
       return null;
     }
   }
-Future<List<Post>> getAUsersPosts(
-      {String targetUid,}) async {
 
-      QuerySnapshot snapshot = await _database
-          .collection("posts")
-          .where("postByUid", isEqualTo: targetUid)
-          .orderBy("time", descending: true)
-          .getDocuments();
-      return snapshot.documents.map((e) => postFromFirebasePost(documentSnapshot: e)).toList();
-
+  Future<List<Post>> getAUsersPosts({
+    String targetUid,
+  }) async {
+    QuerySnapshot snapshot = await _database
+        .collection("posts")
+        .where("postByUid", isEqualTo: targetUid)
+        .orderBy("time", descending: true)
+        .getDocuments();
+    return snapshot.documents
+        .map((e) => postFromFirebasePost(documentSnapshot: e))
+        .toList();
   }
-  Future<List<Post>> getAUsersSolvedDoubts(
-      {String targetUid,}) async {
 
+  Future<List<Post>> getAUsersSolvedDoubts({
+    String targetUid,
+  }) async {
     QuerySnapshot snapshot = await _database
         .collection("users")
-        .document(targetUid).collection("solvedDoubts").getDocuments();
+        .document(targetUid)
+        .collection("solvedDoubts")
+        .getDocuments();
 
     List<Post> solved = [];
 
-    for(int i = 0; i < snapshot.documents.length; i++){
-      DocumentSnapshot documentSnapshot = await _database.collection("posts").document(snapshot.documents[i]["postId"]).get();
+    for (int i = 0; i < snapshot.documents.length; i++) {
+      DocumentSnapshot documentSnapshot = await _database
+          .collection("posts")
+          .document(snapshot.documents[i]["postId"])
+          .get();
 
-        solved.add(postFromFirebasePost(documentSnapshot:documentSnapshot ));
-
+      solved.add(postFromFirebasePost(documentSnapshot: documentSnapshot));
     }
     return solved;
-
   }
 
   Future clipPost({String postId}) async {
@@ -564,7 +600,7 @@ Future<List<Post>> getAUsersPosts(
     DocumentSnapshot snapshot =
         await _database.collection("users").document(Constants.uid).get();
     print(snapshot["clippedPosts"].toString());
-    print(snapshot.data["clippedPosts"].toString()+"clipped");
+    print(snapshot.data["clippedPosts"].toString() + "clipped");
     if ((snapshot["clippedPosts"] as List).isNotEmpty) {
       QuerySnapshot qSnapshot = await _database
           .collection("posts")
@@ -572,19 +608,15 @@ Future<List<Post>> getAUsersPosts(
           .orderBy("time", descending: true)
           .limit(10)
           .getDocuments();
-      print(qSnapshot.documents.length.toString()+"ccccc");
-      if(qSnapshot.documents.isNotEmpty) {
+      print(qSnapshot.documents.length.toString() + "ccccc");
+      if (qSnapshot.documents.isNotEmpty) {
         return qSnapshot.documents;
+      } else {
+        return null;
       }
-      else{
-        return  null;
-      }
-    }
-    else{
+    } else {
       return null;
     }
-
-
 
 //    List<Post> posts = qSnapshot.documents.map((e) => postFromFirebasePost(documentSnapshot: e)).toList();
   }
@@ -627,6 +659,7 @@ Future<List<Post>> getAUsersPosts(
         .map((document) => _responseFromFirebaseResponse(document))
         .toList();
   }
+
   Future<int> getResponsesCountByPostId(String postId) async {
     QuerySnapshot snapshot = await _database
         .collection("responses")
@@ -636,36 +669,67 @@ Future<List<Post>> getAUsersPosts(
     return documents.length;
   }
 
-
   Future<void> toggleSolutionForPost(
       {DocumentSnapshot responseDocument, bool markAsSolution}) async {
-    String postId = responseDocument["postId"];
-    if (markAsSolution) {
-      await _database
-          .collection("posts")
-          .document(postId)
-          .updateData({"solutionId": responseDocument.documentID});
-      DocumentSnapshot snapshot = await _database
-          .collection("users")
-          .document(responseDocument["responseByUid"])
-          .get();
-      snapshot.reference.collection("solvedDoubts").document(postId).setData({"postId":postId});
-      snapshot.reference.collection("updates").add({
-        "updateType": 1,
-        "uidInvolved": Constants.uid,
-        "responseId": responseDocument.documentID,
-        "postInvolved": postId,
-        "time": DateTime.now().millisecondsSinceEpoch,
-      });
-    } else {
-      await _database
-          .collection("users")
-          .document(responseDocument["responseByUid"])
-          .collection("solvedDoubts").document(postId).delete();
-      await _database
-          .collection("posts")
-          .document(postId)
-          .updateData({"solutionId": ""});
+    try {
+      String postId = responseDocument["postId"];
+      if (markAsSolution) {
+        String solutionId = await getSolutionId(postId);
+        if (solutionId != "") {
+          print(solutionId+"solutionIdasdasd");
+          DocumentSnapshot responseDocument =
+              await _database.collection("responses").document(solutionId).get();
+          Response response = _responseFromFirebaseResponse(responseDocument);
+          DocumentSnapshot userSnapshot = await _database
+              .collection("users")
+              .document(response.responseByUid)
+              .get();
+          await userSnapshot.reference
+              .collection("solvedDoubts")
+              .document(postId)
+              .delete();
+          await userSnapshot.reference
+              .updateData({"solvedCount": FieldValue.increment(-1)});
+        }
+        await _database
+            .collection("posts")
+            .document(postId)
+            .updateData({"solutionId": responseDocument.documentID});
+        DocumentSnapshot snapshot = await _database
+            .collection("users")
+            .document(responseDocument["responseByUid"])
+            .get();
+        await snapshot.reference
+            .collection("solvedDoubts")
+            .document(postId)
+            .setData({"postId": postId});
+        await snapshot.reference.updateData({"solvedCount":FieldValue.increment(1)});
+        await snapshot.reference.collection("updates").add({
+          "updateType": 1,
+          "uidInvolved": Constants.uid,
+          "responseId": responseDocument.documentID,
+          "postInvolved": postId,
+          "time": DateTime.now().millisecondsSinceEpoch,
+        });
+      } else {
+        await _database
+            .collection("users")
+            .document(responseDocument["responseByUid"])
+            .collection("solvedDoubts")
+            .document(postId)
+            .delete();
+         await _database
+            .collection("users")
+            .document(responseDocument["responseByUid"])
+            .updateData({"solvedCount":FieldValue.increment(-1)});
+        await _database
+            .collection("posts")
+            .document(postId)
+            .updateData({"solutionId": ""});
+      }
+    }  catch (e) {
+      // TODO
+      print(e.message);
     }
 //    if (isSolution) {
 //      QuerySnapshot snapshot = await _database
@@ -734,35 +798,43 @@ Future<List<Post>> getAUsersPosts(
     }
   }
 
-  Future reportAPost({String targetUid,String postId }) async {
-    await _database.collection("reports").add({"uid":targetUid,"postId": postId,"reportByUid":Constants.uid});
-  }
-  Future reportAResponse({String targetUid,String responseId }) async {
-    await _database.collection("reports").add({"uid":targetUid,"responseId":responseId,"reportByUid":Constants.uid});
+  Future reportAPost({String targetUid, String postId}) async {
+    await _database.collection("reports").add(
+        {"uid": targetUid, "postId": postId, "reportByUid": Constants.uid});
   }
 
-
+  Future reportAResponse({String targetUid, String responseId}) async {
+    await _database.collection("reports").add({
+      "uid": targetUid,
+      "responseId": responseId,
+      "reportByUid": Constants.uid
+    });
+  }
 
   User _userFromFirebaseUser({DocumentSnapshot userDocument}) {
     return User(
-      description: userDocument["description"],
-      userName: userDocument["userName"],
-      lastName: userDocument["lastName"],
-      profilePictureUrl: userDocument["profilePictureUrl"],
-      userEmail: userDocument["userEmail"],
-      firstName: userDocument["firstName"],
-      uid: userDocument["uid"],
-      phoneNo: userDocument["phoneNo"],
-      achievements: userDocument["achievements"],
-      skills: userDocument["skills"],
-    );
+        description: userDocument["description"],
+        userName: userDocument["userName"],
+        lastName: userDocument["lastName"],
+        profilePictureUrl: userDocument["profilePictureUrl"],
+        userEmail: userDocument["userEmail"],
+        firstName: userDocument["firstName"],
+        uid: userDocument["uid"],
+        phoneNo: userDocument["phoneNo"],
+        achievements: userDocument["achievements"],
+        skills: userDocument["skills"],
+        askedCount: userDocument["askedCount"],
+        droogsCount: userDocument["droogsCount"],
+        solvedCount: userDocument["solvedCount"]);
   }
 
   Message _messageFromFirebaseMessage({DocumentSnapshot documentSnapshot}) {
     if (documentSnapshot["messageType"] == MessageType.onlyText.index) {
       return Message(
-        isSeen: documentSnapshot["isSeen"] != null ? documentSnapshot["isSeen"] : false,
-        documentSnapshot: documentSnapshot,
+          isSeen: documentSnapshot["isSeen"] != null
+              ? documentSnapshot["isSeen"]
+              : false,
+          documentSnapshot: documentSnapshot,
           time: documentSnapshot["time"],
           byUid: documentSnapshot["byUid"],
           byUserName: documentSnapshot["byUserName"],
@@ -770,7 +842,9 @@ Future<List<Post>> getAUsersPosts(
           text: documentSnapshot["text"]);
     } else if (documentSnapshot["messageType"] == MessageType.image.index) {
       return Message(
-          isSeen: documentSnapshot["isSeen"] != null ? documentSnapshot["isSeen"] : false,
+          isSeen: documentSnapshot["isSeen"] != null
+              ? documentSnapshot["isSeen"]
+              : false,
           documentSnapshot: documentSnapshot,
           time: documentSnapshot["time"],
           byUid: documentSnapshot["byUid"],
@@ -781,7 +855,9 @@ Future<List<Post>> getAUsersPosts(
     } else if (documentSnapshot["messageType"] ==
         MessageType.sharedPost.index) {
       return Message(
-          isSeen: documentSnapshot["isSeen"] != null ? documentSnapshot["isSeen"] : false,
+          isSeen: documentSnapshot["isSeen"] != null
+              ? documentSnapshot["isSeen"]
+              : false,
           documentSnapshot: documentSnapshot,
           time: documentSnapshot["time"],
           byUid: documentSnapshot["byUid"],

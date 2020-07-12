@@ -4,8 +4,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
+import 'package:droog/models/user.dart';
 import 'package:droog/screens/chat_list.dart';
 import 'package:droog/screens/feed.dart';
+import 'package:droog/screens/feedback.dart';
 import 'package:droog/screens/myclips_screen.dart';
 import 'package:droog/screens/new_post.dart';
 import 'package:droog/screens/notifications_screen.dart';
@@ -13,7 +15,9 @@ import 'package:droog/screens/profile_setup.dart';
 import 'package:droog/screens/search.dart';
 import 'package:droog/screens/signup.dart';
 import 'package:droog/screens/skills_setup.dart';
+import 'package:droog/screens/user_profile.dart';
 import 'package:droog/services/auth.dart';
+import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -57,7 +61,7 @@ class _HomeState extends State<Home> {
       case 0:
         return "Feed";
       case 1:
-        return "Search";
+        return "Discover";
       case 2:
         return "Post";
       case 3:
@@ -68,6 +72,7 @@ class _HomeState extends State<Home> {
   }
 
   void onTabTapped(int newIndex) {
+    FocusScope.of(context).unfocus();
     setState(() {
       _currentIndex = newIndex;
     });
@@ -75,42 +80,48 @@ class _HomeState extends State<Home> {
 
   Widget _createDrawerHeader() {
     final totalHeight = MediaQuery.of(context).size.height;
-    return Padding(
-      padding: EdgeInsets.zero,
-      child: Container(
-        child: Center(
-          child: ListTile(
-            leading: ClipOval(
-                child: CachedNetworkImage(
-              imageUrl: Constants.profilePictureUrl,
-            )),
-            title: Text(
-              Constants.fullName,
-              style: MyThemeData.whiteBold14,
-              overflow: TextOverflow.ellipsis,
-            ),
-            trailing: GestureDetector(
-              onTap: () => Navigator.of(context).pushNamed(ProfileSetup.route,
-                  arguments: RoutedProfileSetupFor.edit),
-              child: Icon(
-                Icons.edit,
-                color: Colors.white,
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.zero,
+        child: Container(
+          child: Center(
+            child: ListTile(
+              onTap: ()async{
+                DatabaseMethods databaseMethods = DatabaseMethods();
+                User user = await databaseMethods.getUserDetailsByUid(targetUid: Constants.uid);
+                Navigator.pushNamed(context, UserProfile.route,arguments:user);},
+              leading: ClipOval(
+                  child: CachedNetworkImage(
+                imageUrl: Constants.profilePictureUrl,
+              )),
+              title: Text(
+                Constants.fullName,
+                style: MyThemeData.whiteBold14,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: GestureDetector(
+                onTap: () => Navigator.of(context).pushNamed(ProfileSetup.route,
+                    arguments: RoutedProfileSetupFor.edit),
+                child: Icon(
+                  Icons.edit,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
-        ),
-        height: totalHeight * .2,
-        decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor,
-          gradient: LinearGradient(
-            colors: [
-              Theme.of(context).primaryColor,
+          height: totalHeight * .2,
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor,
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).primaryColor,
 //              Color(0xff1948a0),
 //              Color(0xff4481bc),
-              Colors.blue
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+                Colors.blue
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
           ),
         ),
       ),
@@ -171,87 +182,99 @@ class _HomeState extends State<Home> {
 
       ),
       drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            _createDrawerHeader(),
-            _createDrawerItem(Icons.home, Text("Home"), Home.route),
-            Divider(
-              thickness: .5,
-            ),
-            _createDrawerItem(
-                Icons.content_paste, Text("My Clips"), MyClipsScreen.route),
-            Divider(
-              thickness: .5,
-            ),
-            _createDrawerItem(
-                FontAwesomeIcons.medal, Text("Skills and Achievements"), SkillsSetup.route),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal:16.0,vertical: 8),
-              child: Text("More",style: MyThemeData.blackBold12,),
-            ),
-            _logoutItem(),
-          ],
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              _createDrawerHeader(),
+              _createDrawerItem(Icons.home, Text("Home"), Home.route),
+              Divider(
+                thickness: .5,
+              ),
+              _createDrawerItem(
+                  Icons.content_paste, Text("My Clips"), MyClipsScreen.route),
+              Divider(
+                thickness: .5,
+              ),
+              _createDrawerItem(
+                  FontAwesomeIcons.medal, Text("Skills and Achievements"), SkillsSetup.route),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal:16.0,vertical: 8),
+                child: Text("More",style: MyThemeData.blackBold12,),
+              ),
+              _logoutItem(),
+              Divider(
+                thickness: .5,
+              ),
+              _createDrawerItem(
+                  FontAwesomeIcons.handsHelping, Text("Share feedback"), FeedbackScreen.route),
+            ],
+          ),
+
+      ),
+      body: GestureDetector(
+        onHorizontalDragStart: (_)=>FocusScope.of(context).unfocus(),
+        onTap: ()=>FocusScope.of(context).unfocus(),
+        child: IndexedStack(
+          children: widgets,
+          index: _currentIndex,
         ),
       ),
-      body: IndexedStack(
-        children: widgets,
-        index: _currentIndex,
-      ),
-      bottomNavigationBar: ConvexAppBar(
+      bottomNavigationBar:  ConvexAppBar(
 
-        onTap: onTabTapped,
-        initialActiveIndex: _currentIndex,
-        backgroundColor: Color(0xfffcfcfd),
-        style: TabStyle.fixedCircle,
-        color: Theme.of(context).primaryColor,
-        activeColor: Theme.of(context).primaryColor,
-        items: [
-          TabItem(
-            activeIcon: Icon(
-              Icons.home,
-              color: Theme.of(context).primaryColor,
-            ),
-            icon: Icon(
-              Icons.home,
-              color: Colors.grey,
-            ),
-          ),
-          TabItem(
+          onTap: onTabTapped,
+          initialActiveIndex: _currentIndex,
+          backgroundColor: Color(0xfffcfcfd),
+          style: TabStyle.fixedCircle,
+          color: Theme.of(context).primaryColor,
+          activeColor: Theme.of(context).primaryColor,
+          items: [
+            TabItem(
+              activeIcon: Icon(
+                Icons.home,
+                color: Theme.of(context).primaryColor,
+              ),
               icon: Icon(
-                Icons.search,
+                Icons.home,
                 color: Colors.grey,
               ),
-              activeIcon: Icon(
-                Icons.search,
-                color: Theme.of(context).primaryColor,
-              )),
-          TabItem(
-            icon: Icon(
-              Icons.add,
-              color: Colors.white,
             ),
-          ),
-          TabItem(
+            TabItem(
+                icon: Icon(
+                  Icons.search,
+                  color: Colors.grey,
+                ),
+                activeIcon: Icon(
+                  Icons.search,
+                  color: Theme.of(context).primaryColor,
+                )),
+            TabItem(
               icon: Icon(
-                Icons.message,
-                color: Colors.grey,
+                Icons.add,
+                color: Colors.white,
               ),
-              activeIcon: Icon(
-                Icons.message,
-                color: Theme.of(context).primaryColor,
-              )),
-          TabItem(
-              icon: Icon(
-                Icons.add_alert,
-                color: Colors.grey,
-              ),
-              activeIcon: Icon(
-                Icons.add_alert,
-                color: Theme.of(context).primaryColor,
-              )),
-        ],
-      ),
+            ),
+            TabItem(
+                icon: Icon(
+                  Icons.message,
+                  color: Colors.grey,
+                ),
+                activeIcon: Icon(
+                  Icons.message,
+                  color: Theme.of(context).primaryColor,
+                )),
+            TabItem(
+                icon: Icon(
+                  Icons.add_alert,
+                  color: Colors.grey,
+                ),
+                activeIcon: Icon(
+                  Icons.add_alert,
+                  color: Theme.of(context).primaryColor,
+                )),
+          ],
+        ),
+
     );
   }
 }

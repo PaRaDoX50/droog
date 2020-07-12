@@ -18,7 +18,13 @@ class ResponseTile extends StatefulWidget {
   Function toggleLoading;
   bool isSolution;
 
-  ResponseTile({this.response, this.postByUserName, this.solutionChanged,this.toggleLoading,this.isSolution,this.scaffoldKey});
+  ResponseTile(
+      {this.response,
+      this.postByUserName,
+      this.solutionChanged,
+      this.toggleLoading,
+      this.isSolution,
+      this.scaffoldKey});
 
   @override
   _ResponseTileState createState() => _ResponseTileState();
@@ -34,11 +40,11 @@ class _ResponseTileState extends State<ResponseTile> {
     return await _databaseMethods.getUserDetailsByUid(
         targetUid: widget.response.responseByUid);
   }
+
   showOptions() {
     showDialog(
         context: context,
-        builder: (_) =>
-            AlertDialog(
+        builder: (_) => AlertDialog(
               contentPadding: EdgeInsets.zero,
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -58,37 +64,37 @@ class _ResponseTileState extends State<ResponseTile> {
                           Navigator.pop(context);
                         }
                       },
-                      child:
-                      ListTile(leading: Column(mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(Icons.report, color:Color(0xff4481bc)),
-                        ],
-                      ),
+                      child: ListTile(
+                        leading: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(Icons.report, color: Color(0xff4481bc)),
+                          ],
+                        ),
                         title: Text("Report"),
-                        subtitle: Text("This response is inappropriate")
-
-                        ,)
-
-
-
-                  ),
-
-                  ],
+                        subtitle: Text("This response is inappropriate"),
+                      )),
+                ],
               ),
             ));
   }
 
   Widget _buildSolutionButton() {
     return RaisedButton(
-      child: FittedBox(child: Text("Mark as Solution",overflow: TextOverflow.ellipsis,maxLines: 1,)),
+      child: FittedBox(
+          child: Text(
+        "Mark as Solution",
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+      )),
       color: Colors.green,
       textColor: Colors.white,
       onPressed: () async {
-        widget.toggleLoading();
+
         try {
-
-
-          widget.solutionChanged(documentSnapshot:widget.response.document,markAsSolution:true);
+          widget.toggleLoading();
+          await widget.solutionChanged(
+              documentSnapshot: widget.response.document, markAsSolution: true);
           widget.toggleLoading();
         } catch (e) {
           widget.toggleLoading();
@@ -106,7 +112,9 @@ class _ResponseTileState extends State<ResponseTile> {
       onPressed: () async {
         try {
           widget.toggleLoading();
-          await widget.solutionChanged(documentSnapshot:widget.response.document,markAsSolution:false);
+          await widget.solutionChanged(
+              documentSnapshot: widget.response.document,
+              markAsSolution: false);
 
           widget.toggleLoading();
         } catch (e) {
@@ -131,53 +139,70 @@ class _ResponseTileState extends State<ResponseTile> {
           String buttonText = voted ? "Un-Vote" : "Vote";
           Color buttonColor = voted ? Colors.lightGreen : Colors.green;
 
-          return  RaisedButton(
-              child: snapshot.hasData
-                  ? Text(buttonText,overflow: TextOverflow.ellipsis,)
-                  : CircularProgressIndicator(),
-              color: buttonColor,
-              textColor: Colors.white,
-
-              onPressed: () async {
-                if (_isFirstPress) {
-                  widget.toggleLoading();
-                  _isFirstPress = false;
-                  if (snapshot.hasData ) {
-
-                    try {
-                      voted
-                          ? await _databaseMethods.voteAResponse(
-                              responseDocument: widget.response.document,
-                              voteType: VoteType.undoUpVote,
-                            )
-                          : await _databaseMethods.voteAResponse(
-                              responseDocument: widget.response.document,
-                              voteType: VoteType.upVote,
-                            );
-                      setState(() {
-                        voted ? widget.response.votes-- : widget.response.votes++;
-
-                      });
-                      widget.toggleLoading();
-                    } catch (e) {
-                      widget.toggleLoading();
-                      print(e.toString());
-                    }
+          return RaisedButton(
+            child: snapshot.hasData
+                ? Text(
+                    buttonText,
+                    overflow: TextOverflow.ellipsis,
+                  )
+                : CircularProgressIndicator(),
+            color: buttonColor,
+            textColor: Colors.white,
+            onPressed: () async {
+              if (_isFirstPress) {
+                widget.toggleLoading();
+                _isFirstPress = false;
+                if (snapshot.hasData) {
+                  try {
+                    voted
+                        ? await _databaseMethods.voteAResponse(
+                            responseDocument: widget.response.document,
+                            voteType: VoteType.undoUpVote,
+                          )
+                        : await _databaseMethods.voteAResponse(
+                            responseDocument: widget.response.document,
+                            voteType: VoteType.upVote,
+                          );
+                    setState(() {
+                      voted ? widget.response.votes-- : widget.response.votes++;
+                    });
+                    widget.toggleLoading();
+                  } catch (e) {
+                    widget.toggleLoading();
+                    print(e.toString());
                   }
-                  _isFirstPress = true;
                 }
-              },
-            );
+                _isFirstPress = true;
+              }
+            },
+          );
         });
   }
 
   Widget _getCenterButton() {
-
     return (widget.postByUserName == Constants.userName && widget.isSolution)
         ? _buildMarkedSolutionButton()
         : ((widget.postByUserName == Constants.userName && !widget.isSolution)
             ? _buildSolutionButton()
             : _buildVoteButton());
+  }
+  String getDate(){
+    print((DateTime.fromMillisecondsSinceEpoch(
+      widget.response.time,
+    ).difference(DateTime.now()).inDays*(-1)).toString()+"helyah");
+   return DateTime.fromMillisecondsSinceEpoch(
+      widget.response.time,
+    ).difference(DateTime.now()).inDays*-1 >
+        0
+        ? DateFormat.MMMd().format(
+      DateTime.fromMillisecondsSinceEpoch(
+        widget.response.time,
+      ),
+    )
+        : DateFormat("hh:mm a")
+        .format(DateTime.fromMillisecondsSinceEpoch(
+      widget.response.time,
+    ));
   }
 
   @override
@@ -194,7 +219,7 @@ class _ResponseTileState extends State<ResponseTile> {
                   leading: snapshot.hasData
                       ? ClipOval(
                           child: CachedNetworkImage(
-                            imageUrl:snapshot.data.profilePictureUrl,
+                            imageUrl: snapshot.data.profilePictureUrl,
 //                            loadingBuilder: (BuildContext context, Widget child,
 //                                ImageChunkEvent loadingProgress) {
 //                              if (loadingProgress == null) return child;
@@ -213,13 +238,12 @@ class _ResponseTileState extends State<ResponseTile> {
                       ? Text(snapshot.data.userName)
                       : Text(""),
                   subtitle: Text(
-                    DateFormat.MMMd().format(
-                      DateTime.fromMicrosecondsSinceEpoch(
-                        widget.response.time,
-                      ),
-                    ),
+                   getDate()
                   ),
-                  trailing: IconButton(icon:Icon(Icons.more_vert), onPressed: showOptions,),
+                  trailing:widget.response.responseByUserName !=  Constants.userName ? IconButton(
+                    icon: Icon(Icons.more_vert),
+                    onPressed: showOptions,
+                  ) : null,
                 );
               }),
           Padding(
@@ -249,20 +273,25 @@ class _ResponseTileState extends State<ResponseTile> {
               : Container(),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Row(
-
+            child: Stack(alignment: Alignment.centerLeft,
               children: <Widget>[
-                 Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      FittedBox(child: Icon(Icons.check_circle)),
-                      SizedBox(width: 8/2),
-                      FittedBox(child: Text("${widget.response.votes} Votes")),
-                    ],
-                  ),
-                  SizedBox(width: 20,),
-                 _getCenterButton()
 
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        FittedBox(child: Icon(Icons.check_circle)),
+                        SizedBox(width: 8 / 2),
+                        FittedBox(child: Text("${widget.response.votes} Votes")),
+                      ],
+                    ),
+
+
+
+                Row(mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    _getCenterButton(),
+                  ],
+                )
               ],
             ),
           )

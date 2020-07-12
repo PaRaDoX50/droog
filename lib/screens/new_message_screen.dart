@@ -53,7 +53,7 @@ class _NewMessageScreenState extends State<NewMessageScreen> {
                 itemCount: searchResults.length,
                 itemBuilder: (_, index) {
 
-                  if(searchResults[index].userName != Constants.userName) {
+                  if(searchResults[index].userName == Constants.userName) {
                     return NewMessageTile(
                       user: searchResults[index],
                     );

@@ -76,10 +76,8 @@ class _OTPscreenState extends State<OTPscreen> {
             children: <Widget>[
               Column(
                 children: <Widget>[
-                  Image.asset("assets/images/droog_pattern.png"),
-                  SizedBox(
-                    height: 32,
-                  ),
+
+                  SizedBox(height: 32,),
                   Text(
                     "Enter confirmation code",
                     style: TextStyle(fontSize: 25),
@@ -94,9 +92,11 @@ class _OTPscreenState extends State<OTPscreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(
-                        widget.number,
-                        style: TextStyle(fontSize: 15),
+                      FittedBox(
+                        child: Text(
+                          widget.number,
+                          style: TextStyle(fontSize: 15),
+                        ),
                       ),
                       SizedBox(
                         width: 8,
@@ -105,10 +105,12 @@ class _OTPscreenState extends State<OTPscreen> {
                         onTap: () =>
                             Navigator.pushReplacementNamed(
                                 context, MobileVerification.route),
-                        child: Text(
-                          "Change",
-                          style:
-                          TextStyle(fontSize: 15, color: Color(0xffdf1d38)),
+                        child: FittedBox(
+                          child: Text(
+                            "Change/Resend",
+                            style:
+                            TextStyle(fontSize: 15, color: Theme.of(context).buttonColor),
+                          ),
                         ),
                       ),
                     ],
@@ -122,6 +124,7 @@ class _OTPscreenState extends State<OTPscreen> {
                           .size
                           .width * .7,
                       child: PinCodeTextField(
+
                         controller: codeController,
                         length: 6,
                         textInputType: TextInputType.number,
@@ -132,16 +135,8 @@ class _OTPscreenState extends State<OTPscreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: <Widget>[
-                    Text(
-                      "Resend OTP",
-                      style: TextStyle(
-                        color: Color(0xffdf1d38),
-                        fontSize: 15,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 16,
-                    ),
+
+
                     Builder(builder: (ctx) {
                       return ButtonTheme(
                         shape: RoundedRectangleBorder(
@@ -160,7 +155,7 @@ class _OTPscreenState extends State<OTPscreen> {
                                 color: Colors.white,
                               ),
                             ),
-                            color: Color(0xffdf1d38),
+                            color: Theme.of(context).buttonColor,
                             onPressed: () async {
                               setState(() {
                                 showLoading = true;

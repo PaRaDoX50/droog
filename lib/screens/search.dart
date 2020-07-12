@@ -80,17 +80,20 @@ class _SearchScreenState extends State<SearchScreen> {
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            SearchTextField(
-              onTextChanged: getSearchResults,
-              controller: searchController,
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SearchTextField(
+                onTextChanged: getSearchResults,
+                controller: searchController,
+              ),
             ),
             searchResults.isNotEmpty
                 ? Expanded(
                     child: ListView.builder(
                     itemCount: searchResults.length,
                     itemBuilder: (_, index) {
-
-                      if(searchResults[index].userName == Constants.userName) {
+//                      searchResults[index].userName != Constants.userName
+                      if(true) {
                         return SearchTile(
                           user: searchResults[index],
                         );

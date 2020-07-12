@@ -10,6 +10,7 @@ import 'package:droog/services/sharedprefs_methods.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUp extends StatelessWidget {
@@ -28,22 +29,23 @@ class SignUp extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: RaisedButton(
-          color: Color(0xff4688f1),
+elevation: 5,
+          color:Colors.white,
           child: Container(
-            width: double.infinity,
+            width: MediaQuery.of(context).size.width*.6,
             height: availableHeight * .05,
             child: Row(
               children: <Widget>[
                 Image.asset(
-                  "assets/images/facebook_icon.png",
-                  height: 20,
-                  width: 20,
+
+                  "assets/images/google icon.png",height: 20,width: 20,
+
                 ),
                 Expanded(
                   child: Center(
                     child: Text(
                       "Sign In with Google",
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.grey),
                     ),
                   ),
                 ),
@@ -93,9 +95,10 @@ class SignUp extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: RaisedButton(
+          elevation: 5,
           color: Color(0xff3b5998),
           child: SizedBox(
-            width: double.infinity,
+            width: MediaQuery.of(context).size.width*.6,
             height: availableHeight * .05,
             child: Row(
               children: <Widget>[
@@ -176,14 +179,23 @@ class SignUp extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Image.asset("assets/images/signup.png", width: double.infinity),
-          googleSigninButton,
-          facebookSigninButton,
-        ],
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Text("droog",style: GoogleFonts.montserrat(fontSize: 80/2,fontWeight: FontWeight.bold),),
+            Image.asset("assets/images/signup.png", width: double.infinity),
+            
+            Column(
+              children: <Widget>[
+                googleSigninButton,
+                facebookSigninButton,
+              ],
+            ),
+           
+          ],
+        ),
       ),
     );
   }

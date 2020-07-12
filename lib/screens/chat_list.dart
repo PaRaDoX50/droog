@@ -12,6 +12,7 @@ import 'package:droog/utils/theme_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 class ChatList extends StatefulWidget {
@@ -91,34 +92,46 @@ class _ChatListState extends State<ChatList> {
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   List<DocumentSnapshot> data = snapshot.data.documents;
-                  return SliverList(
-                    delegate: SliverChildBuilderDelegate((_, index) {
-                      final targetUserName =
-                          data[index]["users"][1] == Constants.userName
-                              ? data[index]["users"][0]
-                              : data[index]["users"][1];
-
-                      return InkWell(
-                        onTap: () async {
-                          try {
-                            User user =
-                                await _databaseMethods.getUserDetailsByUsername(
-                                    targetUserName: targetUserName);
-                            Navigator.pushNamed(context, ChatScreen.route,
-                                arguments: user);
-                          } catch (e) {
-                            print(e.toString());
-                          }
-                        },
-                        child: ChatTile(
-                          targetUserName: targetUserName,
-                        ),
-                      );
-                    }, childCount: data.length),
-                  );
+                  if (snapshot.data.documents.length > 0) {
+                    return SliverList(
+                      delegate: SliverChildBuilderDelegate((_, index) {
+                        final targetUserName =
+                            data[index]["users"][1] == Constants.userName
+                                ? data[index]["users"][0]
+                                : data[index]["users"][1];
+                    
+                        return InkWell(
+                          onTap: () async {
+                            try {
+                              User user =
+                                  await _databaseMethods.getUserDetailsByUsername(
+                                      targetUserName: targetUserName);
+                              Navigator.pushNamed(context, ChatScreen.route,
+                                  arguments: user);
+                            } catch (e) {
+                              print(e.toString());
+                            }
+                          },
+                          child: ChatTile(
+                            targetUserName: targetUserName,
+                          ),
+                        );
+                      }, childCount: data.length),
+                    );
+                  }
+                  else{
+                   return SliverFillRemaining(child: Center(child: Column(
+                     mainAxisSize: MainAxisSize.min,
+                     children: <Widget>[
+                       Image.asset("assets/images/no_conversation.png"),
+                       SizedBox(height: 8,),
+                       FittedBox(child: Text("No conversations!",style: GoogleFonts.montserrat(fontSize: 20,),))
+                     ],
+                   ),));
+                  }
                 } else {
                   return SliverToBoxAdapter(
-                    child: CircularProgressIndicator(),
+                    child: Center(child: CircularProgressIndicator()),
                   );
                 }
               })

@@ -4,6 +4,7 @@ import 'package:droog/services/database_methods.dart';
 import 'package:droog/widgets/feed_tile.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
 
 class Feed extends StatefulWidget {
@@ -37,7 +38,7 @@ class _FeedState extends State<Feed> {
 
     return Scaffold(
       key: _feedScaffoldKey,
-      backgroundColor: Color(0xfffcfcfd),
+      backgroundColor: Colors.white,
       body: FutureBuilder<List<String>>(
           future: _databaseMethods.getConnectionUids(),
           builder: (_, snapshot) {
@@ -79,11 +80,23 @@ class _FeedState extends State<Feed> {
                       scrollOffset: 100,
                       child: ListView(
                           children:posts.map((e) => FeedTile(post: e,feedKey: _feedScaffoldKey,)).toList() ,),
-                    ) : Center(child: Text("No Posts To Display"),);
+                    ) : Center(child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Image.asset("assets/images/empty_feed.png"),
+                        FittedBox(child: Text("No Posts To Display",style: GoogleFonts.montserrat(fontSize: 20),)),
+                      ],
+                    ),);
                   }
                   else {
                     if(snapshot.connectionState == ConnectionState.done ){
-                      return Center(child: Text("No Posts To Display"),);
+                      return Center(child:  Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Image.asset("assets/images/empty_feed.png"),
+                          FittedBox(child: Text("No Posts To Display",style: GoogleFonts.montserrat(fontSize: 20),)),
+                        ],
+                      ),);
                     }
                     return Center(child: CircularProgressIndicator());
                   }

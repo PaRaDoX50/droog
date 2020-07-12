@@ -1,7 +1,9 @@
 import 'package:assorted_layout_widgets/assorted_layout_widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
 import 'package:droog/models/user.dart';
+import 'package:droog/screens/profile_setup.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/widgets/skills_container.dart';
 import 'package:flutter/cupertino.dart';
@@ -27,15 +29,15 @@ class _ProfileContainerState extends State<ProfileContainer> {
     String fullName = widget.user.fullName;
     String profilePictureUrl = widget.user.profilePictureUrl;
     String description = widget.user.description;
-    String askedCount = "10";
-    String droogsCount = "250";
-    String solvedCount = "120";
+    int askedCount = widget.user.askedCount != null ? widget.user.askedCount : 0;
+    int droogsCount = widget.user.droogsCount != null ? widget.user.droogsCount : 0;
+    int solvedCount = widget.user.solvedCount != null ? widget.user.solvedCount : 0;
 
     return ColumnSuper(
       innerDistance: -30,
       children: <Widget>[
         Container(
-          color: Theme.of(context).primaryColor,
+          decoration: BoxDecoration(gradient: LinearGradient(colors: [Color(0xff1948a0),Color(0xff3089e0)],end: Alignment.bottomCenter,begin: Alignment.topCenter)),
           child: Padding(
             padding: const EdgeInsets.only(left: 16.0, right: 16, bottom: 8),
             child: Column(
@@ -58,19 +60,25 @@ class _ProfileContainerState extends State<ProfileContainer> {
                   ),
                   trailing: RaisedButton(
                     onPressed: () {
-                      switch(_connectionStatus){
-                        case ConnectionStatus.requestNotSent:
-                          _sendRequest();
-                          break;
-                        case ConnectionStatus.requestSent:
-                          _cancelRequest();
-                          break;
-                        case ConnectionStatus.droogs:
-                          _unFollow();
-                          break;
+                      if (userName != Constants.userName) {
+                        switch(_connectionStatus){
+                          case ConnectionStatus.requestNotSent:
+                            _sendRequest();
+                            break;
+                          case ConnectionStatus.requestSent:
+                            _cancelRequest();
+                            break;
+                          case ConnectionStatus.droogs:
+                            _unFollow();
+                            break;
+                        }
+
+                      }
+                      else{
+                        Navigator.pushNamed(context, ProfileSetup.route,arguments: RoutedProfileSetupFor.edit);
                       }
                     },
-                    child: FutureBuilder<String>(
+                    child: userName != Constants.userName ? FutureBuilder<String>(
                         future: _followButtonText,
                         builder: (context, snapshot) {
                           return snapshot.hasData
@@ -80,8 +88,8 @@ class _ProfileContainerState extends State<ProfileContainer> {
                                     style: Theme.of(context).textTheme.button,
                                   ),
                               )
-                              : CircularProgressIndicator();
-                        }),
+                              : SizedBox(height:15,width:15,child: CircularProgressIndicator());
+                        }) : FittedBox(child: Text("Edit", style: Theme.of(context).textTheme.button,)),
                   ),
                 ),
                 SizedBox(
@@ -104,7 +112,7 @@ class _ProfileContainerState extends State<ProfileContainer> {
                           style: TextStyle(color: Colors.white),
                         ),
                         Text(
-                          droogsCount,
+                          droogsCount.toString(),
                           style: TextStyle(color: Colors.white),
                         )
                       ],
@@ -116,7 +124,7 @@ class _ProfileContainerState extends State<ProfileContainer> {
                           style: TextStyle(color: Colors.white),
                         ),
                         Text(
-                          askedCount,
+                          askedCount.toString(),
                           style: TextStyle(color: Colors.white),
                         )
                       ],
@@ -128,7 +136,7 @@ class _ProfileContainerState extends State<ProfileContainer> {
                           style: TextStyle(color: Colors.white),
                         ),
                         Text(
-                          solvedCount,
+                          solvedCount.toString(),
                           style: TextStyle(color: Colors.white),
                         )
                       ],
@@ -144,7 +152,7 @@ class _ProfileContainerState extends State<ProfileContainer> {
         ),
         SizedBox(
           width: double.infinity,
-          child: SkillsContainer(
+          child: SkillsContainer(userName: userName,
             skills:widget.user.skills != null? widget.user.skills : [],
             achievements: widget.user.achievements !=null ? widget.user.achievements : [],
           ),
@@ -161,9 +169,9 @@ class _ProfileContainerState extends State<ProfileContainer> {
       case ConnectionStatus.requestSent:
         return "Cancel Request";
       case ConnectionStatus.droogs:
-        return "Un-follow";
+        return "Disconnect";
       default:
-        return "Follow";
+        return "Connect";
     }
   }
 

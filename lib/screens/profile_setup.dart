@@ -17,9 +17,6 @@ import 'package:image_picker/image_picker.dart';
 class ProfileSetup extends StatefulWidget {
   static final String route = "/profile_setup";
 
-
-
-
   @override
   _ProfileSetupState createState() => _ProfileSetupState();
 }
@@ -206,7 +203,8 @@ class _ProfileSetupState extends State<ProfileSetup> {
       ),
     );
   }
-  loadInitialData(){
+
+  loadInitialData() {
     firstNameController = TextEditingController(text: Constants.firstName);
     lastNameController = TextEditingController(text: Constants.lastName);
     userNameController = TextEditingController(text: Constants.userName);
@@ -215,8 +213,9 @@ class _ProfileSetupState extends State<ProfileSetup> {
 
   @override
   Widget build(BuildContext context) {
-    profileSetupFor = ModalRoute.of(context).settings.arguments as RoutedProfileSetupFor;
-    if(profileSetupFor == RoutedProfileSetupFor.edit){
+    profileSetupFor =
+        ModalRoute.of(context).settings.arguments as RoutedProfileSetupFor;
+    if (profileSetupFor == RoutedProfileSetupFor.edit) {
       loadInitialData();
     }
     Widget mainWidget = SingleChildScrollView(
@@ -255,7 +254,7 @@ class _ProfileSetupState extends State<ProfileSetup> {
                           )
                         : profileSetupFor == RoutedProfileSetupFor.edit
                             ? CircleAvatar(
-                      radius: 35,
+                                radius: 35,
                                 child: ClipOval(
                                   child: CachedNetworkImage(
                                     imageUrl: Constants.profilePictureUrl,
@@ -263,19 +262,21 @@ class _ProfileSetupState extends State<ProfileSetup> {
                                 ),
                               )
                             : Center(
-                                child: Icon(
-                                  Icons.account_circle,
-                                  size: 80,
-                                ),
-                              ),
+                                child: CircleAvatar(
+                                child: ClipOval(
+                                    child: Image.asset(
+                                        "assets/images/camera.png"),),
+                                radius: 35,
+                                backgroundColor: Colors.transparent,
+                              ),),
                   ),
                   Positioned(
                     right: 20,
                     top: 20,
+
                     child: SizedBox(
                       height: 30,
                       child: RaisedButton(
-
                         child: Text("Add",
                             style: Theme.of(context).textTheme.button),
                         color: Theme.of(context).buttonColor,
@@ -298,26 +299,27 @@ class _ProfileSetupState extends State<ProfileSetup> {
                 onPressed: () async {
                   if (_formKey.currentState.validate()) {
                     if (await _databaseMethods.userNameAvailable(
-                        userName: userNameController.text) || userNameController.text == Constants.userName) {
-                      if (_takenImage != null || profileSetupFor == RoutedProfileSetupFor.edit) {
+                            userName: userNameController.text) ||
+                        userNameController.text == Constants.userName) {
+                      if (_takenImage != null ||
+                          profileSetupFor == RoutedProfileSetupFor.edit) {
                         setState(() {
                           showLoading = true;
                         });
 
                         try {
-
                           if (_takenImage != null) {
                             String downloadUrl =
                                 await _databaseMethods.uploadPicture(
                                     file: _takenImage,
                                     address: "profilePictures");
 
-                              await _databaseMethods.completeUserProfile(
-                                  userName: userNameController.text,
-                                  description: descriptionController.text,
-                                  firstName: firstNameController.text,
-                                  lastName: lastNameController.text,
-                                  profilePictureUrl: downloadUrl);
+                            await _databaseMethods.completeUserProfile(
+                                userName: userNameController.text,
+                                description: descriptionController.text,
+                                firstName: firstNameController.text,
+                                lastName: lastNameController.text,
+                                profilePictureUrl: downloadUrl);
 
                             await _sharedPrefsMethods.completeUserPrefs(
                                 firstName: firstNameController.text,
@@ -326,8 +328,7 @@ class _ProfileSetupState extends State<ProfileSetup> {
                                 profilePictureUrl: downloadUrl,
                                 description: descriptionController.text,
                                 loggedInStatus: LoggedInStatus.loggedIn);
-                          }
-                          else{
+                          } else {
                             await _databaseMethods.completeUserProfile(
                                 userName: userNameController.text,
                                 description: descriptionController.text,
@@ -344,14 +345,14 @@ class _ProfileSetupState extends State<ProfileSetup> {
                                 loggedInStatus: LoggedInStatus.loggedIn);
                           }
 
-
-
                           if (profileSetupFor == RoutedProfileSetupFor.setup) {
+                            print("reachedIf");
                             Navigator.pushReplacementNamed(
                                 context, SkillsSetup.route);
-                          }
-                          else if(profileSetupFor == RoutedProfileSetupFor.edit){
-                            Navigator.pushNamedAndRemoveUntil(context, Home.route, (r) => false);
+                          } else if (profileSetupFor ==
+                              RoutedProfileSetupFor.edit) {
+                            Navigator.pushNamedAndRemoveUntil(
+                                context, Home.route, (r) => false);
                           }
                           setState(() {
                             showLoading = false;
@@ -383,16 +384,18 @@ class _ProfileSetupState extends State<ProfileSetup> {
       ),
     );
     return Scaffold(
-      appBar: AppBar(elevation: 0,),
+      appBar: AppBar(
+        elevation: 0,
+      ),
       key: _scaffoldKey,
       body: Container(
         height: double.infinity,
         width: double.infinity,
         decoration: BoxDecoration(
             gradient: LinearGradient(stops: [
-          1,
           0,
-          0
+          .5,
+          1,
         ], colors: [
           Color(0xff1948a0),
           Color(0xff2d63ad),

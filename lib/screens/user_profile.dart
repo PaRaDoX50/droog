@@ -71,7 +71,7 @@ class _UserProfileState extends State<UserProfile>
       body: CustomScrollView(
         slivers: <Widget>[
           SliverAppBar(
-            actions: <Widget>[Icon(Icons.search), Icon(Icons.more_vert)],
+           pinned: true,
           ),
           SliverToBoxAdapter(
             child: ProfileContainer(user: user,),

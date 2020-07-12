@@ -2,6 +2,7 @@ import 'package:droog/models/enums.dart';
 import 'package:droog/screens/chat_list.dart';
 import 'package:droog/screens/chat_screen.dart';
 import 'package:droog/screens/feed.dart';
+import 'package:droog/screens/feedback.dart';
 import 'package:droog/screens/image_message_screen.dart';
 import 'package:droog/screens/myclips_screen.dart';
 import 'package:droog/screens/new_message_screen.dart';
@@ -10,7 +11,7 @@ import 'package:droog/screens/responses_screen.dart';
 import 'package:droog/screens/share_screen.dart';
 import 'package:droog/screens/skills_setup.dart';
 import 'package:droog/screens/user_profile.dart';
-
+import 'package:droog/screens/all_requests.dart';
 import 'package:droog/screens/home.dart';
 import 'package:droog/screens/introduction_screen.dart';
 import 'package:droog/screens/mobile_verification.dart';
@@ -45,7 +46,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent),
+      SystemUiOverlayStyle.light.copyWith(statusBarColor:Colors.black),
     );
 
     return MaterialApp(
@@ -65,7 +66,7 @@ class _MyAppState extends State<MyApp> {
           if (snapshot.hasData) {
             print(snapshot.data);
             if(snapshot.data == LoggedInStatus.loggedIn.index){
-              return Home();
+              return SignUp();
             }
             else if(snapshot.data == LoggedInStatus.halfProfileLeft.index){
               return ProfileSetup();
@@ -94,6 +95,8 @@ class _MyAppState extends State<MyApp> {
         NewMessageScreen.route:(_) => NewMessageScreen(),
         MyClipsScreen.route:(_)=> MyClipsScreen(),
         SkillsSetup.route:(_)=>SkillsSetup(),
+        AllRequests.route:(_)=>AllRequests(),
+        FeedbackScreen.route:(_)=>FeedbackScreen(),
       },
     );
   }

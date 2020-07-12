@@ -89,7 +89,7 @@ class _ShareScreenState extends State<ShareScreen> {
         elevation: 5,
         backgroundColor:Color(0xfffcfcfd),
         title: Text(
-          "Share",
+          "Share To",
           style: GoogleFonts.montserrat(color: Theme.of(context).primaryColor),
         ),
       ),

@@ -161,102 +161,104 @@ class _SkillsSetupState extends State<SkillsSetup> {
     return Scaffold(
         appBar: AppBar(elevation: 0,),
         key: _scaffoldKey,
-        backgroundColor: Theme
-            .of(context)
-            .primaryColor,
+
         body:
-        Stack(
-          children: <Widget>[
-            Center(
-              child: SingleChildScrollView(
-                child: Card(
-                  margin: EdgeInsets.all(20),
+        Container(
+          decoration: BoxDecoration(
+              gradient: LinearGradient(stops: [
+                0,
+                .5,
+                1,
+              ], colors: [
+                Color(0xff1948a0),
+                Color(0xff2d63ad),
+                Color(0xff4481bc)
+              ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
+          child: Stack(
+            children: <Widget>[
+              Center(
+                child: SingleChildScrollView(
+                  child: Card(
+                    margin: EdgeInsets.all(20),
 
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      children: <Widget>[
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: <Widget>[
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
 
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Text("Skills",
-                              style: MyThemeData.blackBold12.copyWith(
-                                  fontSize: 20),),
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Text("Skills",
+                                style: MyThemeData.blackBold12.copyWith(
+                                    fontSize: 20),),
 
-                            Container(
-                                constraints: BoxConstraints(
-                                  minHeight: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .height / 8,),
-                                child: Column(
-                                  children: [...skills
-                                      .map((e) =>
-                                      Tile(
-                                        qualityType: QualityType.skill,
-                                        text: e,
-                                        deleteFunction: deleteQuality,))
-                                      .toList()
-                                  ],)),
-                            SizedBox(height: 8,),
-                            _buildTextField(
-                                qualityType: QualityType.skill),
-                          ],
-                        ),
+                              Container(
 
-                        SizedBox(height: 16,),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                                  child: Column(
+                                    children: [...skills
+                                        .map((e) =>
+                                        Tile(
+                                          qualityType: QualityType.skill,
+                                          text: e,
+                                          deleteFunction: deleteQuality,))
+                                        .toList()
+                                    ],)),
+                              SizedBox(height: 8,),
+                              _buildTextField(
+                                  qualityType: QualityType.skill),
+                            ],
+                          ),
 
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Text("Achievements",
-                              style: MyThemeData.blackBold12.copyWith(
-                                  fontSize: 20),),
+                          SizedBox(height: 16,),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
 
-                            Container(
-                                constraints: BoxConstraints(
-                                  minHeight: MediaQuery
-                                      .of(context)
-                                      .size
-                                      .height / 8,),
-                                child: Column(
-                                  children: [...achievements.map((e) =>
-                                      Tile(
-                                        deleteFunction: deleteQuality,
-                                        qualityType: QualityType.achievement,
-                                        text: e,)).toList()
-                                  ],)),
-                            SizedBox(height: 8,),
-                            _buildTextField(
-                                qualityType: QualityType.achievement),
-                          ],
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Text("Achievements",
+                                style: MyThemeData.blackBold12.copyWith(
+                                    fontSize: 20),),
 
-                        ),
-                        SizedBox(height: 16,),
-                        RaisedButton(
-                          child:
-                          Text("Submit", style: Theme
-                              .of(context)
-                              .textTheme
-                              .button),
-                          color: Theme
-                              .of(context)
-                              .buttonColor,
-                          onPressed: _showLoading == false ? submitData : null,
-                        ),
-                      ],
+                              Container(
+
+                                  child: Column(
+                                    children: [...achievements.map((e) =>
+                                        Tile(
+                                          deleteFunction: deleteQuality,
+                                          qualityType: QualityType.achievement,
+                                          text: e,)).toList()
+                                    ],)),
+                              SizedBox(height: 8,),
+                              _buildTextField(
+                                  qualityType: QualityType.achievement),
+                            ],
+
+                          ),
+                          SizedBox(height: 16,),
+                          RaisedButton(
+                            child:
+                            Text("Submit", style: Theme
+                                .of(context)
+                                .textTheme
+                                .button),
+                            color: Theme
+                                .of(context)
+                                .buttonColor,
+                            onPressed: _showLoading == false ? submitData : null,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            _showLoading
-                ? Center(child: CircularProgressIndicator(),)
-                : Container(),
-          ],
+              _showLoading
+                  ? Center(child: CircularProgressIndicator(),)
+                  : Container(),
+            ],
+          ),
         ));
 
 

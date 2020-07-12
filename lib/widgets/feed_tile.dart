@@ -6,6 +6,7 @@ import 'package:droog/screens/feed.dart';
 import 'package:droog/screens/new_response_screen.dart';
 import 'package:droog/screens/responses_screen.dart';
 import 'package:droog/screens/share_screen.dart';
+import 'package:droog/screens/user_profile.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/widgets/expandable_text.dart';
 import 'package:flutter/cupertino.dart';
@@ -111,6 +112,21 @@ class _FeedTileState extends State<FeedTile> {
               ),
             ));
   }
+  String getDate(){
+    return DateTime.fromMillisecondsSinceEpoch(
+      widget.post.time,
+    ).difference(DateTime.now()).inDays*(-1) >
+        0
+        ? DateFormat.MMMd().format(
+      DateTime.fromMillisecondsSinceEpoch(
+        widget.post.time,
+      ),
+    )
+        : DateFormat("hh:mm a")
+        .format(DateTime.fromMillisecondsSinceEpoch(
+      widget.post.time,
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -129,9 +145,11 @@ class _FeedTileState extends State<FeedTile> {
               builder: (context, snapshot) {
                 return ListTile(
                   leading: snapshot.hasData
-                      ? ClipOval(
+                      ? GestureDetector(
+                    onTap: ()=>Navigator.pushNamed(context, UserProfile.route,arguments: snapshot.data),
+                        child: ClipOval(
                     child: CachedNetworkImage(
-                      imageUrl: snapshot.data.profilePictureUrl,
+                        imageUrl: snapshot.data.profilePictureUrl,
 //                            loadingBuilder: (BuildContext context, Widget child,
 //                                ImageChunkEvent loadingProgress) {
 //                              if (loadingProgress == null) return child;
@@ -144,27 +162,27 @@ class _FeedTileState extends State<FeedTile> {
 //                              );
 //                            },
                     ),
-                  )
+                  ),
+                      )
                       : CircleAvatar(
                     child: Icon(
                       Icons.attachment,
                     ),
                   ),
                   title: snapshot.hasData
-                      ? Text(
+                      ? GestureDetector(
+                    onTap:  ()=>Navigator.pushNamed(context, UserProfile.route,arguments: snapshot.data),
+                        child: Text(
                     snapshot.data.userName,
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.montserrat(),
-                  )
+                  ),
+                      )
                       : Text(
                     "",
                   ),
                   subtitle: Text(
-                    DateFormat.MMMd().format(
-                      DateTime.fromMicrosecondsSinceEpoch(
-                        widget.post.time,
-                      ),
-                    ),
+                    getDate(),
                     overflow: TextOverflow.ellipsis,
                   ),
                   trailing:widget.post.postByUserName != Constants.userName ? IconButton(
@@ -228,8 +246,8 @@ class _FeedTileState extends State<FeedTile> {
                             children: <Widget>[
                               Text(
                                 snapshot.hasData
-                                    ? "See all ${snapshot.data} Responses"
-                                    : "See all Responses",
+                                    ? "${snapshot.data} Responses"
+                                    : "? Responses",
                                 style: TextStyle(
                                     color:
                                     Theme

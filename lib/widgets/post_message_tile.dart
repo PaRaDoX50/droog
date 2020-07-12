@@ -124,7 +124,7 @@ class _PostMessageWidgetState extends State<PostMessageWidget> {
                               ),
                         subtitle: Text(
                           DateFormat.MMMd().format(
-                            DateTime.fromMicrosecondsSinceEpoch(
+                            DateTime.fromMillisecondsSinceEpoch(
                               widget.post.time,
                             ),
                           ),

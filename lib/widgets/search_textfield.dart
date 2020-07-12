@@ -18,7 +18,7 @@ class SearchTextField extends StatelessWidget {
             child: SizedBox(
               height: 35,
               child: TextField(
-                maxLines: null,
+                maxLines: 1,
                 controller: controller,
 
                 style: TextStyle(color: Colors.black),
@@ -38,7 +38,7 @@ class SearchTextField extends StatelessWidget {
 //              ),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(style: BorderStyle.solid),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
               ),
