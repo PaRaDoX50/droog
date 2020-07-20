@@ -26,10 +26,10 @@ class _ShareScreenState extends State<ShareScreen> {
   List<User> searchResults = [];
 
   getSearchResults() async {
-    searchResults = await _databaseMethods.searchUser(searchController.text);
-    setState(() {
+    searchResults = await _databaseMethods.searchYourDroogs(
+        keyword: searchController.text);
+    setState(() {});
 
-    });
   }
 
 //  Widget _buildSearchTextField() {

@@ -149,7 +149,7 @@ class DatabaseMethods {
     return searchResults;
   }
 
-  Future<List<User>> searchUserForANewMessage({String keyword}) async {
+  Future<List<User>> searchYourDroogs({String keyword}) async {
     QuerySnapshot snapshotDroogs = await _database
         .collection("users")
         .document(Constants.uid)
@@ -169,6 +169,35 @@ class DatabaseMethods {
           .collection("users")
           .where("uid", whereIn: uids)
           .where("searchParams", arrayContains: keyword)
+          .getDocuments();
+      List<User> results = snapshotResults.documents
+          .map((e) => _userFromFirebaseUser(userDocument: e))
+          .toList();
+      return results;
+    } else {
+      return [];
+    }
+  }
+  Future<List<User>> getListOfYourDroogs({String keyword}) async {
+    QuerySnapshot snapshotDroogs = await _database
+        .collection("users")
+        .document(Constants.uid)
+        .collection("droogs")
+        .getDocuments();
+//    QuerySnapshot snapshotFollowers = await _database
+//        .collection("users")
+//        .document(Constants.uid)
+//        .collection("followers")
+//        .getDocuments();
+//    _database.collection("users").where()
+    final uids = (snapshotDroogs.documents.map((e) => e["uid"]).toList());
+//    uids.addAll(
+//        snapshotFollowers.documents.map((e) => e["uid"]).toList());
+    if (uids.isNotEmpty) {
+      QuerySnapshot snapshotResults = await _database
+          .collection("users")
+          .where("uid", whereIn: uids)
+
           .getDocuments();
       List<User> results = snapshotResults.documents
           .map((e) => _userFromFirebaseUser(userDocument: e))
@@ -375,12 +404,24 @@ class DatabaseMethods {
 
   Future<void> cancelConnectionRequest({String targetUid}) async {
     //Un-send Follow Request
-    await _database
-        .collection("users")
-        .document(targetUid)
-        .collection("requests")
-        .document(Constants.uid)
-        .delete();
+    try {
+      await _database
+          .collection("users")
+          .document(targetUid)
+          .collection("requests")
+          .document(Constants.uid)
+          .delete();
+      await _database
+          .collection("users")
+          .document(Constants.uid)
+          .collection("requests")
+          .document(targetUid)
+          .delete();
+      print("deleted");
+    }  catch (e) {
+      // TODO
+      print(e.toString());
+    }
 
     //Access target user by its uid -> under collections of "requests", delete document named the uid of the user who sent the request.
   }

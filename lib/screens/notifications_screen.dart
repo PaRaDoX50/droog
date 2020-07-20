@@ -34,11 +34,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     userUpdates = _databaseMethods.getUpdates();
   }
 
-  showSnackBarAndSetState(String text) {
-    _scaffoldKey.currentState.showSnackBar(MyThemeData.getSnackBar(text: text));
+  showSnackBarAndSetState(String text)  {
     setState(() {
       userRequests = _databaseMethods.getRequests(limitTo3: true);
     });
+
+    _scaffoldKey.currentState.showSnackBar(MyThemeData.getSnackBar(text: text));
+
   }
 
   Widget _futureBuilderRequests(AsyncSnapshot snapshot) {

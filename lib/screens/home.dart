@@ -19,6 +19,7 @@ import 'package:droog/screens/user_profile.dart';
 import 'package:droog/services/auth.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
+import 'package:droog/widgets/animated_indexed_stack.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -219,7 +220,8 @@ class _HomeState extends State<Home> {
       body: GestureDetector(
         onHorizontalDragStart: (_)=>FocusScope.of(context).unfocus(),
         onTap: ()=>FocusScope.of(context).unfocus(),
-        child: IndexedStack(
+        child: FadeIndexedStack(
+          duration: Duration(milliseconds: 390),
           children: widgets,
           index: _currentIndex,
         ),

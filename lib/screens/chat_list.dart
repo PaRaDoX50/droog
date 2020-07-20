@@ -154,14 +154,17 @@ class ChatTile extends StatelessWidget {
                     child: Column(
                       children: <Widget>[
                         ListTile(
-                          leading: CircleAvatar(
-                            radius: 25,
-                            child: snapshot.hasData
-                                ? ClipOval(
-                                    child: CachedNetworkImage(
-                                    imageUrl: snapshot.data.profilePictureUrl,
-                                  ))
-                                : Icon(Icons.account_circle),
+                          leading: Hero(
+                            tag:snapshot.hasData ? snapshot.data.profilePictureUrl : "  ",
+                            child: CircleAvatar(
+                              radius: 25,
+                              child: snapshot.hasData
+                                  ? ClipOval(
+                                      child: CachedNetworkImage(
+                                      imageUrl: snapshot.data.profilePictureUrl,
+                                    ))
+                                  : Icon(Icons.account_circle),
+                            ),
                           ),
                           title: Text(
                             targetUserName,

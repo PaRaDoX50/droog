@@ -145,15 +145,7 @@ class _PostMessageWidgetState extends State<PostMessageWidget> {
                         aspectRatio: 4 / 3,
                         child: CachedNetworkImage(
                           imageUrl: widget.post.imageUrl,
-                          progressIndicatorBuilder:
-                              (context, child, loadingProgress) {
-//                if (loadingProgress == null) return ;
-                            return CircularProgressIndicator(
-                              value: loadingProgress.totalSize != null
-                                  ? loadingProgress.progress
-                                  : null,
-                            );
-                          },
+
                           width: double.infinity,
                           fit: BoxFit.fill,
                         ),

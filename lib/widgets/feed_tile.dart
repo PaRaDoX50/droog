@@ -183,7 +183,7 @@ class _FeedTileState extends State<FeedTile> {
                             ),
                           ),
                         )
-                      : Container(),
+                      : null,
                   title: snapshot.hasData
                       ? GestureDetector(
                           onTap: () => Navigator.pushNamed(
@@ -226,20 +226,22 @@ class _FeedTileState extends State<FeedTile> {
                   aspectRatio: 4 / 3,
                   child: CachedNetworkImage(
                     imageUrl: widget.post.imageUrl,
-                    progressIndicatorBuilder:
-                        (context, child, loadingProgress) {
-//                if (loadingProgress == null) return ;
-                      return SizedBox(
-                        height: 50,
-                        width: 50,
-                        child: CircularProgressIndicator(
-
-                          value: loadingProgress.totalSize != null
-                              ? loadingProgress.progress
-                              : null,
-                        ),
-                      );
-                    },
+//                    progressIndicatorBuilder:
+//                        (context, child, loadingProgress) {
+////                if (loadingProgress == null) return ;
+//                      return Center(
+//                        child: SizedBox(
+//                          height: 0,
+//                          width: 0,
+//                          child: CircularProgressIndicator(
+//
+//                            value: loadingProgress.totalSize != null
+//                                ? loadingProgress.progress
+//                                : null,
+//                          ),
+//                        ),
+//                      );
+//                    },
                     width: double.infinity,
                     fit: BoxFit.fill,
                   ),

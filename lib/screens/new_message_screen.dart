@@ -20,7 +20,7 @@ class _NewMessageScreenState extends State<NewMessageScreen> {
   DatabaseMethods _databaseMethods = DatabaseMethods();
 
   getSearchResults() async {
-    searchResults = await _databaseMethods.searchUserForANewMessage(
+    searchResults = await _databaseMethods.searchYourDroogs(
         keyword: searchController.text);
     setState(() {});
   }

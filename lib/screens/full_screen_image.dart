@@ -12,6 +12,7 @@ class FullScreenImage extends StatelessWidget {
 
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        brightness: Brightness.dark,
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),

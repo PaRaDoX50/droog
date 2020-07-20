@@ -7,17 +7,17 @@ import 'package:droog/models/enums.dart';
 import 'package:droog/models/message.dart';
 import 'package:droog/models/post.dart';
 import 'package:droog/models/user.dart';
-import 'package:droog/screens/full_screen_image.dart';
 import 'package:droog/screens/image_message_screen.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/image_picker.dart';
+import 'package:droog/widgets/image_message_tile.dart';
 import 'package:droog/widgets/post_message_tile.dart';
+import 'package:droog/widgets/text_message_tile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ChatScreen extends StatefulWidget {
   static final String route = "/chat_screen";
@@ -217,12 +217,15 @@ class _ChatScreenState extends State<ChatScreen> {
                       }
                     }
 
-                    return ListView.builder(
-                      reverse: true,
-                      itemBuilder: (_, index) {
-                        return returnAppropriateTile(data[index]);
-                      },
-                      itemCount: data.length,
+                    return AnimationLimiter(
+                      child: ListView.builder(
+                        addAutomaticKeepAlives: true,
+                        reverse: true,
+                        itemBuilder: (_, index) {
+                          return returnAppropriateTile(data[index]);
+                        },
+                        itemCount: data.length,
+                      ),
                     );
                   }),
             ),
@@ -274,11 +277,14 @@ class CustomAppBar extends PreferredSize {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  CircleAvatar(
-                    radius: 35,
-                    child: ClipOval(
-                      child: CachedNetworkImage(
-                        imageUrl: userProfilePictureUrl,
+                  Hero(
+                    tag:userProfilePictureUrl,
+                    child: CircleAvatar(
+                      radius: 35,
+                      child: ClipOval(
+                        child: CachedNetworkImage(
+                          imageUrl: userProfilePictureUrl,
+                        ),
                       ),
                     ),
                   ),
@@ -305,267 +311,30 @@ class CustomAppBar extends PreferredSize {
   }
 }
 
-//class MessageTileLeft extends StatelessWidget {
-//  final String message;
-//
-//
-//  MessageTileLeft({this.message, });
-//
-//  @override
-//  Widget build(BuildContext context) {
-//    double width = MediaQuery.of(context).size.width;
-//    return Padding(
-//      padding: EdgeInsets.all(width / 60),
-//      child: Row(
-//        mainAxisSize: MainAxisSize.min,
-//        children: <Widget>[
-//
-//          SizedBox(
-//            width: width / 30,
-//          ),
-//          Container(
-//            padding: EdgeInsets.all(10),
-//            decoration: BoxDecoration(
-//              color: Colors.grey[300],
-//              borderRadius: BorderRadius.circular(10),
-//            ),
-//            child: Text(
-//              message,
-//            ),
-//            constraints: BoxConstraints(maxWidth: width / 1.5),
-//          )
-//        ],
-//      ),
-//    );
-//  }
-//}
 
-class TextMessageTile extends StatelessWidget {
-  final String message;
-  final Alignment alignment;
 
-  TextMessageTile({this.message, this.alignment});
-
-  getWidgets(double width) {
-    if (alignment == Alignment.centerRight) {
-      return [
-        Container(
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Color(0xff4481bc),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: SelectableLinkify(
-            text: message,
-            onOpen: (link) async {
-              print("opening");
-              if (await canLaunch(link.url)) {
-                print("opening");
-                await launch(link.url);
-              } else {
-                print(":cant launch url");
-              }
-            },
-            style: TextStyle(color: Colors.white),
-            linkStyle: TextStyle(color:Color(0xffe8f5fd)),
-          ),
-          constraints: BoxConstraints(maxWidth: width / 1.5),
-        ),
-        SizedBox(
-          width: width / 30,
-        ),
-      ];
-    } else {
-      return [
-        Container(
-          padding: EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: Color(0xffe8f5fd),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: SelectableLinkify(
-            text: message,
-            onOpen: (link) async {
-              print("opening");
-              if (await canLaunch(link.url)) {
-                print("opening");
-                await launch(link.url);
-              } else {
-                print(":cant launch url");
-              }
-            },
-            linkStyle: TextStyle(color: Colors.blue),
-          ),
-          constraints: BoxConstraints(maxWidth: width / 1.5),
-        ),
-        SizedBox(
-          width: width / 30,
-        ),
-      ].reversed.toList();
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    return Padding(
-      padding: EdgeInsets.all(width / 60),
-      child: Row(
-        mainAxisAlignment: alignment == Alignment.centerRight
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: getWidgets(width),
-      ),
-    );
-  }
-}
-
-class ImageMessageTile extends StatelessWidget {
-  final String imageUrl;
-  String text = "";
-  final Alignment alignment;
-
-  ImageMessageTile({this.text, this.imageUrl, this.alignment});
-
-  getWidgets(double width, BuildContext ctx) {
-    if (alignment == Alignment.centerRight) {
-      return [
-        Container(
-          padding: EdgeInsets.all(8 / 2),
-          decoration: BoxDecoration(
-            color: Color(0xff4481bc),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Column(
-            children: <Widget>[
-              GestureDetector(
-                onTap: () => Navigator.pushNamed(ctx, FullScreenImage.route,
-                    arguments: imageUrl),
-                child: Hero(
-                  tag: imageUrl,
-                  child: CachedNetworkImage(
-                    placeholder: (x, y) {
-                      return Container(
-                          child: Center(
-                              child: CircularProgressIndicator(
-                        backgroundColor: Colors.white,
-                      )));
-                    },
-                    imageUrl: imageUrl,
-                  ),
-                ),
-              ),
-              text != ""
-                  ? SizedBox(
-                      height: 2,
-                    )
-                  : Container(),
-              text != ""
-                  ? SelectableLinkify(
-                      text: text,
-                      style: TextStyle(color: Colors.white),
-                      onOpen: (link) async {
-                        print("opening");
-                        if (await canLaunch(link.url)) {
-                          print("opening");
-                          await launch(link.url);
-                        } else {
-                          print(":cant launch url");
-                        }
-                      },
-                      linkStyle: TextStyle(color:Color(0xffe8f5fd)),
-                    )
-                  : Container()
-            ],
-          ),
-          constraints: BoxConstraints(maxWidth: width / 1.5),
-        ),
-        SizedBox(
-          width: width / 30,
-        ),
-      ];
-    } else {
-      return [
-        Container(
-          padding: EdgeInsets.all(8 / 2),
-          decoration: BoxDecoration(
-            color: Color(0xffe8f5fd),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Column(
-            children: <Widget>[
-              GestureDetector(
-                onTap: () => Navigator.pushNamed(ctx, FullScreenImage.route,
-                    arguments: imageUrl),
-                child: Hero(
-                  tag: imageUrl,
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl,
-                  ),
-                ),
-              ),
-              text != ""
-                  ? SizedBox(
-                height: 2,
-              )
-                  : Container(),
-              text != ""
-                  ? SelectableLinkify(
-                text: text,
-
-                onOpen: (link) async {
-                  print("opening");
-                  if (await canLaunch(link.url)) {
-                    print("opening");
-                    await launch(link.url);
-                  } else {
-                    print(":cant launch url");
-                  }
-                },
-                linkStyle: TextStyle(color: Colors.blue),
-              )
-                  : Container()
-            ],
-          ),
-          constraints: BoxConstraints(maxWidth: width / 1.5),
-        ),
-        SizedBox(
-          width: width / 30,
-        ),
-      ];
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    return Padding(
-      padding: EdgeInsets.all(width / 60),
-      child: Row(
-        mainAxisAlignment: alignment == Alignment.centerRight
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: getWidgets(width, context),
-      ),
-    );
-  }
-}
-
-class PostMessageTile extends StatelessWidget {
+class PostMessageTile extends StatefulWidget {
   final String postId;
   final Alignment alignment;
-  final DatabaseMethods _databaseMethods = DatabaseMethods();
 
   PostMessageTile({this.postId, this.alignment});
 
+  @override
+  _PostMessageTileState createState() => _PostMessageTileState();
+}
+
+class _PostMessageTileState extends State<PostMessageTile> with  AutomaticKeepAliveClientMixin {
+  final DatabaseMethods _databaseMethods = DatabaseMethods();
+
+  @override
+  bool get wantKeepAlive => true;
+
   Future<Post> _getPost() {
-    return _databaseMethods.getPostByPostId(postId: postId);
+    return _databaseMethods.getPostByPostId(postId: widget.postId);
   }
 
   getWidgets(double width) {
-    if (alignment == Alignment.centerRight) {
+    if (widget.alignment == Alignment.centerRight) {
       return [
         Container(
           padding: EdgeInsets.all(10),
@@ -626,7 +395,7 @@ class PostMessageTile extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(width / 60),
       child: Row(
-        mainAxisAlignment: alignment == Alignment.centerRight
+        mainAxisAlignment: widget.alignment == Alignment.centerRight
             ? MainAxisAlignment.end
             : MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,

@@ -4,22 +4,49 @@ import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
 import 'package:flutter/material.dart';
 
-class RequestTile extends StatelessWidget {
+class RequestTile extends StatefulWidget {
   final User user;
   final Function snackBarAndSetState;
 
   RequestTile({this.user, this.snackBarAndSetState});
 
+  @override
+  _RequestTileState createState() => _RequestTileState();
+}
+
+class _RequestTileState extends State<RequestTile> {
+  bool _acceptingRequest = false;
+  bool _deletingRequest = false;
   final DatabaseMethods _databaseMethods = DatabaseMethods();
 
   acceptFollowRequest() async {
-    await _databaseMethods.acceptConnectionRequest(targetUid: user.uid);
-    snackBarAndSetState("Joined");
+    setState(() {
+      _acceptingRequest = true;
+    });
+    await _databaseMethods.acceptConnectionRequest(targetUid: widget.user.uid);
+
+    widget.snackBarAndSetState("Joined");
+
+//    Future.delayed(Duration(milliseconds: 300),(){setState(() {
+//      _acceptingRequest = false;
+//    });});
+
   }
 
   deleteFollowRequest() async {
-    await _databaseMethods.cancelConnectionRequest(targetUid: user.uid);
-    snackBarAndSetState("Deleted");
+    setState(() {
+      _deletingRequest = true;
+    });
+    try {
+      await _databaseMethods.cancelConnectionRequest(targetUid: widget.user.uid);
+    }  catch (e) {
+      // TODO
+      print(e.toString());
+    }
+//    setState(() {
+//      _deletingRequest = false;
+//    });
+    widget.snackBarAndSetState("Deleted");
   }
 
   @override
@@ -36,7 +63,7 @@ class RequestTile extends StatelessWidget {
                 child: CircleAvatar(
                   child: ClipOval(
                     child: CachedNetworkImage(
-                      imageUrl: user.profilePictureUrl,
+                      imageUrl: widget.user.profilePictureUrl,
                     ),
                   ),
                 ),
@@ -46,11 +73,11 @@ class RequestTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    FittedBox(child: Text(user.userName,maxLines: 1,overflow: TextOverflow.ellipsis,)),
+                    FittedBox(child: Text(widget.user.userName,maxLines: 1,overflow: TextOverflow.ellipsis,)),
                     SizedBox(
                       height: 2,
                     ),
-                    FittedBox(child: Text(user.fullName,maxLines: 1,overflow: TextOverflow.ellipsis,)),
+                    FittedBox(child: Text(widget.user.fullName,maxLines: 1,overflow: TextOverflow.ellipsis,)),
                   ],
                 ),
               ),
@@ -66,9 +93,14 @@ class RequestTile extends StatelessWidget {
                 child: RaisedButton(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5))),
-                  child: FittedBox(
+                  child: _acceptingRequest ?  SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(backgroundColor: Colors.white,strokeWidth: 1.5,
+                    ),
+                  ) : FittedBox(
                       child: Text(
-                        "Join",
+                        "Connect",
                       )),
                   color: MyThemeData.buttonColorBlue,
                   textColor: Colors.white,
@@ -83,7 +115,7 @@ class RequestTile extends StatelessWidget {
                 child: RaisedButton(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5))),
-                  child: FittedBox(child: Text("Delete")),
+                  child: _deletingRequest ? SizedBox(width:20,height:20,child: CircularProgressIndicator(backgroundColor: Colors.blue,strokeWidth: 1.5,)) : FittedBox(child: Text("Delete")),
                   color: MyThemeData.buttonColorWhite,
                   textColor: Colors.black,
                   onPressed: deleteFollowRequest,
