@@ -8,9 +8,11 @@ import 'package:droog/screens/responses_screen.dart';
 import 'package:droog/screens/share_screen.dart';
 import 'package:droog/screens/user_profile.dart';
 import 'package:droog/services/database_methods.dart';
+import 'package:droog/utils/theme_data.dart';
 import 'package:droog/widgets/expandable_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -19,7 +21,9 @@ class FeedTile extends StatefulWidget {
   bool showBottomOptions;
   final GlobalKey<ScaffoldState> feedKey;
 
-  FeedTile({this.post, this.showBottomOptions, this.feedKey});
+
+
+  FeedTile({this.post, this.showBottomOptions, this.feedKey,});
 
   @override
   _FeedTileState createState() => _FeedTileState();
@@ -39,52 +43,61 @@ class _FeedTileState extends State<FeedTile> {
 
   clipPost() async {
     await _databaseMethods.clipPost(postId: widget.post.postId);
+
     widget.feedKey.currentState
-        .showSnackBar(SnackBar(content: Text("Post Clipped")));
+        .showSnackBar(MyThemeData.getSnackBar(text: "Post clipped."),);
+    setState(() {
+
+    });
+  }
+  unClipPost() async {
+    await _databaseMethods.unClipPost(postId: widget.post.postId);
+    widget.feedKey.currentState
+        .showSnackBar(MyThemeData.getSnackBar(text: "Post unclipped"),);
+    setState(() {
+
+    });
   }
 
   showOptions() {
     showDialog(
         context: context,
-        builder: (_) =>
-            AlertDialog(
+        builder: (_) => AlertDialog(
               contentPadding: EdgeInsets.zero,
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   InkWell(
-                    onTap: () async {
-                      try {
-                        await _databaseMethods.reportAPost(
-                            targetUid: widget.post.postByUid,
-                            postId: widget.post.postId);
-                        Navigator.pop(context);
-                      } catch (e) {
-                        // TODO
-                        widget.feedKey.currentState.showSnackBar(SnackBar(
-                          content: Text("Something went wrong"),
-                        ));
-                        Navigator.pop(context);
-                      }
-                    },
-                    child:
-                        ListTile(leading: Column(mainAxisAlignment: MainAxisAlignment.center,
+                      onTap: () async {
+                        try {
+                          await _databaseMethods.reportAPost(
+                              targetUid: widget.post.postByUid,
+                              postId: widget.post.postId);
+                          Navigator.pop(context);
+                        } catch (e) {
+                          // TODO
+                          widget.feedKey.currentState.showSnackBar(MyThemeData.getSnackBar(text: "Something went wrong"));
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: ListTile(
+                        leading: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Icon(Icons.report, color: Color(0xff4481bc),),
+                            Icon(
+                              Icons.report,
+                              color: Color(0xff4481bc),
+                            ),
                           ],
                         ),
-                            title: Text("Report"),
-                            subtitle: Text("This post is inappropriate")
-
-                            ,)
-
-
-
-                  ),
+                        title: Text("Report"),
+                        subtitle: Text("This post is inappropriate"),
+                      )),
                   Divider(
                     height: 1,
                     thickness: 1,
                   ),
+
                   InkWell(
                     onTap: () async {
                       try {
@@ -92,40 +105,44 @@ class _FeedTileState extends State<FeedTile> {
                             targetUid: widget.post.postByUid);
                         Navigator.pop(context);
                       } catch (e) {
-                        widget.feedKey.currentState.showSnackBar(SnackBar(
-                          content: Text("Something went wrong"),
-                        ));
+                        widget.feedKey.currentState.showSnackBar(MyThemeData.getSnackBar(text: "Something went wrong"));
                         Navigator.pop(context);
                         // TODO
                       }
                     },
-                    child: ListTile(leading: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(Icons.clear, color: Color(0xff4481bc),),
-                      ],
-                    ),
+                    child: ListTile(
+                        leading: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              Icons.clear,
+                              color: Color(0xff4481bc),
+                            ),
+                          ],
+                        ),
                         title: Text("Disconnect"),
-                        subtitle: Text("Split from ${widget.post.postByUserName}")
-                  ),
-                  )],
+                        subtitle:
+                            Text("Split from ${widget.post.postByUserName}")),
+                  )
+                ],
               ),
             ));
   }
-  String getDate(){
+
+  String getDate() {
     return DateTime.fromMillisecondsSinceEpoch(
-      widget.post.time,
-    ).difference(DateTime.now()).inDays*(-1) >
-        0
+                  widget.post.time,
+                ).difference(DateTime.now()).inDays *
+                (-1) >
+            0
         ? DateFormat.MMMd().format(
-      DateTime.fromMillisecondsSinceEpoch(
-        widget.post.time,
-      ),
-    )
-        : DateFormat("hh:mm a")
-        .format(DateTime.fromMillisecondsSinceEpoch(
-      widget.post.time,
-    ));
+            DateTime.fromMillisecondsSinceEpoch(
+              widget.post.time,
+            ),
+          )
+        : DateFormat("hh:mm a").format(DateTime.fromMillisecondsSinceEpoch(
+            widget.post.time,
+          ));
   }
 
   @override
@@ -146,10 +163,12 @@ class _FeedTileState extends State<FeedTile> {
                 return ListTile(
                   leading: snapshot.hasData
                       ? GestureDetector(
-                    onTap: ()=>Navigator.pushNamed(context, UserProfile.route,arguments: snapshot.data),
-                        child: ClipOval(
-                    child: CachedNetworkImage(
-                        imageUrl: snapshot.data.profilePictureUrl,
+                          onTap: () => Navigator.pushNamed(
+                              context, UserProfile.route,
+                              arguments: snapshot.data),
+                          child: ClipOval(
+                            child: CachedNetworkImage(
+                              imageUrl: snapshot.data.profilePictureUrl,
 //                            loadingBuilder: (BuildContext context, Widget child,
 //                                ImageChunkEvent loadingProgress) {
 //                              if (loadingProgress == null) return child;
@@ -161,65 +180,70 @@ class _FeedTileState extends State<FeedTile> {
 //                                    : null,
 //                              );
 //                            },
-                    ),
-                  ),
-                      )
-                      : CircleAvatar(
-                    child: Icon(
-                      Icons.attachment,
-                    ),
-                  ),
+                            ),
+                          ),
+                        )
+                      : Container(),
                   title: snapshot.hasData
                       ? GestureDetector(
-                    onTap:  ()=>Navigator.pushNamed(context, UserProfile.route,arguments: snapshot.data),
-                        child: Text(
-                    snapshot.data.userName,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.montserrat(),
-                  ),
-                      )
+                          onTap: () => Navigator.pushNamed(
+                              context, UserProfile.route,
+                              arguments: snapshot.data),
+                          child: Text(
+                            snapshot.data.userName,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(),
+                          ),
+                        )
                       : Text(
-                    "",
-                  ),
+                          "",
+                        ),
                   subtitle: Text(
                     getDate(),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  trailing:widget.post.postByUserName != Constants.userName ? IconButton(
-                    onPressed: showOptions,
-                    icon: Icon(
-                      Icons.more_vert,
-                    ),
-                  ) : null,
+                  trailing: widget.post.postByUserName != Constants.userName
+                      ? IconButton(
+                          onPressed: showOptions,
+                          icon: Icon(
+                            Icons.more_vert,
+                          ),
+                        )
+                      : null,
                 );
               }),
           widget.post.description != ""
               ? Padding(
-              padding: const EdgeInsets.all(
-                8.0,
-              ),
-              child: ExpandableText(
-                text: widget.post.description,
-              ))
+                  padding: const EdgeInsets.all(
+                    8.0,
+                  ),
+                  child: ExpandableText(
+                    text: widget.post.description,
+                  ))
               : Container(),
           widget.post.imageUrl != null
               ? AspectRatio(
-            aspectRatio: 4 / 3,
-            child: CachedNetworkImage(
-              imageUrl: widget.post.imageUrl,
-              progressIndicatorBuilder:
-                  (context, child, loadingProgress) {
+                  aspectRatio: 4 / 3,
+                  child: CachedNetworkImage(
+                    imageUrl: widget.post.imageUrl,
+                    progressIndicatorBuilder:
+                        (context, child, loadingProgress) {
 //                if (loadingProgress == null) return ;
-                return CircularProgressIndicator(
-                  value: loadingProgress.totalSize != null
-                      ? loadingProgress.progress
-                      : null,
-                );
-              },
-              width: double.infinity,
-              fit: BoxFit.fill,
-            ),
-          )
+                      return SizedBox(
+                        height: 50,
+                        width: 50,
+                        child: CircularProgressIndicator(
+
+                          value: loadingProgress.totalSize != null
+                              ? loadingProgress.progress
+                              : null,
+                        ),
+                      );
+                    },
+                    width: double.infinity,
+                    fit: BoxFit.fill,
+                  ),
+                )
               : Container(),
           Padding(
             padding: const EdgeInsets.all(
@@ -227,87 +251,97 @@ class _FeedTileState extends State<FeedTile> {
             ),
             child: widget.showBottomOptions != false
                 ? Row(
-              children: <Widget>[
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () =>
-                        Navigator.pushNamed(
-                          context,
-                          ResponseScreen.route,
-                          arguments: widget.post,
+                    children: <Widget>[
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => Navigator.pushNamed(
+                            context,
+                            ResponseScreen.route,
+                            arguments: widget.post,
+                          ),
+                          child: FutureBuilder<int>(
+                              future:
+                                  _databaseMethods.getResponsesCountByPostId(
+                                      widget.post.postId),
+                              builder: (context, snapshot) {
+                                return Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Text(
+                                      snapshot.hasData
+                                          ? "${snapshot.data} Responses"
+                                          : "Responses",
+                                      style: TextStyle(
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                );
+                              }),
                         ),
-                    child: FutureBuilder<int>(
-                        future:
-                        _databaseMethods.getResponsesCountByPostId(
-                            widget.post.postId),
-                        builder: (context, snapshot) {
-                          return Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Text(
-                                snapshot.hasData
-                                    ? "${snapshot.data} Responses"
-                                    : "? Responses",
-                                style: TextStyle(
-                                    color:
-                                    Theme
-                                        .of(context)
-                                        .primaryColor),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          );
-                        }),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: GestureDetector(
-                    child: Icon(
-                      Icons.message,
-                      color: Colors.grey,
-                    ),
-                    onTap: () =>
-                        Navigator.of(context).pushNamed(
-                          NewResponse.route,
-                          arguments: widget.post,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: GestureDetector(
+                          child: Icon(
+                            Icons.add_comment,
+                            color: Colors.blueGrey,
+                          ),
+                          onTap: () => Navigator.of(context).pushNamed(
+                            NewResponse.route,
+                            arguments: widget.post,
+                          ),
                         ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(
-                    8.0,
-                  ),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pushNamed(ShareScreen.route,
-                          arguments: widget.post.postId);
-                    },
-                    child: Icon(
-                      Icons.send,
-                      color: Colors.grey,
-                      semanticLabel: "Share",
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(
-                    8.0,
-                  ),
-                  child: GestureDetector(
-                    onTap: clipPost,
-                    child: Icon(
-                      Icons.content_paste,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-              ],
-            )
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(
+                          8.0,
+                        ),
+                        child: GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).pushNamed(ShareScreen.route,
+                                  arguments: widget.post.postId);
+                            },
+                            child: FaIcon(
+                              FontAwesomeIcons.paperPlane,
+                              color: Colors.blueGrey,
+                            )),
+                      ),
+                      Padding(
+                          padding: const EdgeInsets.all(
+                            8.0,
+                          ),
+                          child: FutureBuilder<bool>(
+                            future: _databaseMethods.isClipped(
+                                postId: widget.post.postId),
+                            builder: (_, snapshot) {
+                              if (snapshot.hasData) {
+                                if(snapshot.data){
+                                  return GestureDetector(
+                                      onTap: unClipPost,
+                                      child: Icon(Icons.indeterminate_check_box,color: Colors.blueGrey,));
+
+                                }
+                                else{
+                                  return GestureDetector(
+                                      onTap: clipPost,
+                                      child: Icon(Icons.content_paste,color: Colors.blueGrey,));
+                                }
+                              }
+                              else{
+                                return Container(height: 25,width: 25,);
+                              }
+                            },
+                          )),
+                    ],
+                  )
                 : Container(),
           )
         ],
       ),
     );
   }
+
+
 }

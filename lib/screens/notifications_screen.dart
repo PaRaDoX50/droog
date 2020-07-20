@@ -35,10 +35,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   showSnackBarAndSetState(String text) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
-      backgroundColor: Theme.of(context).primaryColor,
-      content: Text(text),
-    ));
+    _scaffoldKey.currentState.showSnackBar(MyThemeData.getSnackBar(text: text));
     setState(() {
       userRequests = _databaseMethods.getRequests(limitTo3: true);
     });
@@ -62,7 +59,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     } else {
       return Container(
         child: Center(
-          child:Text("No Requests"),
+          child:Text("No Requests",style: TextStyle() ,),
         ),
       );
     }
@@ -90,7 +87,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             Image.asset("assets/images/no_updates.png",width: MediaQuery.of(context).size.width*.6,),
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text("No Updates! Try refreshing the page.",style: GoogleFonts.montserrat(fontSize: 16),),
+              child: Text("No Updates! Try refreshing the page.",style: TextStyle(fontSize: 16),),
             ),
           ],
         ),
@@ -199,7 +196,7 @@ class UpdateTile extends StatelessWidget {
                         }),
                   TextSpan(
                       text: " has accepted your request",
-                      style: GoogleFonts.montserrat(color: Colors.black)),
+                      style: TextStyle(color: Colors.black)),
                 ])),
               ),
             ],
@@ -240,20 +237,22 @@ class UpdateTile extends StatelessWidget {
                 SizedBox(
                   width: 8,
                 ),
-                RichText(
-                    text: TextSpan(children: [
-                  TextSpan(
-                      text: user.userName,
-                      style: MyThemeData.primary14,
-                      recognizer: TapGestureRecognizer()
-                        ..onTap = () {
-                          Navigator.pushNamed(context, UserProfile.route,
-                              arguments: user);
-                        }),
-                  TextSpan(
-                      text: " marked your response as solution",
-                      style: GoogleFonts.montserrat(color: Colors.black)),
-                ])),
+                Flexible(
+                  child: RichText(
+                      text: TextSpan(children: [
+                    TextSpan(
+                        text: user.userName,
+                        style: MyThemeData.primary14,
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.pushNamed(context, UserProfile.route,
+                                arguments: user);
+                          }),
+                    TextSpan(
+                        text: " marked your response as solution",
+                        style: TextStyle(color: Colors.black)),
+                  ])),
+                ),
               ],
             ),
           ],
@@ -304,7 +303,7 @@ class UpdateTile extends StatelessWidget {
                     }),
               TextSpan(
                   text: " responded to your post",
-                  style: GoogleFonts.montserrat(color: Colors.black)),
+                  style: TextStyle(color: Colors.black)),
             ]))
           ],
         ),

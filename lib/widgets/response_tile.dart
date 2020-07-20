@@ -5,6 +5,7 @@ import 'package:droog/models/response.dart';
 import 'package:droog/models/user.dart';
 import 'package:droog/screens/responses_screen.dart';
 import 'package:droog/services/database_methods.dart';
+import 'package:droog/utils/theme_data.dart';
 import 'package:droog/widgets/expandable_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -58,9 +59,7 @@ class _ResponseTileState extends State<ResponseTile> {
                           Navigator.pop(context);
                         } catch (e) {
                           // TODO
-                          widget.scaffoldKey.currentState.showSnackBar(SnackBar(
-                            content: Text("Something went wrong"),
-                          ));
+                          widget.scaffoldKey.currentState.showSnackBar(MyThemeData.getSnackBar(text: "Something went wrong"));
                           Navigator.pop(context);
                         }
                       },

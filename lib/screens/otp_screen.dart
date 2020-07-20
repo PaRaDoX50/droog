@@ -1,8 +1,6 @@
 import 'package:droog/models/enums.dart';
-import 'package:droog/screens/home.dart';
 import 'package:droog/screens/mobile_verification.dart';
 import 'package:droog/screens/profile_setup.dart';
-import 'package:droog/screens/search.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/services/sharedprefs_methods.dart';
 import 'package:firebase_auth/firebase_auth.dart';

@@ -79,9 +79,9 @@ class _HomeState extends State<Home> {
   }
 
   Widget _createDrawerHeader() {
+
     final totalHeight = MediaQuery.of(context).size.height;
-    return SafeArea(
-      child: Padding(
+    return  Padding(
         padding: EdgeInsets.zero,
         child: Container(
           child: Center(
@@ -96,6 +96,11 @@ class _HomeState extends State<Home> {
               )),
               title: Text(
                 Constants.fullName,
+                style: MyThemeData.whiteBold14,
+                overflow: TextOverflow.ellipsis,
+              ),
+              subtitle: Text(
+                Constants.userName,
                 style: MyThemeData.whiteBold14,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -124,8 +129,7 @@ class _HomeState extends State<Home> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
   Widget _logoutItem(){
     return  Padding(
@@ -139,7 +143,7 @@ class _HomeState extends State<Home> {
             Navigator.pushNamedAndRemoveUntil(context, SignUp.route, (route) => false);
           }
           catch(e){
-            _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text("Something went wrong"),));
+            _scaffoldKey.currentState.showSnackBar(MyThemeData.getSnackBar(text: "Something went wrong"));
             print(e.message);
           }
 
@@ -177,13 +181,13 @@ class _HomeState extends State<Home> {
         backgroundColor:Color(0xfffcfcfd),
         title: Text(
           _getAppBarTitle(),
-          style: GoogleFonts.montserrat(color: Theme.of(context).primaryColor),
+          style: GoogleFonts.lato(color: Theme.of(context).primaryColor),
         ),
 
       ),
       drawer: Drawer(
           child: ListView(
-            padding: EdgeInsets.zero,
+            padding: EdgeInsets.all(0),
             children: <Widget>[
               _createDrawerHeader(),
               _createDrawerItem(Icons.home, Text("Home"), Home.route),
@@ -256,22 +260,16 @@ class _HomeState extends State<Home> {
             ),
             TabItem(
                 icon: Icon(
-                  Icons.message,
+                  Icons.chat_bubble_outline,
                   color: Colors.grey,
                 ),
                 activeIcon: Icon(
-                  Icons.message,
+                  Icons.chat_bubble_outline,
                   color: Theme.of(context).primaryColor,
                 )),
             TabItem(
-                icon: Icon(
-                  Icons.add_alert,
-                  color: Colors.grey,
-                ),
-                activeIcon: Icon(
-                  Icons.add_alert,
-                  color: Theme.of(context).primaryColor,
-                )),
+                icon:FaIcon(FontAwesomeIcons.bell,color: Colors.grey,),
+                activeIcon:FaIcon(FontAwesomeIcons.bell,color: Theme.of(context).primaryColor,)),
           ],
         ),
 

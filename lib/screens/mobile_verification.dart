@@ -41,10 +41,7 @@ class _MobileVerificationState extends State<MobileVerification> {
       });
       print("vF" + exception.message);
 
-      _scaffoldKey.currentState.showSnackBar(SnackBar(
-        content: Text("Something went wrong"),
-        backgroundColor: Theme.of(context).buttonColor,
-      ));
+      _scaffoldKey.currentState.showSnackBar((MyThemeData.getSnackBar(text: "Something went wrong.")));
     };
 
     final vC = (AuthCredential credential) async {
@@ -73,10 +70,7 @@ class _MobileVerificationState extends State<MobileVerification> {
         setState(() {
           showLoading = false;
         });
-        _scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: FittedBox(child: Text("Something went wrong")),
-          backgroundColor: Theme.of(context).buttonColor,
-        ));
+        _scaffoldKey.currentState.showSnackBar((MyThemeData.getSnackBar(text:"Something went wrong.")));
       }
     };
     final cS = (codeSent, [forceResend]) {

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
+import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
@@ -36,7 +37,7 @@ class PickImage{
 //    _storeImage();
   }
 
-  Future<File> cropImage({File image,PictureFor pictureFor,double ratioX,double ratioY}) async {
+  Future<File> cropImage({@required File image,PictureFor pictureFor,@required double ratioX,@required double ratioY}) async {
     File croppedImageFile =await ImageCropper.cropImage(sourcePath: image.path,aspectRatio: CropAspectRatio(ratioX: ratioX,ratioY: ratioY),compressQuality: 15);
     if(croppedImageFile == null){
       return null;

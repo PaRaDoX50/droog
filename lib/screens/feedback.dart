@@ -1,4 +1,5 @@
 import 'package:droog/services/database_methods.dart';
+import 'package:droog/utils/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -19,7 +20,7 @@ class FeedbackScreen extends StatelessWidget {
         backgroundColor: Color(0xfffcfcfd),
         title: Text(
           "Share Feedback",
-          style: GoogleFonts.montserrat(color: Theme.of(context).primaryColor),
+          style: TextStyle(color: Theme.of(context).primaryColor),
         ),
       ),
       key: _scaffoldKey,
@@ -74,20 +75,14 @@ class FeedbackScreen extends StatelessWidget {
           await _databaseMethods.sendFeedback(
               feedback: feedbackController.text);
           feedbackController.clear();
-          _scaffoldKey.currentState.showSnackBar(SnackBar(
-            content: Text("Thanks for the feedback!"),
-          ));
+          _scaffoldKey.currentState.showSnackBar(MyThemeData.getSnackBar(text: "Thanks for the feedback"));
           allowed = false;
         } catch (e) {
           // TODO
-          _scaffoldKey.currentState.showSnackBar(SnackBar(
-            content: Text("Something went wrong"),
-          ));
+          _scaffoldKey.currentState.showSnackBar(MyThemeData.getSnackBar(text: "Something went wrong"));
         }
       } else {
-        _scaffoldKey.currentState.showSnackBar(SnackBar(
-          content: Text("Only allowed to send feedback once per app session"),
-        ));
+        _scaffoldKey.currentState.showSnackBar(MyThemeData.getSnackBar(text: "Only allowed to send feedback once per app session"));
       }
     }
   }

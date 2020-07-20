@@ -11,7 +11,6 @@ import 'package:droog/utils/theme_data.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -35,50 +34,14 @@ class _ChatListState extends State<ChatList> {
 
   @override
   Widget build(BuildContext context) {
-    final searchTextField = Center(
-      child: Container(
-        height: 70,
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-        child: TextField(
-          style: TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            hintText: "Search",
-            hintStyle: TextStyle(color: Colors.white),
-            contentPadding: EdgeInsets.only(
-              left: 16,
-            ),
-            filled: true,
-            fillColor: Colors.grey[300],
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(style: BorderStyle.solid),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            border: OutlineInputBorder(
-              borderSide: BorderSide(style: BorderStyle.solid),
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-        ),
-      ),
-    );
 
-    final curveContainer = Container(
-      height: 20,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-      ),
-    );
+
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton(backgroundColor:Colors.blueGrey,
         onPressed: () {
           Navigator.pushNamed(context, NewMessageScreen.route);
         },
-        child: Icon(Icons.message),
+        child: Icon(Icons.add,color: Colors.white,),
       ),
       backgroundColor: Colors.white,
       body: CustomScrollView(
@@ -125,7 +88,7 @@ class _ChatListState extends State<ChatList> {
                      children: <Widget>[
                        Image.asset("assets/images/no_conversation.png"),
                        SizedBox(height: 8,),
-                       FittedBox(child: Text("No conversations!",style: GoogleFonts.montserrat(fontSize: 20,),))
+                       FittedBox(child: Text("No conversations!",style: TextStyle(fontSize: 20,),))
                      ],
                    ),));
                   }
@@ -143,7 +106,7 @@ class _ChatListState extends State<ChatList> {
 
 class ChatTile extends StatelessWidget {
   final String targetUserName;
-  DatabaseMethods _databaseMethods = DatabaseMethods();
+  final DatabaseMethods _databaseMethods = DatabaseMethods();
   Message lastMessage;
   String date = " ";
 
@@ -183,8 +146,8 @@ class ChatTile extends StatelessWidget {
                 DateTime.fromMillisecondsSinceEpoch(lastMessage.time);
             date = DateFormat.MMMd().format(temp);
             return FutureBuilder<User>(
-                future: _databaseMethods.getUserDetailsByUid(
-                    targetUid: lastMessage.byUid),
+                future: _databaseMethods.getUserDetailsByUsername(
+                    targetUserName: targetUserName ),
                 builder: (context, snapshot) {
                   return Container(
                     color: Colors.white,

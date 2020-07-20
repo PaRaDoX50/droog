@@ -65,7 +65,7 @@ class _SkillsContainerState extends State<SkillsContainer> {
               padding: const EdgeInsets.only(left:8.0,),
               child: Text("Achievements",style: MyThemeData.blackBold12,),
             ),
-            ...widget.skills.map((e) => Padding(
+            ...widget.achievements.map((e) => Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 mainAxisSize: MainAxisSize.min,

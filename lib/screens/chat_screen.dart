@@ -7,19 +7,17 @@ import 'package:droog/models/enums.dart';
 import 'package:droog/models/message.dart';
 import 'package:droog/models/post.dart';
 import 'package:droog/models/user.dart';
+import 'package:droog/screens/full_screen_image.dart';
 import 'package:droog/screens/image_message_screen.dart';
-import 'package:droog/screens/search.dart';
-import 'package:droog/screens/share_screen.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/image_picker.dart';
-import 'package:droog/widgets/feed_tile.dart';
 import 'package:droog/widgets/post_message_tile.dart';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ChatScreen extends StatefulWidget {
   static final String route = "/chat_screen";
@@ -32,20 +30,29 @@ class _ChatScreenState extends State<ChatScreen> {
   final DatabaseMethods _databaseMethods = DatabaseMethods();
   final TextEditingController messageController = TextEditingController();
   User user;
+  bool sendingMessage = false;
 
   sendMessage(String userName) async {
-    print(userName + messageController.text);
-    if (messageController.text.isNotEmpty) {
-      Map<String, dynamic> message = {
-        "messageType": MessageType.onlyText.index,
-        "text": messageController.text,
-        "byUid": Constants.uid,
-        "byUserName": Constants.userName,
-        "time": DateTime.now().millisecondsSinceEpoch,
-      };
-      await _databaseMethods.sendMessage(
-          targetUserName: userName, message: message);
-      messageController.clear();
+    if (!sendingMessage) {
+      setState(() {
+        sendingMessage = true;
+      });
+      print(userName + messageController.text);
+      if (messageController.text.trim().isNotEmpty) {
+        Map<String, dynamic> message = {
+          "messageType": MessageType.onlyText.index,
+          "text": messageController.text,
+          "byUid": Constants.uid,
+          "byUserName": Constants.userName,
+          "time": DateTime.now().millisecondsSinceEpoch,
+        };
+        await _databaseMethods.sendMessage(
+            targetUserName: userName, message: message);
+        messageController.clear();
+      }
+      setState(() {
+        sendingMessage =false;
+      });
     }
   }
 
@@ -123,7 +130,7 @@ class _ChatScreenState extends State<ChatScreen> {
             BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 5),
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
             Expanded(
               child: TextField(
@@ -175,7 +182,6 @@ class _ChatScreenState extends State<ChatScreen> {
             )
           ],
         ));
-    int largestIndexOfTargetUserMessage = 0;
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       appBar: CustomAppBar(
@@ -221,7 +227,18 @@ class _ChatScreenState extends State<ChatScreen> {
                   }),
             ),
           ),
-          Align(alignment: Alignment.bottomCenter, child: messageTextField),
+          FutureBuilder(future:_databaseMethods.isDroog(targetUid: user.uid),builder: (_,snapshot){
+            if(snapshot.hasData){
+              return snapshot.data ? Align(alignment: Alignment.bottomCenter, child: messageTextField) : Align(alignment: Alignment.bottomCenter, child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text("Can't send message, both of you are not connected."),
+              ));
+            }
+            else{
+              return Container();
+            }
+          },)
+          ,
         ],
       ),
     );
@@ -338,9 +355,19 @@ class TextMessageTile extends StatelessWidget {
             color: Color(0xff4481bc),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Text(
-            message,
+          child: SelectableLinkify(
+            text: message,
+            onOpen: (link) async {
+              print("opening");
+              if (await canLaunch(link.url)) {
+                print("opening");
+                await launch(link.url);
+              } else {
+                print(":cant launch url");
+              }
+            },
             style: TextStyle(color: Colors.white),
+            linkStyle: TextStyle(color:Color(0xffe8f5fd)),
           ),
           constraints: BoxConstraints(maxWidth: width / 1.5),
         ),
@@ -356,7 +383,19 @@ class TextMessageTile extends StatelessWidget {
             color: Color(0xffe8f5fd),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Text(message),
+          child: SelectableLinkify(
+            text: message,
+            onOpen: (link) async {
+              print("opening");
+              if (await canLaunch(link.url)) {
+                print("opening");
+                await launch(link.url);
+              } else {
+                print(":cant launch url");
+              }
+            },
+            linkStyle: TextStyle(color: Colors.blue),
+          ),
           constraints: BoxConstraints(maxWidth: width / 1.5),
         ),
         SizedBox(
@@ -389,7 +428,7 @@ class ImageMessageTile extends StatelessWidget {
 
   ImageMessageTile({this.text, this.imageUrl, this.alignment});
 
-  getWidgets(double width) {
+  getWidgets(double width, BuildContext ctx) {
     if (alignment == Alignment.centerRight) {
       return [
         Container(
@@ -400,8 +439,22 @@ class ImageMessageTile extends StatelessWidget {
           ),
           child: Column(
             children: <Widget>[
-              CachedNetworkImage(
-                imageUrl: imageUrl,
+              GestureDetector(
+                onTap: () => Navigator.pushNamed(ctx, FullScreenImage.route,
+                    arguments: imageUrl),
+                child: Hero(
+                  tag: imageUrl,
+                  child: CachedNetworkImage(
+                    placeholder: (x, y) {
+                      return Container(
+                          child: Center(
+                              child: CircularProgressIndicator(
+                        backgroundColor: Colors.white,
+                      )));
+                    },
+                    imageUrl: imageUrl,
+                  ),
+                ),
               ),
               text != ""
                   ? SizedBox(
@@ -409,9 +462,19 @@ class ImageMessageTile extends StatelessWidget {
                     )
                   : Container(),
               text != ""
-                  ? Text(
-                      text,
+                  ? SelectableLinkify(
+                      text: text,
                       style: TextStyle(color: Colors.white),
+                      onOpen: (link) async {
+                        print("opening");
+                        if (await canLaunch(link.url)) {
+                          print("opening");
+                          await launch(link.url);
+                        } else {
+                          print(":cant launch url");
+                        }
+                      },
+                      linkStyle: TextStyle(color:Color(0xffe8f5fd)),
                     )
                   : Container()
             ],
@@ -432,13 +495,37 @@ class ImageMessageTile extends StatelessWidget {
           ),
           child: Column(
             children: <Widget>[
-              CachedNetworkImage(
-                imageUrl: imageUrl,
+              GestureDetector(
+                onTap: () => Navigator.pushNamed(ctx, FullScreenImage.route,
+                    arguments: imageUrl),
+                child: Hero(
+                  tag: imageUrl,
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
+                  ),
+                ),
               ),
-              SizedBox(
+              text != ""
+                  ? SizedBox(
                 height: 2,
-              ),
-              Text(text)
+              )
+                  : Container(),
+              text != ""
+                  ? SelectableLinkify(
+                text: text,
+
+                onOpen: (link) async {
+                  print("opening");
+                  if (await canLaunch(link.url)) {
+                    print("opening");
+                    await launch(link.url);
+                  } else {
+                    print(":cant launch url");
+                  }
+                },
+                linkStyle: TextStyle(color: Colors.blue),
+              )
+                  : Container()
             ],
           ),
           constraints: BoxConstraints(maxWidth: width / 1.5),
@@ -460,7 +547,7 @@ class ImageMessageTile extends StatelessWidget {
             ? MainAxisAlignment.end
             : MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: getWidgets(width),
+        children: getWidgets(width, context),
       ),
     );
   }

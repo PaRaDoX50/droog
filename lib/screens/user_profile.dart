@@ -1,5 +1,4 @@
 import 'package:droog/models/user.dart';
-import 'package:droog/screens/feed.dart';
 import 'package:droog/widgets/asked_doubts.dart';
 import 'package:droog/widgets/profile_container.dart';
 import 'package:droog/widgets/solved_doubts.dart';

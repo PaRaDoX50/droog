@@ -103,14 +103,17 @@ class _ImageMessageScreenState extends State<ImageMessageScreen> {
 
     return Scaffold(
       appBar: AppBar(backgroundColor: Colors.black,actionsIconTheme: IconThemeData(color: Colors.white),title: Text("Send message"),),
-      body: Container(color: Colors.black,
-        child: Stack(children: <Widget>[
-          Center(child: AspectRatio(aspectRatio: 4 / 3,
-            child: Image.file(image, width: double.infinity,),)),
-          Align(alignment: Alignment.bottomCenter, child: messageTextField),
-          _showLoading ? Center(child: CircularProgressIndicator(),) : Container(),
+      body: IgnorePointer(
+        ignoring: _showLoading,
+        child: Container(color: Colors.black,
+          child: Stack(children: <Widget>[
+            Center(child: AspectRatio(aspectRatio: 4 / 3,
+              child: Image.file(image, width: double.infinity,),)),
+            Align(alignment: Alignment.bottomCenter, child: messageTextField),
+            _showLoading ? Center(child: CircularProgressIndicator(),) : Container(),
 
-        ],),
+          ],),
+        ),
       ),
     );
   }

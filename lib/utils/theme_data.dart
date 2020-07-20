@@ -9,5 +9,10 @@ class MyThemeData{
   static Color buttonColorBlue = Color(0xff2d80d7);
   static Color buttonColorWhite = Color(0xfffcfcfd);
 
-
+ static SnackBar getSnackBar({String text}){
+   return SnackBar(
+     backgroundColor: Colors.blueGrey,
+     content: Text(text,),
+   );
+ }
 }

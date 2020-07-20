@@ -1,13 +1,11 @@
 import 'package:droog/models/user.dart';
-import 'package:droog/screens/chat_screen.dart';
-import 'package:droog/screens/user_profile.dart';
+
 import 'package:droog/data/constants.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/widgets/search_textfield.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:droog/utils/theme_data.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/models/enums.dart';
 
@@ -90,7 +88,7 @@ class _ShareScreenState extends State<ShareScreen> {
         backgroundColor:Color(0xfffcfcfd),
         title: Text(
           "Share To",
-          style: GoogleFonts.montserrat(color: Theme.of(context).primaryColor),
+          style: TextStyle(color: Theme.of(context).primaryColor),
         ),
       ),
       body: SafeArea(

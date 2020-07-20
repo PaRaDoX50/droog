@@ -42,7 +42,7 @@ class _IntroductionScreenState extends State<IntroductionScreen> {
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text("Done",style: GoogleFonts.montserrat(color: Colors.white),),
+                    child: Text("Done",style: TextStyle(color: Colors.white),),
                   ),
                 ),
                 color: Theme.of(context).buttonColor,
@@ -92,7 +92,7 @@ class _IntroductionScreenState extends State<IntroductionScreen> {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     "droog",
-                    style: GoogleFonts.montserrat(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                         fontSize: 80 / 2,),
                   ),
@@ -139,7 +139,7 @@ class SliderTile extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
               body,
-              style: GoogleFonts.montserrat(
+              style: TextStyle(
                   fontSize: 16,
               ),
             ),

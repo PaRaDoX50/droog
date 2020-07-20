@@ -1,5 +1,5 @@
-import 'package:droog/models/user.dart';
 import 'package:droog/services/database_methods.dart';
+import 'package:droog/utils/theme_data.dart';
 import 'package:droog/widgets/request_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -24,10 +24,7 @@ class _AllRequestsState extends State<AllRequests> {
   }
 
   showSnackBarAndSetState(String text) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
-      backgroundColor: Theme.of(context).primaryColor,
-      content: Text(text),
-    ));
+    _scaffoldKey.currentState.showSnackBar(MyThemeData.getSnackBar(text:text));
     setState(() {
       userRequests = _databaseMethods.getRequests(limitTo3: false);
     });
@@ -42,7 +39,7 @@ class _AllRequestsState extends State<AllRequests> {
         backgroundColor: Color(0xfffcfcfd),
         title: Text(
           "All Requests",
-          style: GoogleFonts.montserrat(color: Theme.of(context).primaryColor),
+          style: TextStyle(color: Theme.of(context).primaryColor),
         ),
       ),
       body: FutureBuilder(

@@ -4,11 +4,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
 import 'package:droog/screens/home.dart';
-import 'package:droog/screens/new_post.dart';
 import 'package:droog/screens/skills_setup.dart';
 import 'package:droog/services/database_methods.dart';
 import 'file:///P:/androidProjects/Droog/droog/lib/utils/image_picker.dart';
 import 'package:droog/services/sharedprefs_methods.dart';
+import 'package:droog/utils/theme_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -37,9 +37,7 @@ class _ProfileSetupState extends State<ProfileSetup> {
   File _takenImage;
 
   void _showSnackBar(String content) {
-    _scaffoldKey.currentState.showSnackBar(SnackBar(
-      content: Text(content),
-    ));
+    _scaffoldKey.currentState.showSnackBar((MyThemeData.getSnackBar(text: content)));
   }
 
   showImageSourceOptions() {

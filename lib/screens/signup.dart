@@ -11,7 +11,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUp extends StatelessWidget {
   static final String route = "/sign_up";
@@ -184,7 +183,7 @@ elevation: 5,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Text("droog",style: GoogleFonts.montserrat(fontSize: 80/2,fontWeight: FontWeight.bold),),
+            Text("droog",style: TextStyle(fontSize: 80/2,fontWeight: FontWeight.bold),),
             Image.asset("assets/images/signup.png", width: double.infinity),
             
             Column(

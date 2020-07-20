@@ -3,6 +3,7 @@ import 'package:droog/screens/chat_list.dart';
 import 'package:droog/screens/chat_screen.dart';
 import 'package:droog/screens/feed.dart';
 import 'package:droog/screens/feedback.dart';
+import 'package:droog/screens/full_screen_image.dart';
 import 'package:droog/screens/image_message_screen.dart';
 import 'package:droog/screens/myclips_screen.dart';
 import 'package:droog/screens/new_message_screen.dart';
@@ -22,14 +23,18 @@ import 'package:droog/screens/search.dart';
 import 'package:droog/screens/signup.dart';
 import 'package:droog/services/sharedprefs_methods.dart';
 import 'package:droog/widgets/profile_container.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  runApp(
+    MyApp(),
+  );
+}
 
 class MyApp extends StatefulWidget {
-  // This widget is the root of your application.
-
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -46,33 +51,41 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
-      SystemUiOverlayStyle.light.copyWith(statusBarColor:Colors.black),
+      SystemUiOverlayStyle(statusBarColor: Colors.transparent ),
     );
 
     return MaterialApp(
-      title: 'Flutter Demo',
+//      locale: DevicePreview.of(context).locale, // <--- Add the locale
+//      builder: DevicePreview.appBuilder, // <--- Add the builder
+      title: 'Droog',
       theme: ThemeData(
-          primaryColor: Color(0xff1948a0),
-          buttonColor: Color(0xff2d80d7),
-          textTheme: ThemeData.light().textTheme.copyWith(
-              button: TextStyle(color: Colors.white),
-              headline6: TextStyle(
-                  fontSize: 20,
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600))),
+        primaryColor: Color(0xff1948a0),
+        buttonColor: Color(0xff2d80d7),
+//        textTheme: ThemeData.light().textTheme.copyWith(
+//              button: TextStyle(color: Colors.white),
+//              headline6: TextStyle(
+//                  fontSize: 20,
+//                  color: Colors.black,
+//                  fontWeight: FontWeight.w600),
+//            ),
+      appBarTheme: AppBarTheme(textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme),brightness: Brightness.light),
+      textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme).copyWith( button: TextStyle(color: Colors.white),
+        headline6: TextStyle(
+            fontSize: 20,
+            color: Colors.black,
+            fontWeight: FontWeight.w600),),
+      ),
       home: FutureBuilder(
         future: _sharedPrefsMethods.getLoggedInStatusAndBuildConstants(),
         builder: (_, snapshot) {
           if (snapshot.hasData) {
             print(snapshot.data);
-            if(snapshot.data == LoggedInStatus.loggedIn.index){
-              return SignUp();
-            }
-            else if(snapshot.data == LoggedInStatus.halfProfileLeft.index){
+            if (snapshot.data == LoggedInStatus.loggedIn.index) {
+              return Home();
+            } else if (snapshot.data == LoggedInStatus.halfProfileLeft.index) {
               return ProfileSetup();
             }
             return IntroductionScreen();
-
           }
           return Scaffold(body: Center(child: CircularProgressIndicator()));
         },
@@ -88,15 +101,16 @@ class _MyAppState extends State<MyApp> {
         NewPost.route: (_) => NewPost(),
         UserProfile.route: (_) => UserProfile(),
         ProfileSetup.route: (_) => ProfileSetup(),
-        ResponseScreen.route:(_) => ResponseScreen(),
-        NewResponse.route:(_) => NewResponse(),
-        ImageMessageScreen.route:(_) => ImageMessageScreen(),
-        ShareScreen.route:(_) => ShareScreen(),
-        NewMessageScreen.route:(_) => NewMessageScreen(),
-        MyClipsScreen.route:(_)=> MyClipsScreen(),
-        SkillsSetup.route:(_)=>SkillsSetup(),
-        AllRequests.route:(_)=>AllRequests(),
-        FeedbackScreen.route:(_)=>FeedbackScreen(),
+        ResponseScreen.route: (_) => ResponseScreen(),
+        NewResponse.route: (_) => NewResponse(),
+        ImageMessageScreen.route: (_) => ImageMessageScreen(),
+        ShareScreen.route: (_) => ShareScreen(),
+        NewMessageScreen.route: (_) => NewMessageScreen(),
+        MyClipsScreen.route: (_) => MyClipsScreen(),
+        SkillsSetup.route: (_) => SkillsSetup(),
+        AllRequests.route: (_) => AllRequests(),
+        FeedbackScreen.route: (_) => FeedbackScreen(),
+        FullScreenImage.route: (_) => FullScreenImage(),
       },
     );
   }

@@ -22,8 +22,7 @@ class _FeedState extends State<Feed> {
   int countOfMoreDocs;
   bool _isLoading = false;
   bool _isFirstTime = true;
-  bool _isFirstSnapshot = true;
-  bool _rebuildDueToSetState =  false;
+
   int buildCount = 0;
 
 
@@ -77,14 +76,33 @@ class _FeedState extends State<Feed> {
                     return posts.length != 0 ? LazyLoadScrollView(
                       onEndOfPage: countOfMoreDocs == 10 ?_loadMore : (){},
                       isLoading: _isLoading,
-                      scrollOffset: 100,
-                      child: ListView(
-                          children:posts.map((e) => FeedTile(post: e,feedKey: _feedScaffoldKey,)).toList() ,),
+                      scrollOffset: 300,
+                      child: ListView.builder(
+                         itemBuilder: (_,index){
+                           if (index == posts.length - 1 && _isLoading) {
+
+                             return Column(
+                               crossAxisAlignment: CrossAxisAlignment.center,
+                               mainAxisSize: MainAxisSize.min,
+                               children: <Widget>[
+                                 FeedTile(
+                                   post: posts[index],
+                                   feedKey: _feedScaffoldKey,
+                                 ),
+                                 Padding(
+                                   padding: const EdgeInsets.all(8.0),
+                                   child: CircularProgressIndicator(),
+                                 )
+                               ],
+                             );
+                           }
+                           return FeedTile(post: posts[index],feedKey: _feedScaffoldKey,);
+                         } ,itemCount: posts.length,),
                     ) : Center(child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         Image.asset("assets/images/empty_feed.png"),
-                        FittedBox(child: Text("No Posts To Display",style: GoogleFonts.montserrat(fontSize: 20),)),
+                        FittedBox(child: Text("No Posts To Display",style: TextStyle(fontSize: 20),)),
                       ],
                     ),);
                   }
@@ -94,7 +112,7 @@ class _FeedState extends State<Feed> {
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           Image.asset("assets/images/empty_feed.png"),
-                          FittedBox(child: Text("No Posts To Display",style: GoogleFonts.montserrat(fontSize: 20),)),
+                          FittedBox(child: Text("No Posts To Display",style: TextStyle(fontSize: 20),)),
                         ],
                       ),);
                     }
@@ -113,22 +131,31 @@ class _FeedState extends State<Feed> {
   }
 
   void _loadMore() async {
-    print("loadingmore");
-    setState(() {
-      _isFirstTime = false;
-      _isLoading = true;
-//      _rebuildDueToSetState = true;
-    });
-    List<DocumentSnapshot> moreDocuments = await _databaseMethods.getMorePostsForFeed(droogsUids: followingUids,documentSnapshot: lastDocument,);
-    lastDocument = moreDocuments.last;
-    List<Post> morePosts = moreDocuments.map((e) => _postFromFirebasePost(documentSnapshot: e)).toList();
-    countOfMoreDocs = morePosts.length;
-    posts.addAll(morePosts);
-    setState(() {
-//      _rebuildDueToSetState = true;
-      _isFirstTime = false;
-      _isLoading = false;
-    });
+    try {
+      print("loadingmore");
+      setState(() {
+        _isFirstTime = false;
+        _isLoading = true;
+      //      _rebuildDueToSetState = true;
+      });
+      List<DocumentSnapshot> moreDocuments = await _databaseMethods.getMorePostsForFeed(droogsUids: followingUids,documentSnapshot: lastDocument,);
+      if (moreDocuments.isNotEmpty) {
+        lastDocument = moreDocuments.last;
+        List<Post> morePosts = moreDocuments.map((e) => _postFromFirebasePost(documentSnapshot: e)).toList();
+        countOfMoreDocs = morePosts.length;
+        posts.addAll(morePosts);
+      }
+      else{
+        countOfMoreDocs = 0;
+      }
+      setState(() {
+      //      _rebuildDueToSetState = true;
+        _isFirstTime = false;
+        _isLoading = false;
+      });
+    }  catch (e) {
+      print(e.toString());
+    }
   }
 }
 

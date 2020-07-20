@@ -36,7 +36,7 @@ class _SkillsSetupState extends State<SkillsSetup> {
     if (qualityType == QualityType.skill) {
       if (skills.contains(skillController.text)) {
         _scaffoldKey.currentState
-            .showSnackBar(SnackBar(content: Text("Skill already added")));
+            .showSnackBar((MyThemeData.getSnackBar(text: "Skill already added")));
         return false;
       }
 
@@ -49,7 +49,7 @@ class _SkillsSetupState extends State<SkillsSetup> {
     else {
       if (skills.contains(achievementController.text)) {
         _scaffoldKey.currentState
-            .showSnackBar(SnackBar(content: Text("Achievement already added")));
+            .showSnackBar((MyThemeData.getSnackBar(text: "Achievement already added")));
         return false;
       }
 
@@ -149,8 +149,7 @@ class _SkillsSetupState extends State<SkillsSetup> {
       });
       print(e.toString() + "adsaasd");
       _scaffoldKey.currentState.showSnackBar(
-          SnackBar(content: Text(
-            "Something went wrong", style: TextStyle(color: Colors.white),),));
+          (MyThemeData.getSnackBar(text: "Something went wrong.")));
 
       return false;
     }

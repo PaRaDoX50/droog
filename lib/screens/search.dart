@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
 import 'package:droog/models/user.dart';
-import 'package:droog/screens/chat_screen.dart';
 import 'package:droog/screens/user_profile.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
@@ -93,7 +92,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     itemCount: searchResults.length,
                     itemBuilder: (_, index) {
 //                      searchResults[index].userName != Constants.userName
-                      if(true) {
+                      if(searchResults[index].userName != Constants.userName) {
                         return SearchTile(
                           user: searchResults[index],
                         );

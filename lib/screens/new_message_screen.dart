@@ -36,7 +36,7 @@ class _NewMessageScreenState extends State<NewMessageScreen> {
           title: Text(
             "New Message",
             style:
-                GoogleFonts.montserrat(color: Theme.of(context).primaryColor),
+                TextStyle(color: Theme.of(context).primaryColor),
           )),
       body: Column(
         children: <Widget>[
@@ -53,7 +53,7 @@ class _NewMessageScreenState extends State<NewMessageScreen> {
                 itemCount: searchResults.length,
                 itemBuilder: (_, index) {
 
-                  if(searchResults[index].userName == Constants.userName) {
+                  if(searchResults[index].userName != Constants.userName) {
                     return NewMessageTile(
                       user: searchResults[index],
                     );

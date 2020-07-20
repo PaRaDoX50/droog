@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/models/post.dart';
 import 'package:droog/models/response.dart';
 import 'package:droog/services/database_methods.dart';
-import 'package:droog/utils/theme_data.dart';
 import 'package:droog/widgets/feed_tile.dart';
 import 'package:droog/widgets/response_tile.dart';
 import 'package:flutter/cupertino.dart';
@@ -71,7 +70,7 @@ class ResponseScreenState extends State<ResponseScreen> {
         backgroundColor: Color(0xfffcfcfd),
         title: Text("Responses",
             style:
-                GoogleFonts.montserrat(color: Theme.of(context).primaryColor)),
+                TextStyle(color: Theme.of(context).primaryColor)),
       ),
       body: Stack(
         children: <Widget>[

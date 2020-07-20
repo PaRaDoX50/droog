@@ -51,12 +51,17 @@ class _ProfileContainerState extends State<ProfileContainer> {
                     ),
                   ),
                   title: Text(
-                    userName,
-                    style: TextStyle(color: Colors.white),
-                  ),
+                      userName,
+                      style: TextStyle(color: Colors.white,fontSize: 15),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    ),
+
                   subtitle: Text(
                     fullName,
                     style: TextStyle(color: Colors.white),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   trailing: RaisedButton(
                     onPressed: () {

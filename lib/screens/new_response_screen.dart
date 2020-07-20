@@ -37,7 +37,7 @@ class _NewResponseState extends State<NewResponse> {
           title: Text(
             "Respond",
             style:
-                GoogleFonts.montserrat(color: Theme.of(context).primaryColor),
+                TextStyle(color: Theme.of(context).primaryColor),
           )),
       body: Stack(
         children: <Widget>[

@@ -16,8 +16,9 @@ class NewPostBox extends StatefulWidget {
   PostIs postIs;
   Post post;
   Function toggleLoading;
+  GlobalKey<ScaffoldState> scaffoldKey;
 
-  NewPostBox({@required this.postIs, this.post,@required this.toggleLoading});
+  NewPostBox({@required this.postIs, this.post,@required this.toggleLoading,@required this.scaffoldKey});
 
   @override
   _NewPostBoxState createState() => _NewPostBoxState();
@@ -80,37 +81,49 @@ class _NewPostBoxState extends State<NewPostBox> {
                 if (widget.postIs == PostIs.normalPost) {
 
                   await _databaseMethods.makeAPost(
-                      description: descriptionController.text,
+                      description: descriptionController.text ?? "",
                       imageUrl: imageUrl);
-                  Navigator.pushNamed(context, Home.route);
+                  widget.toggleLoading();
+
+                  Navigator.pushReplacementNamed(context, Home.route);
                   print("post complete");
                 } else if (widget.postIs == PostIs.response) {
                   await _databaseMethods.makeAResponse(
                       postId: widget.post.postId,
                       imageUrl: imageUrl,
-                      description: descriptionController.text);
+                      description: descriptionController.text ?? "");
                   widget.toggleLoading();
                   Navigator.pushReplacementNamed(context, ResponseScreen.route,arguments: widget.post);
                 }
               }
             } else {
-              if (widget.postIs == PostIs.normalPost) {
-                await _databaseMethods.makeAPost(
-                    description: descriptionController.text);
-                Navigator.pushNamed(context, Home.route);
-              } else if (widget.postIs == PostIs.response) {
-                await _databaseMethods.makeAResponse(
-                    postId: widget.post.postId,
-                    description: descriptionController.text);
-                widget.toggleLoading();
-                Navigator.pushReplacementNamed(context, ResponseScreen.route,arguments: widget.post);
+              if (descriptionController.text.trim() != "") {
+                if (widget.postIs == PostIs.normalPost) {
+                  await _databaseMethods.makeAPost(
+                      description: descriptionController.text);
+                  widget.toggleLoading();
+
+                  Navigator.pushReplacementNamed(context, Home.route);
+                } else if (widget.postIs == PostIs.response) {
+                  await _databaseMethods.makeAResponse(
+                      postId: widget.post.postId,
+                      description: descriptionController.text);
+                  widget.toggleLoading();
+                  Navigator.pushReplacementNamed(context, ResponseScreen.route,arguments: widget.post);
+                }
+                print("post complete without picture");
               }
-              print("post complete without picture");
+
+
+
+
             }
+            widget.toggleLoading();
           } catch (e) {
             widget.toggleLoading();
             print(e.toString());
           }
+
         },
         child: Text(
           "Share",
@@ -203,6 +216,8 @@ class _NewPostBoxState extends State<NewPostBox> {
                                   File croppedImage;
                                   if (image != null) {
                                     croppedImage = await _pickImage.cropImage(
+                                       ratioX: 4,
+                                        ratioY: 3,
                                         image: image,
                                         pictureFor: PictureFor.postPicture);
                                   }
