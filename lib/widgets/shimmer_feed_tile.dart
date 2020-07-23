@@ -1,3 +1,4 @@
+import 'package:droog/widgets/profile_picture_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -13,19 +14,7 @@ class ShimmerFeedTile extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   ListTile(
-                    leading: Shimmer.fromColors(
-                      baseColor: Colors.grey[300],
-                      highlightColor: Colors.grey,
-                      child: CircleAvatar(
-                        child: ClipOval(
-                          child: Container(
-                            height: 35,
-                            width: 35,
-                            color: Colors.grey[300],
-                          ),
-                        ),
-                      ),
-                    ),
+                    leading: ProfilePictureLoading(),
                     title: Shimmer.fromColors(
                       baseColor: Colors.grey[300],
                       highlightColor: Colors.grey,

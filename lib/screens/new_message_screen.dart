@@ -4,9 +4,11 @@ import 'package:droog/models/user.dart';
 import 'package:droog/screens/chat_screen.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
+import 'package:droog/widgets/profile_picture_loading.dart';
 import 'package:droog/widgets/search_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class NewMessageScreen extends StatefulWidget {
   static final String route = "/new_message_screen";
@@ -113,10 +115,11 @@ class _NewMessageScreenState extends State<NewMessageScreen> {
                       : Center(
                             child: AspectRatio(
                               aspectRatio: 1,
-                              child: Image.asset(
+                              child: FadeInImage(image: AssetImage(
                                 "assets/images/no_results.png",
-                                width: double.infinity,
-                              ),
+
+                              ),width: double.infinity,
+                                placeholder: MemoryImage(kTransparentImage),),
 
                           ),
                         )),
@@ -142,9 +145,13 @@ class NewMessageTile extends StatelessWidget {
       },
       child: ListTile(
         leading: CircleAvatar(
+          radius: 30,
           child: ClipOval(
             child: CachedNetworkImage(
               imageUrl: user.profilePictureUrl,
+              placeholder: (x, y) {
+                return  ProfilePictureLoading();
+              },
             ),
           ),
         ),

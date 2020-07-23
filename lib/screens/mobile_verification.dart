@@ -6,6 +6,7 @@ import 'package:droog/services/sharedprefs_methods.dart';
 import 'package:droog/utils/theme_data.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class MobileVerification extends StatefulWidget {
   static final String route = "/mobile_verification";
@@ -41,7 +42,8 @@ class _MobileVerificationState extends State<MobileVerification> {
       });
       print("vF" + exception.message);
 
-      _scaffoldKey.currentState.showSnackBar((MyThemeData.getSnackBar(text: "Something went wrong.")));
+      _scaffoldKey.currentState.showSnackBar(
+          (MyThemeData.getSnackBar(text: "Something went wrong.")));
     };
 
     final vC = (AuthCredential credential) async {
@@ -70,7 +72,8 @@ class _MobileVerificationState extends State<MobileVerification> {
         setState(() {
           showLoading = false;
         });
-        _scaffoldKey.currentState.showSnackBar((MyThemeData.getSnackBar(text:"Something went wrong.")));
+        _scaffoldKey.currentState.showSnackBar(
+            (MyThemeData.getSnackBar(text: "Something went wrong.")));
       }
     };
     final cS = (codeSent, [forceResend]) {
@@ -110,7 +113,10 @@ class _MobileVerificationState extends State<MobileVerification> {
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
             prefixIcon: Container(
-              width: MediaQuery.of(context).size.width * .23,
+              width: MediaQuery
+                  .of(context)
+                  .size
+                  .width * .23,
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: FittedBox(
@@ -130,127 +136,139 @@ class _MobileVerificationState extends State<MobileVerification> {
       body: isCodeSent == true
           ? IgnorePointer(
         ignoring: showLoading,
-            child: Stack(
-                children: <Widget>[
-                  OTPscreen(
-                    code: verificationCode,
-                    number: mobileController.text,
-                  ),
-                  showLoading == true
-                      ? Center(child: CircularProgressIndicator())
-                      : Container()
-                ],
-              ),
-          )
+        child: Stack(
+          children: <Widget>[
+            OTPscreen(
+              code: verificationCode,
+              number: mobileController.text,
+            ),
+            showLoading == true
+                ? Center(child: CircularProgressIndicator())
+                : Container()
+          ],
+        ),
+      )
           : Stack(
-              children: <Widget>[
-                Center(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                          top: MediaQuery.of(context).padding.top + 16,
-                          left: 16,
-                          right: 16),
-                      child: Column(mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.only(
+                    top: MediaQuery
+                        .of(context)
+                        .padding
+                        .top + 16,
+                    left: 16,
+                    right: 16),
+                child: Column(mainAxisSize: MainAxisSize.min,
 
-                        children: <Widget>[
+                  children: <Widget>[
 
 //                  Image.asset("assets/images/droog_pattern.png"),
 //                  SizedBox(
 //                    height: 16,
 //                  ),
-                          FittedBox(
-                            child: Text(
-                              "Enter Mobile Number",
-                              style: TextStyle(
-                                  fontSize: 28, fontWeight: FontWeight.w400),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 16,
-                          ),
-                          FittedBox(
-                            child: Text(
-                              "SMS verification code will be sent",
-                              style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w400),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 16,
-                          ),
-                          mobileField,
-                          SizedBox(
-                            height: 16,
-                          ),
-                          FittedBox(
-                            child: Text(
-                                "By clicking continue you are accepting to Droog's",
-                                style: TextStyle(
-                                    fontSize: 13, fontWeight: FontWeight.w400)),
-                          ),
-                          FittedBox(
-                            child: Text("Terms and Conditions",
-                                style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w400,
-                                    color: Theme.of(context).buttonColor)),
-                          ),
-                          SizedBox(
-                            height: 16,
-                          ),
-                          Builder(
-                            builder: (ctx) {
-                              return ButtonTheme(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: Container(
-                                  height: 29,
-                                  width: MediaQuery.of(context).size.width * .6,
-                                  child: RaisedButton(
-                                    child: Text(
-                                      "Continue",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    color: Theme.of(context).buttonColor,
-                                    onPressed: () async {
-                                      try {
-                                        if (_formKey.currentState.validate()) {
-                                          setState(() {
-                                            showLoading = true;
-                                          });
-                                          await mobileSignIn(
-                                              mobileController.text);
-                                        }
-                                      } catch (e) {
-                                        setState(() {
-                                          showLoading = false;
-                                        });
-                                        print("errooooooooorr" + e.toString());
-                                      }
-                                    },
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          SizedBox(
-                            height: 16,
-                          ),
-                          Image.asset("assets/images/mobile_verification.png"),
-                        ],
+                    FittedBox(
+                      child: Text(
+                        "Enter Mobile Number",
+                        style: TextStyle(
+                            fontSize: 28, fontWeight: FontWeight.w400),
                       ),
                     ),
-                  ),
+                    SizedBox(
+                      height: 16,
+                    ),
+                    FittedBox(
+                      child: Text(
+                        "SMS verification code will be sent",
+                        style: TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.w400),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 16,
+                    ),
+                    mobileField,
+                    SizedBox(
+                      height: 16,
+                    ),
+                    FittedBox(
+                      child: Text(
+                          "By clicking continue you are accepting to Droog's",
+                          style: TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.w400)),
+                    ),
+                    FittedBox(
+                      child: Text("Terms and Conditions",
+                          style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w400,
+                              color: Theme
+                                  .of(context)
+                                  .buttonColor)),
+                    ),
+                    SizedBox(
+                      height: 16,
+                    ),
+                    Builder(
+                      builder: (ctx) {
+                        return ButtonTheme(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Container(
+                            height: 29,
+                            width: MediaQuery
+                                .of(context)
+                                .size
+                                .width * .6,
+                            child: RaisedButton(
+                              child: Text(
+                                "Continue",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              color: Theme
+                                  .of(context)
+                                  .buttonColor,
+                              onPressed: () async {
+                                try {
+                                  if (_formKey.currentState.validate()) {
+                                    setState(() {
+                                      showLoading = true;
+                                    });
+                                    await mobileSignIn(
+                                        mobileController.text);
+                                  }
+                                } catch (e) {
+                                  setState(() {
+                                    showLoading = false;
+                                  });
+                                  print("errooooooooorr" + e.toString());
+                                }
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(
+                      height: 16,
+                    ),
+                    FadeInImage(image: AssetImage(
+                        "assets/images/mobile_verification.png"),placeholder: MemoryImage(kTransparentImage),)
+//                    Image.asset("assets/images/mobile_verification.png"),
+                  ],
                 ),
-                showLoading == true
-                    ? Center(child: CircularProgressIndicator())
-                    : Container()
-              ],
+              ),
             ),
+          ),
+          showLoading == true
+              ? Center(child: CircularProgressIndicator())
+              : Container()
+        ],
+      ),
     );
   }
 }

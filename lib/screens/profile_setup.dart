@@ -9,10 +9,12 @@ import 'package:droog/services/database_methods.dart';
 import 'file:///P:/androidProjects/Droog/droog/lib/utils/image_picker.dart';
 import 'package:droog/services/sharedprefs_methods.dart';
 import 'package:droog/utils/theme_data.dart';
+import 'package:droog/widgets/profile_picture_loading.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class ProfileSetup extends StatefulWidget {
   static final String route = "/profile_setup";
@@ -256,14 +258,18 @@ class _ProfileSetupState extends State<ProfileSetup> {
                                 child: ClipOval(
                                   child: CachedNetworkImage(
                                     imageUrl: Constants.profilePictureUrl,
+                                    placeholder: (x, y) {
+                                      return  ProfilePictureLoading();
+                                    },
                                   ),
                                 ),
                               )
                             : Center(
                                 child: CircleAvatar(
                                 child: ClipOval(
-                                    child: Image.asset(
-                                        "assets/images/camera.png"),),
+                                    child: FadeInImage(image:AssetImage(
+                                        "assets/images/camera.png"),
+                                      placeholder: MemoryImage(kTransparentImage),),),
                                 radius: 35,
                                 backgroundColor: Colors.transparent,
                               ),),

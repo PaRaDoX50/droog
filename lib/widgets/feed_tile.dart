@@ -10,20 +10,24 @@ import 'package:droog/screens/user_profile.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
 import 'package:droog/widgets/expandable_text.dart';
+import 'package:droog/widgets/profile_picture_loading.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:shimmer/shimmer.dart';
 
 class FeedTile extends StatefulWidget {
   final Post post;
   bool showBottomOptions;
   final GlobalKey<ScaffoldState> feedKey;
 
-
-
-  FeedTile({this.post, this.showBottomOptions, this.feedKey,});
+  FeedTile({
+    this.post,
+    this.showBottomOptions,
+    this.feedKey,
+  });
 
   @override
   _FeedTileState createState() => _FeedTileState();
@@ -44,19 +48,18 @@ class _FeedTileState extends State<FeedTile> {
   clipPost() async {
     await _databaseMethods.clipPost(postId: widget.post.postId);
 
-    widget.feedKey.currentState
-        .showSnackBar(MyThemeData.getSnackBar(text: "Post clipped."),);
-    setState(() {
-
-    });
+    widget.feedKey.currentState.showSnackBar(
+      MyThemeData.getSnackBar(text: "Post clipped."),
+    );
+    setState(() {});
   }
+
   unClipPost() async {
     await _databaseMethods.unClipPost(postId: widget.post.postId);
-    widget.feedKey.currentState
-        .showSnackBar(MyThemeData.getSnackBar(text: "Post unclipped"),);
-    setState(() {
-
-    });
+    widget.feedKey.currentState.showSnackBar(
+      MyThemeData.getSnackBar(text: "Post unclipped"),
+    );
+    setState(() {});
   }
 
   showOptions() {
@@ -76,7 +79,9 @@ class _FeedTileState extends State<FeedTile> {
                           Navigator.pop(context);
                         } catch (e) {
                           // TODO
-                          widget.feedKey.currentState.showSnackBar(MyThemeData.getSnackBar(text: "Something went wrong"));
+                          widget.feedKey.currentState.showSnackBar(
+                              MyThemeData.getSnackBar(
+                                  text: "Something went wrong"));
                           Navigator.pop(context);
                         }
                       },
@@ -97,49 +102,47 @@ class _FeedTileState extends State<FeedTile> {
                     height: 1,
                     thickness: 1,
                   ),
-
                   FutureBuilder<bool>(
-                    future: _databaseMethods.isDroog(targetUid: widget.post.postByUid),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        if (snapshot.data) {
-                          return InkWell(
-                            onTap: () async {
-                              try {
-                                await _databaseMethods.disconnectFromUser(
-                                    targetUid: widget.post.postByUid);
-                                Navigator.pop(context);
-                              } catch (e) {
-                                widget.feedKey.currentState.showSnackBar(MyThemeData.getSnackBar(text: "Something went wrong"));
-                                Navigator.pop(context);
-                                // TODO
-                              }
-                            },
-                            child: ListTile(
-                                leading: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Icon(
-                                      Icons.clear,
-                                      color: Color(0xff4481bc),
-                                    ),
-                                  ],
-                                ),
-                                title: Text("Disconnect"),
-                                subtitle:
-                                    Text("Split from ${widget.post.postByUserName}")),
-                          );
-                        }
-                        else{
+                      future: _databaseMethods.isDroog(
+                          targetUid: widget.post.postByUid),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          if (snapshot.data) {
+                            return InkWell(
+                              onTap: () async {
+                                try {
+                                  await _databaseMethods.disconnectFromUser(
+                                      targetUid: widget.post.postByUid);
+                                  Navigator.pop(context);
+                                } catch (e) {
+                                  widget.feedKey.currentState.showSnackBar(
+                                      MyThemeData.getSnackBar(
+                                          text: "Something went wrong"));
+                                  Navigator.pop(context);
+                                  // TODO
+                                }
+                              },
+                              child: ListTile(
+                                  leading: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Icon(
+                                        Icons.clear,
+                                        color: Color(0xff4481bc),
+                                      ),
+                                    ],
+                                  ),
+                                  title: Text("Disconnect"),
+                                  subtitle: Text(
+                                      "Split from ${widget.post.postByUserName}")),
+                            );
+                          } else {
+                            return Container();
+                          }
+                        } else {
                           return Container();
                         }
-
-                      }
-                      else{
-                        return Container();
-                      }
-                    }
-                  )
+                      })
                 ],
               ),
             ));
@@ -185,6 +188,9 @@ class _FeedTileState extends State<FeedTile> {
                           child: ClipOval(
                             child: CachedNetworkImage(
                               imageUrl: snapshot.data.profilePictureUrl,
+                              placeholder: (x, y) {
+                                return  ProfilePictureLoading();
+                              },
 //                            loadingBuilder: (BuildContext context, Widget child,
 //                                ImageChunkEvent loadingProgress) {
 //                              if (loadingProgress == null) return child;
@@ -199,7 +205,7 @@ class _FeedTileState extends State<FeedTile> {
                             ),
                           ),
                         )
-                      : null,
+                      : ProfilePictureLoading(),
                   title: snapshot.hasData
                       ? GestureDetector(
                           onTap: () => Navigator.pushNamed(
@@ -335,20 +341,26 @@ class _FeedTileState extends State<FeedTile> {
                                 postId: widget.post.postId),
                             builder: (_, snapshot) {
                               if (snapshot.hasData) {
-                                if(snapshot.data){
+                                if (snapshot.data) {
                                   return GestureDetector(
                                       onTap: unClipPost,
-                                      child: Icon(Icons.indeterminate_check_box,color: Colors.blueGrey,));
-
-                                }
-                                else{
+                                      child: Icon(
+                                        Icons.indeterminate_check_box,
+                                        color: Colors.blueGrey,
+                                      ));
+                                } else {
                                   return GestureDetector(
                                       onTap: clipPost,
-                                      child: Icon(Icons.content_paste,color: Colors.blueGrey,));
+                                      child: Icon(
+                                        Icons.content_paste,
+                                        color: Colors.blueGrey,
+                                      ));
                                 }
-                              }
-                              else{
-                                return Container(height: 25,width: 25,);
+                              } else {
+                                return Container(
+                                  height: 25,
+                                  width: 25,
+                                );
                               }
                             },
                           )),
@@ -360,6 +372,4 @@ class _FeedTileState extends State<FeedTile> {
       ),
     );
   }
-
-
 }

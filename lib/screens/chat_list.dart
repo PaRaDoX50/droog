@@ -8,11 +8,13 @@ import 'package:droog/screens/chat_screen.dart';
 import 'package:droog/screens/new_message_screen.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
+import 'package:droog/widgets/profile_picture_loading.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class ChatList extends StatefulWidget {
   static final String route = "/chat_list";
@@ -86,7 +88,9 @@ class _ChatListState extends State<ChatList> {
                    return SliverFillRemaining(child: Center(child: Column(
                      mainAxisSize: MainAxisSize.min,
                      children: <Widget>[
-                       Image.asset("assets/images/no_conversation.png"),
+                       FadeInImage(
+                         image: AssetImage("assets/images/no_conversation.png",),
+                         placeholder: MemoryImage(kTransparentImage),),
                        SizedBox(height: 8,),
                        FittedBox(child: Text("No conversations!",style: TextStyle(fontSize: 20,),))
                      ],
@@ -157,13 +161,16 @@ class ChatTile extends StatelessWidget {
                           leading: Hero(
                             tag:snapshot.hasData ? snapshot.data.profilePictureUrl : "  ",
                             child: CircleAvatar(
-                              radius: 25,
+                              radius: 30,
                               child: snapshot.hasData
                                   ? ClipOval(
                                       child: CachedNetworkImage(
                                       imageUrl: snapshot.data.profilePictureUrl,
+                                        placeholder: (x, y) {
+                                          return  ProfilePictureLoading();
+                                        },
                                     ))
-                                  : Icon(Icons.account_circle),
+                                  : ProfilePictureLoading(),
                             ),
                           ),
                           title: Text(

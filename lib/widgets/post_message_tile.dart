@@ -9,6 +9,7 @@ import 'package:droog/screens/share_screen.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
 import 'package:droog/widgets/expandable_text.dart';
+import 'package:droog/widgets/profile_picture_loading.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -93,6 +94,9 @@ class _PostMessageWidgetState extends State<PostMessageWidget> {
                             ? ClipOval(
                                 child:CachedNetworkImage(
                                   imageUrl:snapshot.data.profilePictureUrl,
+                                  placeholder: (x, y) {
+                                    return  ProfilePictureLoading();
+                                  },
 //                                  loadingBuilder: (BuildContext context,
 //                                      Widget child,
 //                                      ImageChunkEvent loadingProgress) {
@@ -109,11 +113,7 @@ class _PostMessageWidgetState extends State<PostMessageWidget> {
 //                                  },
                                 ),
                               )
-                            : CircleAvatar(
-                                child: Icon(
-                                  Icons.attachment,
-                                ),
-                              ),
+                            : ProfilePictureLoading(),
                         title: snapshot.hasData
                             ? Text(
                                 snapshot.data.userName,

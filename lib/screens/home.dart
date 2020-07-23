@@ -20,6 +20,7 @@ import 'package:droog/services/auth.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
 import 'package:droog/widgets/animated_indexed_stack.dart';
+import 'package:droog/widgets/profile_picture_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -97,6 +98,9 @@ class _HomeState extends State<Home> {
               leading: ClipOval(
                   child: CachedNetworkImage(
                 imageUrl: Constants.profilePictureUrl,
+                    placeholder: (x, y) {
+                      return  ProfilePictureLoading();
+                    },
               )),
               title: Text(
                 Constants.fullName,

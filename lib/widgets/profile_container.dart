@@ -3,9 +3,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:droog/data/constants.dart';
 import 'package:droog/models/enums.dart';
 import 'package:droog/models/user.dart';
+import 'package:droog/screens/droogs_list.dart';
 import 'package:droog/screens/profile_setup.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
+import 'package:droog/widgets/profile_picture_loading.dart';
 import 'package:droog/widgets/skills_container.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -58,6 +60,9 @@ class _ProfileContainerState extends State<ProfileContainer> {
                   leading: ClipOval(
                     child: CachedNetworkImage(
                       imageUrl: profilePictureUrl,
+                      placeholder: (x, y) {
+                        return  ProfilePictureLoading();
+                      },
                     ),
                   ),
                   title: Text(
@@ -144,17 +149,20 @@ class _ProfileContainerState extends State<ProfileContainer> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        Text(
-                          "Droogs",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        Text(
-                          droogsCount.toString(),
-                          style: TextStyle(color: Colors.white),
-                        )
-                      ],
+                    GestureDetector(
+                      onTap: ()=>widget.user.uid == Constants.uid ? Navigator.pushNamed(context, DroogsList.route) : null,
+                      child: Column(
+                        children: <Widget>[
+                          Text(
+                            "Droogs",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          Text(
+                            droogsCount.toString(),
+                            style: TextStyle(color: Colors.white),
+                          )
+                        ],
+                      ),
                     ),
                     Column(
                       children: <Widget>[

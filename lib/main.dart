@@ -1,6 +1,7 @@
 import 'package:droog/models/enums.dart';
 import 'package:droog/screens/chat_list.dart';
 import 'package:droog/screens/chat_screen.dart';
+import 'package:droog/screens/droogs_list.dart';
 import 'package:droog/screens/feed.dart';
 import 'package:droog/screens/feedback.dart';
 import 'package:droog/screens/full_screen_image.dart';
@@ -111,6 +112,7 @@ class _MyAppState extends State<MyApp> {
         AllRequests.route: (_) => AllRequests(),
         FeedbackScreen.route: (_) => FeedbackScreen(),
         FullScreenImage.route: (_) => FullScreenImage(),
+        DroogsList.route:(_)=>DroogsList(),
       },
     );
   }

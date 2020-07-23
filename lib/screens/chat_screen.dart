@@ -12,6 +12,7 @@ import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/image_picker.dart';
 import 'package:droog/widgets/image_message_tile.dart';
 import 'package:droog/widgets/post_message_tile.dart';
+import 'package:droog/widgets/profile_picture_loading.dart';
 import 'package:droog/widgets/text_message_tile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -290,6 +291,9 @@ class CustomAppBar extends PreferredSize {
                       child: ClipOval(
                         child: CachedNetworkImage(
                           imageUrl: userProfilePictureUrl,
+                          placeholder: (x, y) {
+                            return  ProfilePictureLoading();
+                          },
                         ),
                       ),
                     ),

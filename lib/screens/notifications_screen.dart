@@ -9,11 +9,13 @@ import 'package:droog/screens/responses_screen.dart';
 import 'package:droog/screens/user_profile.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
+import 'package:droog/widgets/profile_picture_loading.dart';
 import 'package:droog/widgets/request_tile.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class NotificationsScreen extends StatefulWidget {
   @override
@@ -86,7 +88,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         child: Column(mainAxisSize: MainAxisSize.min,
 
           children: <Widget>[
-            Image.asset("assets/images/no_updates.png",width: MediaQuery.of(context).size.width*.6,),
+            FadeInImage(
+              image: AssetImage("assets/images/no_updates.png",),
+              placeholder: MemoryImage(kTransparentImage),width: MediaQuery.of(context).size.width*.6,),
+//            Image.asset("assets/images/no_updates.png",width: MediaQuery.of(context).size.width*.6,),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text("No Updates! Try refreshing the page.",style: TextStyle(fontSize: 16),),
@@ -175,9 +180,13 @@ class UpdateTile extends StatelessWidget {
                       arguments: user);
                 },
                 child: CircleAvatar(
+                  radius: 25,
                   child: ClipOval(
                     child: CachedNetworkImage(
                       imageUrl: user.profilePictureUrl,
+                      placeholder: (x, y) {
+                        return  ProfilePictureLoading();
+                      },
                     ),
                   ),
                 ),
@@ -229,9 +238,13 @@ class UpdateTile extends StatelessWidget {
                         arguments: user);
                   },
                   child: CircleAvatar(
+                    radius: 25,
                     child: ClipOval(
                       child: CachedNetworkImage(
                         imageUrl: user.profilePictureUrl,
+                        placeholder: (x, y) {
+                          return  ProfilePictureLoading();
+                        },
                       ),
                     ),
                   ),
@@ -286,6 +299,9 @@ class UpdateTile extends StatelessWidget {
                 child: ClipOval(
                   child: CachedNetworkImage(
                     imageUrl: user.profilePictureUrl,
+                    placeholder: (x, y) {
+                      return  ProfilePictureLoading();
+                    },
                   ),
                 ),
               ),

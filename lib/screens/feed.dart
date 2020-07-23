@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class Feed extends StatefulWidget {
   @override
@@ -35,7 +36,6 @@ class _FeedState extends State<Feed> {
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       key: _feedScaffoldKey,
       backgroundColor: Colors.white,
@@ -47,85 +47,103 @@ class _FeedState extends State<Feed> {
               Stream<QuerySnapshot> stream = _databaseMethods.getPostsForFeed(
                   droogsUids: followingUids);
               return StreamBuilder<QuerySnapshot>(
-                stream:stream,
+                stream: stream,
                 builder: (_, snapshot) {
-
-                  print("build"+(++buildCount).toString());
+                  print("build" + (++buildCount).toString());
                   if (snapshot.hasData) {
-
-
                     if (_isFirstTime && snapshot.data.documents.length != 0) {
                       print("first time");
                       lastDocument = snapshot.data.documents.last;
-                      posts = snapshot.data.documents.map((e) => _postFromFirebasePost(documentSnapshot: e)).toList();
+                      posts = snapshot.data.documents.map((e) =>
+                          _postFromFirebasePost(documentSnapshot: e)).toList();
                       countOfMoreDocs = posts.length;
 //                      _isFirstTime = false;
                     }
-                    if (!listEquals(snapshot.data.documents.map((e) => e.documentID).toList(), snapshot.data.documentChanges.map((e) => e.document.documentID).toList())) {
-                        print("changes");
-                        print(snapshot.data.documentChanges.length);
-                        if(snapshot.data.documentChanges.isNotEmpty){
-
-                            if (snapshot.data.documentChanges[0].type == DocumentChangeType.added) {
-                              posts.insert(0, _postFromFirebasePost(documentSnapshot: snapshot.data.documentChanges[0].document));
-
-
-                          }
+                    if (!listEquals(
+                        snapshot.data.documents.map((e) => e.documentID)
+                            .toList(),
+                        snapshot.data.documentChanges.map((e) => e.document
+                            .documentID).toList())) {
+                      print("changes");
+                      print(snapshot.data.documentChanges.length);
+                      if (snapshot.data.documentChanges.isNotEmpty) {
+                        if (snapshot.data.documentChanges[0].type ==
+                            DocumentChangeType.added) {
+                          posts.insert(0,
+                              _postFromFirebasePost(documentSnapshot: snapshot
+                                  .data.documentChanges[0].document));
                         }
+                      }
                     }
 
                     return posts.length != 0 ? LazyLoadScrollView(
-                      onEndOfPage: countOfMoreDocs == 10 ?_loadMore : (){},
+                      onEndOfPage: countOfMoreDocs == 10 ? _loadMore : () {},
                       isLoading: _isLoading,
                       scrollOffset: 300,
                       child: ListView.builder(
-                         itemBuilder: (_,index){
-                           if (index == posts.length - 1 && _isLoading) {
-
-                             return Column(
-                               crossAxisAlignment: CrossAxisAlignment.center,
-                               mainAxisSize: MainAxisSize.min,
-                               children: <Widget>[
-                                 FeedTile(
-                                   post: posts[index],
-                                   feedKey: _feedScaffoldKey,
-                                 ),
-                                 Padding(
-                                   padding: const EdgeInsets.all(8.0),
-                                   child: CircularProgressIndicator(),
-                                 )
-                               ],
-                             );
-                           }
-                           return FeedTile(post: posts[index],feedKey: _feedScaffoldKey,);
-                         } ,itemCount: posts.length,),
+                        itemBuilder: (_, index) {
+                          if (index == posts.length - 1 && _isLoading) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                FeedTile(
+                                  post: posts[index],
+                                  feedKey: _feedScaffoldKey,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(),
+                                )
+                              ],
+                            );
+                          }
+                          return FeedTile(
+                            post: posts[index], feedKey: _feedScaffoldKey,);
+                        }, itemCount: posts.length,),
                     ) : Center(child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        Image.asset("assets/images/empty_feed.png"),
-                        FittedBox(child: Text("No Posts To Display",style: TextStyle(fontSize: 20),)),
+                        FadeInImage(
+                          image: AssetImage("assets/images/empty_feed.png",),
+                          placeholder: MemoryImage(kTransparentImage),),
+                        FittedBox(child: Text("No Posts To Display",
+                          style: TextStyle(fontSize: 20),)),
                       ],
                     ),);
                   }
                   else {
-                    if(snapshot.connectionState == ConnectionState.done ){
-                      return Center(child:  Column(
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return Center(child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
-                          Image.asset("assets/images/empty_feed.png"),
-                          FittedBox(child: Text("No Posts To Display",style: TextStyle(fontSize: 20),)),
+                          FadeInImage(
+                            image: AssetImage("assets/images/empty_feed.png",),
+                            placeholder: MemoryImage(kTransparentImage),),
+                          FittedBox(child: Text("No Posts To Display",
+                            style: TextStyle(fontSize: 20),)),
                         ],
                       ),);
                     }
-                    return ListView(children: <Widget>[ShimmerFeedTile(),ShimmerFeedTile(),ShimmerFeedTile(),ShimmerFeedTile(),],);
+                    return ListView(children: <Widget>[
+                      ShimmerFeedTile(),
+                      ShimmerFeedTile(),
+                      ShimmerFeedTile(),
+                      ShimmerFeedTile(),
+                    ],);
                   }
                 },
               );
             } else {
-              if(snapshot.connectionState == ConnectionState.done){
+              if (snapshot.connectionState == ConnectionState.done) {
                 return Center(child: Text("No Posts To Display"),);
               }
-              return ListView(children: <Widget>[ShimmerFeedTile(),ShimmerFeedTile(),ShimmerFeedTile(),ShimmerFeedTile(),],);
+              return ListView(children: <Widget>[
+                ShimmerFeedTile(),
+                ShimmerFeedTile(),
+                ShimmerFeedTile(),
+                ShimmerFeedTile(),
+              ],);
             }
           }),
     );
@@ -137,24 +155,27 @@ class _FeedState extends State<Feed> {
       setState(() {
         _isFirstTime = false;
         _isLoading = true;
-      //      _rebuildDueToSetState = true;
+        //      _rebuildDueToSetState = true;
       });
-      List<DocumentSnapshot> moreDocuments = await _databaseMethods.getMorePostsForFeed(droogsUids: followingUids,documentSnapshot: lastDocument,);
+      List<DocumentSnapshot> moreDocuments = await _databaseMethods
+          .getMorePostsForFeed(
+        droogsUids: followingUids, documentSnapshot: lastDocument,);
       if (moreDocuments.isNotEmpty) {
         lastDocument = moreDocuments.last;
-        List<Post> morePosts = moreDocuments.map((e) => _postFromFirebasePost(documentSnapshot: e)).toList();
+        List<Post> morePosts = moreDocuments.map((e) =>
+            _postFromFirebasePost(documentSnapshot: e)).toList();
         countOfMoreDocs = morePosts.length;
         posts.addAll(morePosts);
       }
-      else{
+      else {
         countOfMoreDocs = 0;
       }
       setState(() {
-      //      _rebuildDueToSetState = true;
+        //      _rebuildDueToSetState = true;
         _isFirstTime = false;
         _isLoading = false;
       });
-    }  catch (e) {
+    } catch (e) {
       print(e.toString());
     }
   }

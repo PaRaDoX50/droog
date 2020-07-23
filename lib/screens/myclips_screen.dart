@@ -4,6 +4,7 @@ import 'package:droog/services/database_methods.dart';
 import 'package:droog/widgets/feed_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:lazy_load_scrollview/lazy_load_scrollview.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class MyClipsScreen extends StatefulWidget {
   static final route = "/my_clips_screen";
@@ -120,7 +121,7 @@ class _MyClipsScreenState extends State<MyClipsScreen> {
               }
             } else {
               if (snapshot.connectionState == ConnectionState.done) {
-                return Center(child: Image.asset("assets/images/no_clips.png"));
+                return Center(child: FadeInImage(image: AssetImage( "assets/images/no_clips.png",),placeholder: MemoryImage(kTransparentImage),));
               }
               return Center(
                 child: CircularProgressIndicator(),

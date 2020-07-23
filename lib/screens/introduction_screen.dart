@@ -5,6 +5,7 @@ import 'package:droog/screens/signup.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 int currentIndex = 0;
 PageController pageController = PageController();
@@ -129,11 +130,15 @@ class SliderTile extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Image.asset(
-              imagePath,
-              width: double.infinity,
+            FadeInImage(image:AssetImage(
+              imagePath,),width: double.infinity,
               height: (heightAvailable) * .6,
-            ),
+              placeholder: MemoryImage(kTransparentImage),),
+//            Image.asset(
+//              imagePath,
+//              width: double.infinity,
+//              height: (heightAvailable) * .6,
+//            ),
             FittedBox(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),

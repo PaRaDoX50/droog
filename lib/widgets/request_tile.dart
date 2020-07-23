@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:droog/models/user.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/utils/theme_data.dart';
+import 'package:droog/widgets/profile_picture_loading.dart';
 import 'package:flutter/material.dart';
 
 class RequestTile extends StatefulWidget {
@@ -65,9 +66,13 @@ class _RequestTileState extends State<RequestTile> {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: CircleAvatar(
+                  radius: 30,
                   child: ClipOval(
                     child: CachedNetworkImage(
                       imageUrl: widget.user.profilePictureUrl,
+                      placeholder: (x, y) {
+                        return  ProfilePictureLoading();
+                      },
                     ),
                   ),
                 ),

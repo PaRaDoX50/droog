@@ -11,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class SignUp extends StatelessWidget {
   static final String route = "/sign_up";
@@ -35,11 +36,12 @@ elevation: 5,
             height: availableHeight * .05,
             child: Row(
               children: <Widget>[
-                Image.asset(
+                FadeInImage(image: AssetImage(
+                  "assets/images/google icon.png",
 
-                  "assets/images/google icon.png",height: 20,width: 20,
+                ),height: 20,width: 20,
+                  placeholder: MemoryImage(kTransparentImage),),
 
-                ),
                 Expanded(
                   child: Center(
                     child: Text(
@@ -101,11 +103,13 @@ elevation: 5,
             height: availableHeight * .05,
             child: Row(
               children: <Widget>[
-                Image.asset(
+                FadeInImage(image:AssetImage(
                   "assets/images/facebook_icon.png",
-                  height: 20,
+
+                ), height: 20,
                   width: 20,
-                ),
+                  placeholder: MemoryImage(kTransparentImage),),
+
                 Expanded(
                   child: Center(
                     child: Text(
@@ -184,7 +188,13 @@ elevation: 5,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Text("droog",style: TextStyle(fontSize: 80/2,fontWeight: FontWeight.bold),),
-            Image.asset("assets/images/signup.png", width: double.infinity),
+            FadeInImage(image:AssetImage(
+              "assets/images/signup.png",
+
+            ),
+                width: double.infinity,
+              placeholder: MemoryImage(kTransparentImage),),
+//            Image.asset("assets/images/signup.png", width: double.infinity),
             
             Column(
               children: <Widget>[
