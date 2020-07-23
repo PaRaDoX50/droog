@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/models/post.dart';
 import 'package:droog/services/database_methods.dart';
 import 'package:droog/widgets/feed_tile.dart';
+import 'package:droog/widgets/shimmer_feed_tile.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -116,7 +117,7 @@ class _FeedState extends State<Feed> {
                         ],
                       ),);
                     }
-                    return Center(child: CircularProgressIndicator());
+                    return ListView(children: <Widget>[ShimmerFeedTile(),ShimmerFeedTile(),ShimmerFeedTile(),ShimmerFeedTile(),],);
                   }
                 },
               );
@@ -124,7 +125,7 @@ class _FeedState extends State<Feed> {
               if(snapshot.connectionState == ConnectionState.done){
                 return Center(child: Text("No Posts To Display"),);
               }
-              return Center(child:  CircularProgressIndicator());
+              return ListView(children: <Widget>[ShimmerFeedTile(),ShimmerFeedTile(),ShimmerFeedTile(),ShimmerFeedTile(),],);
             }
           }),
     );

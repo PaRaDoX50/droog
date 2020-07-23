@@ -98,31 +98,47 @@ class _FeedTileState extends State<FeedTile> {
                     thickness: 1,
                   ),
 
-                  InkWell(
-                    onTap: () async {
-                      try {
-                        await _databaseMethods.disconnectFromUser(
-                            targetUid: widget.post.postByUid);
-                        Navigator.pop(context);
-                      } catch (e) {
-                        widget.feedKey.currentState.showSnackBar(MyThemeData.getSnackBar(text: "Something went wrong"));
-                        Navigator.pop(context);
-                        // TODO
+                  FutureBuilder<bool>(
+                    future: _databaseMethods.isDroog(targetUid: widget.post.postByUid),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        if (snapshot.data) {
+                          return InkWell(
+                            onTap: () async {
+                              try {
+                                await _databaseMethods.disconnectFromUser(
+                                    targetUid: widget.post.postByUid);
+                                Navigator.pop(context);
+                              } catch (e) {
+                                widget.feedKey.currentState.showSnackBar(MyThemeData.getSnackBar(text: "Something went wrong"));
+                                Navigator.pop(context);
+                                // TODO
+                              }
+                            },
+                            child: ListTile(
+                                leading: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Icon(
+                                      Icons.clear,
+                                      color: Color(0xff4481bc),
+                                    ),
+                                  ],
+                                ),
+                                title: Text("Disconnect"),
+                                subtitle:
+                                    Text("Split from ${widget.post.postByUserName}")),
+                          );
+                        }
+                        else{
+                          return Container();
+                        }
+
                       }
-                    },
-                    child: ListTile(
-                        leading: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(
-                              Icons.clear,
-                              color: Color(0xff4481bc),
-                            ),
-                          ],
-                        ),
-                        title: Text("Disconnect"),
-                        subtitle:
-                            Text("Split from ${widget.post.postByUserName}")),
+                      else{
+                        return Container();
+                      }
+                    }
                   )
                 ],
               ),

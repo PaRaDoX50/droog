@@ -178,7 +178,7 @@ class DatabaseMethods {
       return [];
     }
   }
-  Future<List<User>> getListOfYourDroogs({String keyword}) async {
+  Future<List<User>> getListOfYourDroogs() async {
     QuerySnapshot snapshotDroogs = await _database
         .collection("users")
         .document(Constants.uid)
@@ -411,6 +411,18 @@ class DatabaseMethods {
           .collection("requests")
           .document(Constants.uid)
           .delete();
+
+      print("deleted");
+    }  catch (e) {
+      // TODO
+      print(e.toString());
+    }
+    //Access target user by its uid -> under collections of "requests", delete document named the uid of the user who sent the request.
+  }
+  Future<void> rejectConnectionRequest({String targetUid}) async {
+    //Un-send Follow Request
+    try {
+
       await _database
           .collection("users")
           .document(Constants.uid)
@@ -422,7 +434,6 @@ class DatabaseMethods {
       // TODO
       print(e.toString());
     }
-
     //Access target user by its uid -> under collections of "requests", delete document named the uid of the user who sent the request.
   }
 
@@ -491,12 +502,23 @@ class DatabaseMethods {
         .collection("requests")
         .where("uid", isEqualTo: Constants.uid)
         .getDocuments();
+    QuerySnapshot snapshotRequestOfTargetUser = await _database
+        .collection("users")
+        .document(Constants.uid)
+        .collection("requests")
+        .where("uid", isEqualTo: targetUid)
+        .getDocuments();
+
     if (snapshotDroogs.documents.isEmpty &&
-        snapshotRequests.documents.isEmpty) {
+        snapshotRequests.documents.isEmpty && snapshotRequestOfTargetUser.documents.isEmpty) {
       return ConnectionStatus.requestNotSent;
     } else if (snapshotDroogs.documents.isNotEmpty) {
       return ConnectionStatus.droogs;
-    } else {
+    }
+    else if (snapshotRequestOfTargetUser.documents.isNotEmpty) {
+      return ConnectionStatus.requestAlreadyPresent;
+    }
+    else {
       return ConnectionStatus.requestSent;
     }
   }

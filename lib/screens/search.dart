@@ -23,6 +23,7 @@ class _SearchScreenState extends State<SearchScreen> {
   final DatabaseMethods _databaseMethods = DatabaseMethods();
   final TextEditingController searchController = TextEditingController();
   List<User> searchResults = [];
+  final scaffoldKey = GlobalKey<ScaffoldState>();
 
   getSearchResults() async {
     searchResults = await _databaseMethods.searchUser(searchController.text);
@@ -75,6 +76,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldKey,
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
@@ -92,12 +94,11 @@ class _SearchScreenState extends State<SearchScreen> {
                     itemCount: searchResults.length,
                     itemBuilder: (_, index) {
 //                      searchResults[index].userName != Constants.userName
-                      if(searchResults[index].userName != Constants.userName) {
+                      if (searchResults[index].userName != Constants.userName) {
                         return SearchTile(
                           user: searchResults[index],
                         );
-                      }
-                      else{
+                      } else {
                         return Container();
                       }
                     },
@@ -119,8 +120,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
 class SearchTile extends StatefulWidget {
   final User user;
+  final GlobalKey<ScaffoldState> scaffoldKey;
 
-  SearchTile({this.user});
+  SearchTile({@required this.user, @required this.scaffoldKey});
 
   @override
   _SearchTileState createState() => _SearchTileState();
@@ -175,32 +177,46 @@ class _SearchTileState extends State<SearchTile> {
             trailing: RaisedButton(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(5))),
-              child: FutureBuilder<String>(
-                  future: _followButtonText,
-                  builder: (context, snapshot) {
-                    return snapshot.hasData
-                        ? getAppropriateChild(snapshot.data)
-                        : SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              backgroundColor: Colors.white,
-                              strokeWidth: 2,
-                            ));
-                  }),
+              child: _showLoading
+                  ? SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : FutureBuilder<String>(
+                      future: _followButtonText,
+                      builder: (context, snapshot) {
+                        return snapshot.hasData
+                            ? getAppropriateChild(snapshot.data)
+                            : SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  backgroundColor: Colors.white,
+                                  strokeWidth: 2,
+                                ));
+                      }),
               color: MyThemeData.buttonColorBlue,
               textColor: Colors.white,
               onPressed: () {
-                switch (_connectionStatus) {
-                  case ConnectionStatus.requestNotSent:
-                    _sendRequest();
-                    break;
-                  case ConnectionStatus.requestSent:
-                    _cancelRequest();
-                    break;
-                  case ConnectionStatus.droogs:
-                    _unFollow();
-                    break;
+                if (!_showLoading) {
+                  switch (_connectionStatus) {
+                    case ConnectionStatus.requestNotSent:
+                      _sendRequest();
+                      break;
+                    case ConnectionStatus.requestSent:
+                      _cancelRequest();
+                      break;
+                    case ConnectionStatus.droogs:
+                      _unFollow();
+                      break;
+                    case ConnectionStatus.requestAlreadyPresent:
+                      showOptions();
+                      break;
+                  }
                 }
               },
             ),
@@ -224,43 +240,155 @@ class _SearchTileState extends State<SearchTile> {
         return "Disconnect";
       case ConnectionStatus.requestNotSent:
         return "Connect";
-      default:
-        return "";
+      case ConnectionStatus.requestAlreadyPresent:
+        return "Respond";
     }
   }
 
-  Future _sendRequest() async {
-    print(widget.user.firstName);
-    print(widget.user.uid.toString());
-    setState(() {
-      _showLoading = true;
-    });
-    await _databaseMethods.sendConnectionRequest(targetUid: widget.user.uid);
+  showOptions() {
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              contentPadding: EdgeInsets.zero,
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  InkWell(
+                      onTap: () async {
+                        try {
+                          Navigator.pop(context);
+                          acceptFollowRequest();
+                        } catch (e) {
+                          // TODO
 
-    setState(() {
-      _showLoading = false;
-    });
+                          Navigator.pop(context);
+                          widget.scaffoldKey.currentState.showSnackBar(
+                              MyThemeData.getSnackBar(
+                                  text: "Something went wrong"));
+                        }
+                      },
+                      child: ListTile(
+                        leading: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              Icons.report,
+                              color: Color(0xff4481bc),
+                            ),
+                          ],
+                        ),
+                        title: Text("Connect"),
+                        subtitle: Text("Accept Connection Request"),
+                      )),
+                  Divider(
+                    height: 1,
+                    thickness: 1,
+                  ),
+                  InkWell(
+                    onTap: () async {
+                      try {
+                        Navigator.pop(context);
+                        deleteFollowRequest();
+                      } catch (e) {
+                        Navigator.pop(context);
+                        widget.scaffoldKey.currentState.showSnackBar(
+                            MyThemeData.getSnackBar(
+                                text: "Something went wrong"));
+                        // TODO
+                      }
+                    },
+                    child: ListTile(
+                        leading: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              Icons.clear,
+                              color: Color(0xff4481bc),
+                            ),
+                          ],
+                        ),
+                        title: Text("Delete"),
+                        subtitle: Text("Delete Connection Request")),
+                  )
+                ],
+              ),
+            ));
+  }
+
+  Future _sendRequest() async {
+    if (!_showLoading) {
+      print(widget.user.firstName);
+      print(widget.user.uid.toString());
+      setState(() {
+        _showLoading = true;
+      });
+      await _databaseMethods.sendConnectionRequest(targetUid: widget.user.uid);
+
+      setState(() {
+        _showLoading = false;
+      });
+    }
   }
 
   Future _cancelRequest() async {
-    setState(() {
-      _showLoading = true;
-    });
-    await _databaseMethods.cancelConnectionRequest(targetUid: widget.user.uid);
-    print("Sed");
-    setState(() {
-      _showLoading = false;
-    });
+    if (!_showLoading) {
+      setState(() {
+        _showLoading = true;
+      });
+      await _databaseMethods.cancelConnectionRequest(
+          targetUid: widget.user.uid);
+      print("Sed");
+      setState(() {
+        _showLoading = false;
+      });
+    }
   }
 
   Future _unFollow() async {
-    setState(() {
-      _showLoading = true;
-    });
-    await _databaseMethods.disconnectFromUser(targetUid: widget.user.uid);
-    print("Snd");
-    setState(() {
-      _showLoading = false;
-    });
+    if (!_showLoading) {
+      setState(() {
+        _showLoading = true;
+      });
+      await _databaseMethods.disconnectFromUser(targetUid: widget.user.uid);
+      print("Snd");
+      setState(() {
+        _showLoading = false;
+      });
+    }
+  }
+
+  acceptFollowRequest() async {
+    if (!_showLoading) {
+      setState(() {
+        _showLoading = !_showLoading;
+      });
+      await _databaseMethods.acceptConnectionRequest(
+          targetUid: widget.user.uid);
+      setState(() {
+        _showLoading = !_showLoading;
+      });
+    }
+
+//    Future.delayed(Duration(milliseconds: 300),(){setState(() {
+//      _acceptingRequest = false;
+//    });});
+  }
+
+  deleteFollowRequest() async {
+    if (!_showLoading) {
+      setState(() {
+        _showLoading = !_showLoading;
+      });
+
+      await _databaseMethods.rejectConnectionRequest(
+          targetUid: widget.user.uid);
+      setState(() {
+        _showLoading = !_showLoading;
+      });
+
+      //    setState(() {
+      //      _deletingRequest = false;
+      //    });
+    }
   }
 }

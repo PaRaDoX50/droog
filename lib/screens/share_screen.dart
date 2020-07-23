@@ -9,10 +9,11 @@ import 'package:droog/utils/theme_data.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/models/enums.dart';
 
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 String postId;
+
 class ShareScreen extends StatefulWidget {
   static final String route = "/Share_screen";
 
@@ -24,12 +25,49 @@ class _ShareScreenState extends State<ShareScreen> {
   final DatabaseMethods _databaseMethods = DatabaseMethods();
   final TextEditingController searchController = TextEditingController();
   List<User> searchResults = [];
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _showLoading = false;
 
   getSearchResults() async {
-    searchResults = await _databaseMethods.searchYourDroogs(
-        keyword: searchController.text);
+    if(searchController.text.trim() != "") {
+      searchResults =
+      await _databaseMethods.searchYourDroogs(keyword: searchController.text);
+    }
+    else{
+      searchResults = await _databaseMethods.getListOfYourDroogs();
+    }
     setState(() {});
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    loadInitialData();
+  }
 
+  Future<bool> loadInitialData() async {
+    try {
+      setState(() {
+        _showLoading = true;
+      });
+      print(Constants.uid + "tryyy");
+      searchResults = await _databaseMethods.getListOfYourDroogs();
+
+      setState(() {
+        _showLoading = false;
+      });
+      return true;
+    } catch (e) {
+      setState(() {
+        _showLoading = false;
+      });
+      print(e.toString() + "adsaasd");
+
+      _scaffoldKey.currentState.showSnackBar(
+          (MyThemeData.getSnackBar(text: "Something went wrong.")));
+
+      return false;
+    }
   }
 
 //  Widget _buildSearchTextField() {
@@ -81,11 +119,12 @@ class _ShareScreenState extends State<ShareScreen> {
   Widget build(BuildContext context) {
     postId = ModalRoute.of(context).settings.arguments as String;
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: Colors.white,
-      appBar:  AppBar(
+      appBar: AppBar(
         iconTheme: IconThemeData(color: Theme.of(context).primaryColor),
         elevation: 5,
-        backgroundColor:Color(0xfffcfcfd),
+        backgroundColor: Color(0xfffcfcfd),
         title: Text(
           "Share To",
           style: TextStyle(color: Theme.of(context).primaryColor),
@@ -93,28 +132,48 @@ class _ShareScreenState extends State<ShareScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.only(top:8.0),
-          child: Column(children: <Widget>[
-            SearchTextField(controller: searchController,onTextChanged: getSearchResults,),
-            searchResults.isNotEmpty ? Expanded(child: ListView.builder(
-              itemCount: searchResults.length,
-              itemBuilder: (_, index) {
-                if(searchResults[index].userName != Constants.userName) {
-                  return ShareTile(user: searchResults[index],);
-                }
-                else{
-                  return Container();
-                }
-              },)) :
-            Expanded(
-                child: Center(
-                    child: AspectRatio(
-                        aspectRatio: 1,
-                        child: Image.asset(
-                          "assets/images/no_results.png",
-                          width: double.infinity,
-                        )))),
-          ],),
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Column(
+            children: <Widget>[
+              SearchTextField(
+                controller: searchController,
+                onTextChanged: getSearchResults,
+              ),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration:Duration(milliseconds: 300),
+                  child: _showLoading
+                      ?  Center(
+                            child: CircularProgressIndicator(),
+                          )
+                      : (searchResults.isNotEmpty
+                          ? ListView.builder(
+                              itemCount: searchResults.length,
+                              itemBuilder: (_, index) {
+                                if (searchResults[index].userName !=
+                                    Constants.userName) {
+                                  return ShareTile(
+                                    user: searchResults[index],
+                                  );
+                                } else {
+                                  return Container();
+                                }
+                              },
+                            )
+                          :  Center(
+                                child: AspectRatio(
+                                  aspectRatio: 1,
+                                  child: Image.asset(
+                                    "assets/images/no_results.png",
+                                    width: double.infinity,
+                                  ),
+                                ),
+
+                            )),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -124,7 +183,9 @@ class _ShareScreenState extends State<ShareScreen> {
 class ShareTile extends StatefulWidget {
   final User user;
 
-  ShareTile({this.user,});
+  ShareTile({
+    this.user,
+  });
 
   @override
   _ShareTileState createState() => _ShareTileState();
@@ -142,54 +203,59 @@ class _ShareTileState extends State<ShareTile> {
       _showLoading = true;
     });
     final message = {
-      "messageType":MessageType.sharedPost.index,
-      "byUserName":Constants.userName,
-      "byUid":Constants.uid,
-      "postId":postId,
-      "time":DateTime.now().millisecondsSinceEpoch,
-
+      "messageType": MessageType.sharedPost.index,
+      "byUserName": Constants.userName,
+      "byUid": Constants.uid,
+      "postId": postId,
+      "time": DateTime.now().millisecondsSinceEpoch,
     };
-    documentReference = await _databaseMethods.sendMessage(targetUserName: widget.user.userName,message: message);
+    documentReference = await _databaseMethods.sendMessage(
+        targetUserName: widget.user.userName, message: message);
     setState(() {
       _showLoading = false;
       _shared = true;
     });
   }
 
-  showAppropriateButtonChild(){
-    if(_shared){
-      return Icon(Icons.check,color: Colors.white,);
-    }
-    else{
-      if(_showLoading){
-        return SizedBox(height:15,width:15,child: CircularProgressIndicator(backgroundColor: Colors.white,strokeWidth: 2,));
-
-      }
-      else{
-        return Text("Share",style: MyThemeData.whiteBold14,);
+  showAppropriateButtonChild() {
+    if (_shared) {
+      return Icon(
+        Icons.check,
+        color: Colors.white,
+      );
+    } else {
+      if (_showLoading) {
+        return SizedBox(
+            height: 15,
+            width: 15,
+            child: CircularProgressIndicator(
+              backgroundColor: Colors.white,
+              strokeWidth: 2,
+            ));
+      } else {
+        return Text(
+          "Share",
+          style: MyThemeData.whiteBold14,
+        );
       }
     }
   }
 
   onPressedButton() async {
-    if(_shared){
+    if (_shared) {
       setState(() {
         _showLoading = true;
       });
-     await _databaseMethods.deleteMessage(documentReference: documentReference);
-     setState(() {
-       _shared = false;
-       _showLoading = false;
-
-     });
-    }
-    else{
-      if(_showLoading){
-
-      }
-      else{
+      await _databaseMethods.deleteMessage(
+          documentReference: documentReference);
+      setState(() {
+        _shared = false;
+        _showLoading = false;
+      });
+    } else {
+      if (_showLoading) {
+      } else {
         sharePostAsMessage();
-
       }
     }
   }
@@ -201,7 +267,8 @@ class _ShareTileState extends State<ShareTile> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Expanded(
-          child: Row(mainAxisSize: MainAxisSize.min,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -218,11 +285,19 @@ class _ShareTileState extends State<ShareTile> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(widget.user.userName,maxLines: 1,overflow: TextOverflow.ellipsis,),
+                    Text(
+                      widget.user.userName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     SizedBox(
                       height: 2,
                     ),
-                    Text(widget.user.fullName,maxLines: 1,overflow: TextOverflow.ellipsis,),
+                    Text(
+                      widget.user.fullName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ),
               ),
@@ -232,21 +307,19 @@ class _ShareTileState extends State<ShareTile> {
         Row(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.only(right:8.0),
+              padding: const EdgeInsets.only(right: 8.0),
               child: SizedBox(
                 height: 30,
                 child: RaisedButton(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(5))),
-                  child: FittedBox(
-                      child: showAppropriateButtonChild()),
+                  child: FittedBox(child: showAppropriateButtonChild()),
                   color: MyThemeData.buttonColorBlue,
                   textColor: Colors.white,
                   onPressed: onPressedButton,
                 ),
               ),
             ),
-
           ],
         )
       ],

@@ -36,6 +36,7 @@ class ResponseScreenState extends State<ResponseScreen> {
 //    setState(() {
 //
 //    });
+
     await _databaseMethods.toggleSolutionForPost(
         responseDocument: documentSnapshot, markAsSolution: markAsSolution);
     if (markAsSolution) {

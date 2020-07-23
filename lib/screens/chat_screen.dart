@@ -16,7 +16,6 @@ import 'package:droog/widgets/text_message_tile.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -70,18 +69,22 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  returnAppropriateTile(Message message) {
+  returnAppropriateTile({Message message, bool isLastMessage}) {
     print(message.text);
     if (message.messageType == MessageType.onlyText) {
       if (message.byUserName == Constants.userName) {
         return TextMessageTile(
           message: message.text,
           alignment: Alignment.centerRight,
+          isLastMessage: isLastMessage,
+          documentSnapshot: isLastMessage ? message.documentSnapshot : null,
         );
       }
       return TextMessageTile(
         message: message.text,
         alignment: Alignment.centerLeft,
+//        isLastMessage: isLastMessage,
+//        documentSnapshot: isLastMessage ? message.documentSnapshot : null,
       );
     } else if (message.messageType == MessageType.image) {
       if (message.byUserName == Constants.userName) {
@@ -89,6 +92,8 @@ class _ChatScreenState extends State<ChatScreen> {
           imageUrl: message.imageUrl,
           text: message.text,
           alignment: Alignment.centerRight,
+          isLastMessage: isLastMessage,
+          documentSnapshot: isLastMessage ? message.documentSnapshot : null,
         );
       }
       return ImageMessageTile(
@@ -101,6 +106,8 @@ class _ChatScreenState extends State<ChatScreen> {
         return PostMessageTile(
           postId: message.postId,
           alignment: Alignment.centerRight,
+          isLastMessage: isLastMessage,
+          documentSnapshot: isLastMessage ? message.documentSnapshot : null,
         );
       }
       return PostMessageTile(
@@ -128,7 +135,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final messageTextField = Container(
         constraints:
             BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 5),
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        padding: const EdgeInsets.only(top: 0,bottom: 8, left: 8,right: 8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: <Widget>[
@@ -196,7 +203,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Container(
               color: Colors.white,
               padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).padding.bottom + 70),
+                  bottom: MediaQuery.of(context).padding.bottom + 60),
               child: StreamBuilder<List<Message>>(
                   stream: _databaseMethods.getAConversation(
                       targetUserName: user.userName, limitToOne: false),
@@ -217,16 +224,15 @@ class _ChatScreenState extends State<ChatScreen> {
                       }
                     }
 
-                    return AnimationLimiter(
-                      child: ListView.builder(
+                    return ListView.builder(
                         addAutomaticKeepAlives: true,
                         reverse: true,
                         itemBuilder: (_, index) {
-                          return returnAppropriateTile(data[index]);
+
+                          return returnAppropriateTile(message:data[index],isLastMessage: index == 0 ? true : false);
                         },
                         itemCount: data.length,
-                      ),
-                    );
+                      );
                   }),
             ),
           ),
@@ -316,18 +322,36 @@ class CustomAppBar extends PreferredSize {
 class PostMessageTile extends StatefulWidget {
   final String postId;
   final Alignment alignment;
+  final bool isLastMessage;
+  final DocumentSnapshot documentSnapshot;
 
-  PostMessageTile({this.postId, this.alignment});
+  PostMessageTile({this.postId, this.alignment,this.documentSnapshot,this.isLastMessage});
 
   @override
   _PostMessageTileState createState() => _PostMessageTileState();
 }
 
-class _PostMessageTileState extends State<PostMessageTile> with  AutomaticKeepAliveClientMixin {
+class _PostMessageTileState extends State<PostMessageTile> with  AutomaticKeepAliveClientMixin, SingleTickerProviderStateMixin{
   final DatabaseMethods _databaseMethods = DatabaseMethods();
-
+  AnimationController _controller;
+  Animation<Offset> _offsetAnimation;
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this,duration: Duration(milliseconds: 300));
+    _offsetAnimation = Tween<Offset>( begin:const Offset(2, 0.0) ,
+      end: Offset.zero,).animate(CurvedAnimation(curve: Curves.linear,parent: _controller));
+
+
+  }
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
 
   Future<Post> _getPost() {
     return _databaseMethods.getPostByPostId(postId: widget.postId);
@@ -394,12 +418,35 @@ class _PostMessageTileState extends State<PostMessageTile> with  AutomaticKeepAl
     double width = MediaQuery.of(context).size.width;
     return Padding(
       padding: EdgeInsets.all(width / 60),
-      child: Row(
-        mainAxisAlignment: widget.alignment == Alignment.centerRight
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
+      child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: getWidgets(width),
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: widget.alignment == Alignment.centerRight
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: getWidgets(width),
+          ),
+          widget.alignment == Alignment.centerRight ?
+          (widget.isLastMessage ? StreamBuilder<DocumentSnapshot>(stream: widget.documentSnapshot.reference.snapshots(),builder: (_,snapshot){
+            if(snapshot.hasData){
+              if(snapshot.data.data["isSeen"] ?? false){
+                _controller.forward();
+                return Padding(
+                  padding: EdgeInsets.only(right: width/20),
+                  child: SlideTransition(child:Text("Seen",style: TextStyle(color: Colors.blueGrey,fontSize: 10),),position: _offsetAnimation,),
+                );
+              }
+
+              return Container();
+            }
+            return Container();
+          },):Container())
+              :
+          Container()
+        ],
       ),
     );
   }

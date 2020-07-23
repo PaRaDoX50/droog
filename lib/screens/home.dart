@@ -73,7 +73,10 @@ class _HomeState extends State<Home> {
   }
 
   void onTabTapped(int newIndex) {
-    FocusScope.of(context).unfocus();
+        final FocusScopeNode currentScope = FocusScope.of(context);
+    if (!currentScope.hasPrimaryFocus && currentScope.hasFocus) {
+      FocusManager.instance.primaryFocus.unfocus();
+    }
     setState(() {
       _currentIndex = newIndex;
     });
@@ -218,8 +221,14 @@ class _HomeState extends State<Home> {
 
       ),
       body: GestureDetector(
-        onHorizontalDragStart: (_)=>FocusScope.of(context).unfocus(),
-        onTap: ()=>FocusScope.of(context).unfocus(),
+        onHorizontalDragStart: (_){final FocusScopeNode currentScope = FocusScope.of(context);
+        if (!currentScope.hasPrimaryFocus && currentScope.hasFocus) {
+          FocusManager.instance.primaryFocus.unfocus();
+        }},
+        onTap: (){final FocusScopeNode currentScope = FocusScope.of(context);
+        if (!currentScope.hasPrimaryFocus && currentScope.hasFocus) {
+          FocusManager.instance.primaryFocus.unfocus();
+        }},
         child: FadeIndexedStack(
           duration: Duration(milliseconds: 390),
           children: widgets,

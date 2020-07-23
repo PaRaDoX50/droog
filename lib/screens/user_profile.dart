@@ -73,7 +73,7 @@ class _UserProfileState extends State<UserProfile>
            pinned: true,
           ),
           SliverToBoxAdapter(
-            child: ProfileContainer(user: user,),
+            child: ProfileContainer(user: user,scaffoldKey: scaffoldKey,),
           ),
           SliverToBoxAdapter(
             child: TabBar(

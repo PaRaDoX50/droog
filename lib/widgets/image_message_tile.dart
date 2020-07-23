@@ -1,18 +1,47 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:droog/screens/full_screen_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ImageMessageTile extends StatelessWidget {
+class ImageMessageTile extends StatefulWidget {
   final String imageUrl;
   String text = "";
   final Alignment alignment;
+//  final String message;
+//  final Alignment alignment;
+  final bool isLastMessage;
+  final DocumentSnapshot documentSnapshot;
 
-  ImageMessageTile({this.text, this.imageUrl, this.alignment});
+
+  ImageMessageTile({this.text, this.imageUrl, this.alignment,this.isLastMessage,this.documentSnapshot});
+
+  @override
+  _ImageMessageTileState createState() => _ImageMessageTileState();
+}
+
+class _ImageMessageTileState extends State<ImageMessageTile> with SingleTickerProviderStateMixin{
+  AnimationController _controller;
+  Animation<Offset> _offsetAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this,duration: Duration(milliseconds: 300));
+    _offsetAnimation = Tween<Offset>( begin:const Offset(2, 0.0) ,
+      end: Offset.zero,).animate(CurvedAnimation(curve: Curves.linear,parent: _controller));
+
+
+  }
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
 
   getWidgets(double width, BuildContext ctx) {
-    if (alignment == Alignment.centerRight) {
+    if (widget.alignment == Alignment.centerRight) {
       return [
         Container(
           padding: EdgeInsets.all(8 / 2),
@@ -24,9 +53,9 @@ class ImageMessageTile extends StatelessWidget {
             children: <Widget>[
               GestureDetector(
                 onTap: () => Navigator.pushNamed(ctx, FullScreenImage.route,
-                    arguments: imageUrl),
+                    arguments: widget.imageUrl),
                 child: Hero(
-                  tag: imageUrl,
+                  tag: widget.imageUrl,
                   child: CachedNetworkImage(
                     placeholder: (x, y) {
                       return Container(
@@ -35,18 +64,18 @@ class ImageMessageTile extends StatelessWidget {
                                 backgroundColor: Colors.white,
                               )));
                     },
-                    imageUrl: imageUrl,
+                    imageUrl: widget.imageUrl,
                   ),
                 ),
               ),
-              text != ""
+              widget.text != ""
                   ? SizedBox(
                 height: 2,
               )
                   : Container(),
-              text != ""
+              widget.text != ""
                   ? SelectableLinkify(
-                text: text,
+                text: widget.text,
                 style: TextStyle(color: Colors.white),
                 onOpen: (link) async {
                   print("opening");
@@ -80,11 +109,11 @@ class ImageMessageTile extends StatelessWidget {
             children: <Widget>[
               GestureDetector(
                 onTap: () => Navigator.pushNamed(ctx, FullScreenImage.route,
-                    arguments: imageUrl),
+                    arguments: widget.imageUrl),
                 child: Hero(
-                  tag: imageUrl,
+                  tag: widget.imageUrl,
                   child: CachedNetworkImage(
-                    imageUrl: imageUrl,
+                    imageUrl: widget.imageUrl,
                     placeholder: (x, y) {
                       return Container(
                           child: Center(
@@ -95,14 +124,14 @@ class ImageMessageTile extends StatelessWidget {
                   ),
                 ),
               ),
-              text != ""
+              widget.text != ""
                   ? SizedBox(
                 height: 2,
               )
                   : Container(),
-              text != ""
+              widget.text != ""
                   ? SelectableLinkify(
-                text: text,
+                text: widget.text,
 
                 onOpen: (link) async {
                   print("opening");
@@ -132,12 +161,40 @@ class ImageMessageTile extends StatelessWidget {
     double width = MediaQuery.of(context).size.width;
     return Padding(
       padding: EdgeInsets.all(width / 60),
-      child: Row(
-        mainAxisAlignment: alignment == Alignment.centerRight
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
+      child: Column(
         mainAxisSize: MainAxisSize.min,
-        children: getWidgets(width, context),
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: widget.alignment == Alignment.centerRight
+                ? MainAxisAlignment.end
+                : MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: getWidgets(width,context),
+          ),
+          widget.alignment == Alignment.centerRight ?
+          (widget.isLastMessage ? StreamBuilder<DocumentSnapshot>(stream: widget.documentSnapshot.reference.snapshots(),builder: (_,snapshot){
+            if(snapshot.hasData){
+
+              if(snapshot.data.data["isSeen"] ?? false){
+                _controller.forward();
+                return Padding(
+                  padding: EdgeInsets.only(right: width/20),
+                  child: SlideTransition(child:Text("Seen",style: TextStyle(color: Colors.blueGrey,fontSize: 10),),position: _offsetAnimation,),
+                );
+              }
+              return Container();
+//              _controller.forward();
+//              return Padding(
+//                padding: EdgeInsets.only(right: width/20),
+//                child: SlideTransition(child:Text("NOTSeen",style: TextStyle(color: Colors.blueGrey,fontSize: 10),),position: _offsetAnimation,),
+//              );
+            }
+            return Container();
+          },):Container())
+              :
+          Container()
+        ],
       ),
     );
   }

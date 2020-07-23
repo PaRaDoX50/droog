@@ -20,12 +20,14 @@ class _RequestTileState extends State<RequestTile> {
   final DatabaseMethods _databaseMethods = DatabaseMethods();
 
   acceptFollowRequest() async {
-    setState(() {
-      _acceptingRequest = true;
-    });
-    await _databaseMethods.acceptConnectionRequest(targetUid: widget.user.uid);
+    if (!_acceptingRequest && !_deletingRequest) {
+      setState(() {
+        _acceptingRequest = true;
+      });
+      await _databaseMethods.acceptConnectionRequest(targetUid: widget.user.uid);
 
-    widget.snackBarAndSetState("Joined");
+      widget.snackBarAndSetState("Joined");
+    }
 
 //    Future.delayed(Duration(milliseconds: 300),(){setState(() {
 //      _acceptingRequest = false;
@@ -34,19 +36,21 @@ class _RequestTileState extends State<RequestTile> {
   }
 
   deleteFollowRequest() async {
-    setState(() {
-      _deletingRequest = true;
-    });
-    try {
-      await _databaseMethods.cancelConnectionRequest(targetUid: widget.user.uid);
-    }  catch (e) {
-      // TODO
-      print(e.toString());
+    if (!_acceptingRequest && !_deletingRequest) {
+      setState(() {
+        _deletingRequest = true;
+      });
+      try {
+        await _databaseMethods.rejectConnectionRequest(targetUid: widget.user.uid);
+      }  catch (e) {
+        // TODO
+        print(e.toString());
+      }
+      //    setState(() {
+      //      _deletingRequest = false;
+      //    });
+      widget.snackBarAndSetState("Deleted");
     }
-//    setState(() {
-//      _deletingRequest = false;
-//    });
-    widget.snackBarAndSetState("Deleted");
   }
 
   @override

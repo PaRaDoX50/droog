@@ -15,6 +15,7 @@ enum ConnectionStatus{
   requestSent,
   droogs,
   requestNotSent,
+  requestAlreadyPresent,
 }
 
 enum PostIs{
