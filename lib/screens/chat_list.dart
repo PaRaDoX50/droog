@@ -56,7 +56,7 @@ class _ChatListState extends State<ChatList> {
                   userName: Constants.userName),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  List<DocumentSnapshot> data = snapshot.data.documents;
+                  List<DocumentSnapshot> data = snapshot.data.documents.reversed.toList();
                   if (snapshot.data.documents.length > 0) {
                     return SliverList(
                       delegate: SliverChildBuilderDelegate((_, index) {

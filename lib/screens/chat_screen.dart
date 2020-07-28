@@ -39,6 +39,7 @@ class _ChatScreenState extends State<ChatScreen> {
       });
       print(userName + messageController.text);
       if (messageController.text.trim().isNotEmpty) {
+
         Map<String, dynamic> message = {
           "messageType": MessageType.onlyText.index,
           "text": messageController.text,
@@ -46,9 +47,10 @@ class _ChatScreenState extends State<ChatScreen> {
           "byUserName": Constants.userName,
           "time": DateTime.now().millisecondsSinceEpoch,
         };
+        messageController.clear();
         await _databaseMethods.sendMessage(
             targetUserName: userName, message: message);
-        messageController.clear();
+
       }
       setState(() {
         sendingMessage =false;

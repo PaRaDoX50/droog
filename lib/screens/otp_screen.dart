@@ -122,7 +122,7 @@ class _OTPscreenState extends State<OTPscreen> {
                           .size
                           .width * .7,
                       child: PinCodeTextField(
-
+                          pinTheme: PinTheme(fieldHeight: 50,fieldWidth: 40),
                         controller: codeController,
                         length: 6,
                         textInputType: TextInputType.number,

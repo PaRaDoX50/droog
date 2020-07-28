@@ -55,8 +55,7 @@ class _DroogsListState extends State<DroogsList> {
                 if (snapshot.hasData) {
                   searchResults = snapshot.data;
                   return (searchResults.isNotEmpty
-                      ? Expanded(
-                      child: ListView.builder(
+                      ? ListView.builder(
                         itemCount: searchResults.length,
                         itemBuilder: (_, index) {
 //                      searchResults[index].userName != Constants.userName
@@ -70,9 +69,8 @@ class _DroogsListState extends State<DroogsList> {
                             return Container();
                           }
                         },
-                      ))
-                      : Expanded(
-                      child: Center(
+                      )
+                      : Center(
                           child: AspectRatio(
                               aspectRatio: 1,
                               child: FadeInImage(
@@ -80,7 +78,7 @@ class _DroogsListState extends State<DroogsList> {
                                   "assets/images/no_results.png",),
                                 width: double.infinity,
                                 placeholder: MemoryImage(
-                                    kTransparentImage),)))));
+                                    kTransparentImage),))));
                 } else {
                   if (snapshot.connectionState == ConnectionState.done) {
                     return Center(
