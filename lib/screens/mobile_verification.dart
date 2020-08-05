@@ -20,12 +20,14 @@ class _MobileVerificationState extends State<MobileVerification> {
 
   bool showLoading = false;
   bool isCodeSent = false;
+  bool vCrunning = false;
   String verificationCode;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
 
   void codeSentFunc(String codeSent) {
     setState(() {
+      showLoading = false;
       isCodeSent = true;
       verificationCode = codeSent;
     });
@@ -49,7 +51,7 @@ class _MobileVerificationState extends State<MobileVerification> {
     final vC = (AuthCredential credential) async {
       try {
         setState(() {
-          showLoading = true;
+          vCrunning = true;
         });
         print("vC MobileVerification");
         FirebaseUser user = await _auth.currentUser();
@@ -64,13 +66,13 @@ class _MobileVerificationState extends State<MobileVerification> {
         await _databaseMethods.createHalfUserProfile(
             userEmail: user.email, mobileNo: user.phoneNumber, uid: user.uid);
         setState(() {
-          showLoading = false;
+          vCrunning = false;
         });
         Navigator.pushReplacementNamed(context, ProfileSetup.route,
             arguments: RoutedProfileSetupFor.setup);
       } catch (e) {
         setState(() {
-          showLoading = false;
+          vCrunning = false;
         });
         _scaffoldKey.currentState.showSnackBar(
             (MyThemeData.getSnackBar(text: "Something went wrong.")));
@@ -135,14 +137,14 @@ class _MobileVerificationState extends State<MobileVerification> {
       backgroundColor: Colors.white,
       body: isCodeSent == true
           ? IgnorePointer(
-        ignoring: showLoading,
+        ignoring: showLoading || vCrunning,
         child: Stack(
           children: <Widget>[
             OTPscreen(
               code: verificationCode,
               number: mobileController.text,
             ),
-            showLoading == true
+            showLoading || vCrunning
                 ? Center(child: CircularProgressIndicator())
                 : Container()
           ],
@@ -264,7 +266,7 @@ class _MobileVerificationState extends State<MobileVerification> {
               ),
             ),
           ),
-          showLoading == true
+          showLoading || vCrunning
               ? Center(child: CircularProgressIndicator())
               : Container()
         ],
